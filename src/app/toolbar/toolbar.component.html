@@ -1,12 +1,12 @@
 <mat-toolbar>
-    <span class="title-link" routerLink="/home" ariaCurrentWhenActive="page">Organic Shop</span>
+    <a mat-button disableRipple="true" class="toolbar-brand" routerLink="/" ariaCurrentWhenActive="page">Organic Shop</a>
     <span class="filling-spacer"></span>
-    <button mat-button routerLink="/shoppingcart" ariaCurrentWhenActive="page">Shopping Cart</button>
+    <button mat-button routerLink="/shopping-cart" ariaCurrentWhenActive="page">Shopping Cart</button>
     <button mat-button [matMenuTriggerFor]="menu">Username<mat-icon aria-hidden="false">arrow_drop_down</mat-icon></button>
     <mat-menu #menu>
-      <button mat-menu-item routerLink="/orders">My Orders</button>
-      <button mat-menu-item routerLink="/manage-orders">Manage Orders</button>
-      <button mat-menu-item routerLink="/manage-products">Manage Products</button>
+      <button mat-menu-item routerLink="/my/orders" ariaCurrentWhenActive="page">My Orders</button>
+      <button mat-menu-item routerLink="/admin/orders" ariaCurrentWhenActive="page">Manage Orders</button>
+      <button mat-menu-item routerLink="/admin/products" ariaCurrentWhenActive="page">Manage Products</button>
       <button mat-menu-item>Log Out</button>
     </mat-menu>
 </mat-toolbar>

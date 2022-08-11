@@ -2,19 +2,28 @@ import { MaterialComponentsModule } from './material-components/material-compone
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
+import { environment } from '../environments/environment';
+
+// Firebase
+import { initializeApp,provideFirebaseApp } from '@angular/fire/app';
+import { provideAuth,getAuth } from '@angular/fire/auth';
+import { provideFirestore,getFirestore } from '@angular/fire/firestore';
+
+// Components
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { HomeComponent } from './home/home.component';
-import { ShoppingcartComponent } from './shoppingcart/shoppingcart.component';
-import { OrdersComponent } from './orders/orders.component';
-import { ManageOrdersComponent } from './manage-orders/manage-orders.component';
-import { ManageProductsComponent } from './manage-products/manage-products.component';
-import { initializeApp,provideFirebaseApp } from '@angular/fire/app';
-import { environment } from '../environments/environment';
-import { provideAuth,getAuth } from '@angular/fire/auth';
-import { provideFirestore,getFirestore } from '@angular/fire/firestore';
+import { ProductsComponent } from './products/products.component';
+import { CheckOutComponent } from './check-out/check-out.component';
+import { ShoppingCartComponent } from './shopping-cart/shopping-cart.component';
+import { OrderSuccessComponent } from './order-success/order-success.component';
+import { MyOrdersComponent } from './my-orders/my-orders.component';
+import { AdminProductsComponent } from './admin/admin-products/admin-products.component';
+import { AdminOrdersComponent } from './admin/admin-orders/admin-orders.component';
+import { LoginComponent } from './login/login.component';
 
 
 @NgModule({
@@ -22,10 +31,17 @@ import { provideFirestore,getFirestore } from '@angular/fire/firestore';
     AppComponent,
     ToolbarComponent,
     HomeComponent,
-    ShoppingcartComponent,
-    OrdersComponent,
-    ManageOrdersComponent,
-    ManageProductsComponent
+    ShoppingCartComponent,
+    ProductsComponent,
+    CheckOutComponent,
+    ShoppingCartComponent,
+    OrderSuccessComponent,
+    MyOrdersComponent,
+    AdminProductsComponent,
+    AdminOrdersComponent,
+    AdminProductsComponent,
+    AdminOrdersComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
