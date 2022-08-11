@@ -1,5 +1,10 @@
 # Organicshop
 
+This is an implementation of the final lessons in the course ["Angular 4: Beginner to Pro"](https://codewithmosh.com/p/angular-master-class) of Mosh Hamedani.
+I heavily changed the project by using Angular 14 and Angular Materials.
+
+---
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.0.4.
 
 ## Development server
