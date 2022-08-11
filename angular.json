@@ -102,6 +102,16 @@
             ],
             "scripts": []
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {
+            "prerender": false,
+            "ssr": false,
+            "browserTarget": "organicshop:build:production",
+            "firebaseProject": "organicshop-3e919",
+            "firebaseHostingSite": "organicshop-3e919"
+          }
         }
       }
     }

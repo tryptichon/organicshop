@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "organicshop-3e919": {
+      "hosting": {
+        "organicshop": [
+          "organicshop-3e919"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "organicshop-3e919"
+  }
+}
