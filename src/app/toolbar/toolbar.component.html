@@ -1,12 +1,47 @@
 <mat-toolbar>
-    <a mat-button disableRipple="true" class="toolbar-brand" routerLink="/" ariaCurrentWhenActive="page">Organic Shop</a>
-    <span class="filling-spacer"></span>
-    <button mat-button routerLink="/shopping-cart" ariaCurrentWhenActive="page">Shopping Cart</button>
-    <button mat-button [matMenuTriggerFor]="menu">Username<mat-icon aria-hidden="false">arrow_drop_down</mat-icon></button>
-    <mat-menu #menu>
-      <button mat-menu-item routerLink="/my/orders" ariaCurrentWhenActive="page">My Orders</button>
-      <button mat-menu-item routerLink="/admin/orders" ariaCurrentWhenActive="page">Manage Orders</button>
-      <button mat-menu-item routerLink="/admin/products" ariaCurrentWhenActive="page">Manage Products</button>
-      <button mat-menu-item>Log Out</button>
-    </mat-menu>
+  <a
+    mat-button
+    disableRipple="true"
+    class="toolbar-brand"
+    routerLink="/"
+    ariaCurrentWhenActive="page"
+    >Organic Shop</a
+  >
+  <span class="filling-spacer"></span>
+  <button mat-button routerLink="/shopping-cart" ariaCurrentWhenActive="page">
+    Shopping Cart
+  </button>
+  <button
+    *ngIf="name; else anonymousUser"
+    mat-button
+    [matMenuTriggerFor]="menu"
+  >
+    {{ name }}
+    <mat-icon aria-hidden="false">arrow_drop_down</mat-icon>
+  </button>
+  <ng-template #anonymousUser>
+    <button mat-raised-button routerLink="login">Login</button>
+  </ng-template>
+  <mat-menu #menu>
+    <button mat-menu-item routerLink="/my/orders" ariaCurrentWhenActive="page">
+      My Orders
+    </button>
+    <button
+      *ngIf="isAdmin"
+      mat-menu-item
+      routerLink="/admin/orders"
+      ariaCurrentWhenActive="page"
+    >
+      Manage Orders
+    </button>
+    <button
+      *ngIf="isAdmin"
+      mat-menu-item
+      routerLink="/admin/products"
+      ariaCurrentWhenActive="page"
+    >
+      Manage Products
+    </button>
+    <button mat-menu-item (click)="logout()">Log Out</button>
+  </mat-menu>
 </mat-toolbar>

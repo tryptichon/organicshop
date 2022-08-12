@@ -5,9 +5,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
 
 // Firebase
-import { initializeApp,provideFirebaseApp } from '@angular/fire/app';
-import { provideAuth,getAuth } from '@angular/fire/auth';
-import { provideFirestore,getFirestore } from '@angular/fire/firestore';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 
 // Components
 
@@ -24,7 +24,8 @@ import { MyOrdersComponent } from './my-orders/my-orders.component';
 import { AdminProductsComponent } from './admin/admin-products/admin-products.component';
 import { AdminOrdersComponent } from './admin/admin-orders/admin-orders.component';
 import { LoginComponent } from './login/login.component';
-
+import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
+import { ForbiddenComponent } from './shared/forbidden/forbidden.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,9 @@ import { LoginComponent } from './login/login.component';
     AdminOrdersComponent,
     AdminProductsComponent,
     AdminOrdersComponent,
-    LoginComponent
+    LoginComponent,
+    PagenotfoundComponent,
+    ForbiddenComponent
   ],
   imports: [
     BrowserModule,
@@ -52,7 +55,8 @@ import { LoginComponent } from './login/login.component';
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore())
   ],
-  providers: [],
+  providers: [
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
