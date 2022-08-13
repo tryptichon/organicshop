@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { AppUser } from '../model/appuser';
-import { LoginService } from './../service/login.service';
+import { AppUser } from '../../model/appuser';
+import { LoginService } from '../../services/login.service';
 
 @Component({
   selector: 'app-toolbar',
