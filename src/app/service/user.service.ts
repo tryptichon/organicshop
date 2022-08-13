@@ -24,7 +24,7 @@ export class UserService {
   }
 
   getOrCreate(user: AppUser): Observable<AppUser> {
-    return (docData(this.ref(user.id), { idField: 'id' }) as Observable<AppUser>)
+    return (docData(this.ref(user.id), { idField: 'id' }) as Observable<AppUser | null>)
       .pipe(
         map(appUser => {
           if (!appUser) {

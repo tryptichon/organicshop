@@ -26,6 +26,7 @@ import { AdminOrdersComponent } from './admin/admin-orders/admin-orders.componen
 import { LoginComponent } from './login/login.component';
 import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
 import { ForbiddenComponent } from './shared/forbidden/forbidden.component';
+import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { ForbiddenComponent } from './shared/forbidden/forbidden.component';
     AdminOrdersComponent,
     LoginComponent,
     PagenotfoundComponent,
-    ForbiddenComponent
+    ForbiddenComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,

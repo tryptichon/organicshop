@@ -1,15 +1,15 @@
-<mat-toolbar>
+<mat-toolbar class="top-toolbar" color="primary">
   <a
     mat-button
     disableRipple="true"
-    class="toolbar-brand"
+    class="top-toolbar-brand"
     routerLink="/"
     ariaCurrentWhenActive="page"
     >Organic Shop</a
   >
   <span class="filling-spacer"></span>
   <button mat-button routerLink="/shopping-cart" ariaCurrentWhenActive="page">
-    Shopping Cart
+    <mat-icon aria-hidden="false" title="Shopping cart">shopping_cart</mat-icon>
   </button>
   <button
     *ngIf="name; else anonymousUser"
@@ -20,7 +20,7 @@
     <mat-icon aria-hidden="false">arrow_drop_down</mat-icon>
   </button>
   <ng-template #anonymousUser>
-    <button mat-raised-button routerLink="login">Login</button>
+    <button mat-stroked-button routerLink="login">Login</button>
   </ng-template>
   <mat-menu #menu>
     <button mat-menu-item routerLink="/my/orders" ariaCurrentWhenActive="page">
