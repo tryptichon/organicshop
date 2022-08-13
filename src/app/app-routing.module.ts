@@ -1,7 +1,7 @@
 import { ForbiddenComponent } from './shared/forbidden/forbidden.component';
 import { PagenotfoundComponent } from './shared/pagenotfound/pagenotfound.component';
 import { NgModule } from '@angular/core';
-import { canActivate, hasCustomClaim, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
+import { AuthGuard, canActivate, hasCustomClaim, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 import { ActivatedRouteSnapshot, RouterModule, RouterStateSnapshot, Routes } from '@angular/router';
 import { AdminOrdersComponent } from './admin/admin-orders/admin-orders.component';
 import { AdminProductsComponent } from './admin/admin-products/admin-products.component';
@@ -23,12 +23,12 @@ const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'products', component: ProductsComponent },
   { path: 'shopping-cart', component: ShoppingCartComponent },
-  { path: 'login', component: LoginComponent, ...canActivate(redirectLoggedInToHome) },
-  { path: 'check-out', component: CheckOutComponent, ...canActivate(redirectUnauthorizedToLogin) },
-  { path: 'order-success', component: OrderSuccessComponent, ...canActivate(redirectUnauthorizedToLogin) },
-  { path: 'my/orders', component: MyOrdersComponent, ...canActivate(redirectUnauthorizedToLogin) },
-  { path: 'admin/orders', component: AdminOrdersComponent, canActivate: [AdminAuthGuard]},
-  { path: 'admin/products', component: AdminProductsComponent, canActivate: [AdminAuthGuard] },
+  { path: 'login', component: LoginComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectLoggedInToHome } },
+  { path: 'check-out', component: CheckOutComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
+  { path: 'order-success', component: OrderSuccessComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
+  { path: 'my/orders', component: MyOrdersComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
+  { path: 'admin/orders', component: AdminOrdersComponent, canActivate: [AuthGuard, AdminAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin, noAdminRedirectUrl: ['forbidden'] } },
+  { path: 'admin/products', component: AdminProductsComponent, canActivate: [AuthGuard, AdminAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin, noAdminRedirectUrl: ['forbidden'] } },
   { path: 'forbidden', component: ForbiddenComponent },
   { path: '**', pathMatch: 'full', component: PagenotfoundComponent }
 ];

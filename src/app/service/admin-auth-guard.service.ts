@@ -8,6 +8,8 @@ import { LoginService } from './login.service';
 })
 export class AdminAuthGuard implements CanActivate {
 
+  static DEFAULTROUTE = ['forbidden'];
+
   constructor(
     public loginService: LoginService,
     public router: Router
@@ -15,8 +17,11 @@ export class AdminAuthGuard implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
-    return this.loginService.appUser$.pipe(
-      map(appUser => appUser?.isAdmin || this.router.createUrlTree(['forbidden']))
-    );
+    let redirect = (route.data['noAdminRedirectUrl'] || AdminAuthGuard.DEFAULTROUTE) as any[];
+
+    return this.loginService.appUser$
+      .pipe(
+        map(appUser => appUser?.isAdmin || this.router.createUrlTree(redirect))
+      );
   }
 }
