@@ -1,1 +1,50 @@
-<p>admin-products works!</p>
+<h1>Administer Products</h1>
+<form [formGroup]="form" class="product-form">
+  <p>
+    <mat-form-field appearance="fill" class="product-field">
+      <mat-label>Product name</mat-label>
+      <input matInput type="text" [formControl]="nameControl" name="name" />
+      <mat-error *ngIf="nameControl.hasError('required')">
+        Product name is required
+      </mat-error>
+    </mat-form-field>
+  </p>
+  <p>
+    <mat-form-field appearance="fill" class="product-field">
+      <mat-label>Price</mat-label>
+      <span matSuffix>€ &nbsp;</span>
+      <input matInput type="number" [formControl]="priceControl" name="price" />
+      <mat-error *ngIf="priceControl.hasError('required')">
+        Price is required
+      </mat-error>
+    </mat-form-field>
+  </p>
+  <p>
+    <mat-form-field appearance="fill" class="product-field">
+      <mat-label>Food Category</mat-label>
+      <mat-select [formControl]="categoryControl" name="category">
+        <mat-option
+          *ngFor="let category of categories | async"
+          [value]="category.id"
+        >
+          {{ category.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="categoryControl.hasError('required')">
+        Category is required
+      </mat-error>
+    </mat-form-field>
+  </p>
+  <p>
+    <mat-form-field appearance="fill" class="product-field">
+      <mat-label>Product image URL</mat-label>
+      <input matInput type="url" [formControl]="imageControl" name="imageUrl" />
+      <mat-error *ngIf="imageControl.invalid">
+        Invalid URL
+      </mat-error>
+    </mat-form-field>
+    <mat-card>
+      <img *ngIf="imageControl.valid" class="product-field product-image" [src]="imageControl.value"/>
+    </mat-card>
+  </p>
+</form>

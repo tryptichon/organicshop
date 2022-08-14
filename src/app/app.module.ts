@@ -15,18 +15,19 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToolbarComponent } from './app-components/toolbar/toolbar.component';
-import { HomeComponent } from './pages/public/home/home.component';
-import { ProductsComponent } from './pages/public/products/products.component';
-import { CheckOutComponent } from './pages/loggedin/check-out/check-out.component';
-import { ShoppingCartComponent } from './pages/public/shopping-cart/shopping-cart.component';
-import { OrderSuccessComponent } from './pages/loggedin/order-success/order-success.component';
-import { MyOrdersComponent } from './pages/loggedin/my-orders/my-orders.component';
+import { HomeComponent } from './pages/home/home.component';
+import { ProductsComponent } from './pages/products/products.component';
+import { CheckOutComponent } from './pages/my/check-out/check-out.component';
+import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
+import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
+import { MyOrdersComponent } from './pages/my/my-orders/my-orders.component';
 import { AdminProductsComponent } from './pages/admin/admin-products/admin-products.component';
 import { AdminOrdersComponent } from './pages/admin/admin-orders/admin-orders.component';
-import { LoginComponent } from './pages/public/login/login.component';
+import { LoginComponent } from './pages/login/login.component';
 import { PagenotfoundComponent } from './pages/errors/pagenotfound/pagenotfound.component';
 import { ForbiddenComponent } from './pages/errors/forbidden/forbidden.component';
 import { FooterComponent } from './app-components/footer/footer.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,8 @@ import { FooterComponent } from './app-components/footer/footer.component';
     FooterComponent
   ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,

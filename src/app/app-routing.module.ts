@@ -5,14 +5,14 @@ import { AuthGuard, canActivate, hasCustomClaim, redirectLoggedInTo, redirectUna
 import { ActivatedRouteSnapshot, RouterModule, RouterStateSnapshot, Routes } from '@angular/router';
 import { AdminOrdersComponent } from './pages/admin/admin-orders/admin-orders.component';
 import { AdminProductsComponent } from './pages/admin/admin-products/admin-products.component';
-import { CheckOutComponent } from './pages/loggedin/check-out/check-out.component';
-import { HomeComponent } from './pages/public/home/home.component';
-import { LoginComponent } from './pages/public/login/login.component';
-import { MyOrdersComponent } from './pages/loggedin/my-orders/my-orders.component';
-import { OrderSuccessComponent } from './pages/loggedin/order-success/order-success.component';
-import { ProductsComponent } from './pages/public/products/products.component';
-import { ShoppingCartComponent } from './pages/public/shopping-cart/shopping-cart.component';
-import { AdminAuthGuard } from './services/admin-auth-guard.service';
+import { CheckOutComponent } from './pages/my/check-out/check-out.component';
+import { HomeComponent } from './pages/home/home.component';
+import { LoginComponent } from './pages/login/login.component';
+import { MyOrdersComponent } from './pages/my/my-orders/my-orders.component';
+import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
+import { ProductsComponent } from './pages/products/products.component';
+import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
+import { AdminAuthGuard } from './services/routing/admin-auth-guard.service';
 
 /** Add the intended route as parameter 'returnUrl' to the route of the login component. */
 const redirectUnauthorizedToLogin = (activated: ActivatedRouteSnapshot, state: RouterStateSnapshot) => redirectUnauthorizedTo(['login', { returnUrl: state.url }]);
