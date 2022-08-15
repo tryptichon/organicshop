@@ -1,3 +1,4 @@
+import '@angular/common/locales/global/de';
 import { NgModule } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -7,12 +8,16 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { environment } from './../environments/environment';
+
 import { FooterComponent } from './app-components/footer/footer.component';
+import { ProductCardComponent } from './app-components/product-card/product-card.component';
 import { ToolbarComponent } from './app-components/toolbar/toolbar.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MaterialComponentsModule } from './material-components/material-components.module';
+
 import { AdminOrdersComponent } from './pages/admin/admin-orders/admin-orders.component';
+import { AdminProductComponent } from './pages/admin/admin-product/admin-product.component';
 import { AdminProductsComponent } from './pages/admin/admin-products/admin-products.component';
 import { ForbiddenComponent } from './pages/errors/forbidden/forbidden.component';
 import { PagenotfoundComponent } from './pages/errors/pagenotfound/pagenotfound.component';
@@ -23,9 +28,6 @@ import { MyOrdersComponent } from './pages/my/my-orders/my-orders.component';
 import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
-
-// Firebase
-// Components
 
 @NgModule({
   declarations: [
@@ -45,7 +47,9 @@ import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.compo
     LoginComponent,
     PagenotfoundComponent,
     ForbiddenComponent,
-    FooterComponent
+    FooterComponent,
+    ProductCardComponent,
+    AdminProductComponent
   ],
   imports: [
     FormsModule,

@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { uuidv4 as uuid } from "@firebase/util";
-
-
-import { DbCategory } from './../../../model/db-category';
-import { DbProduct } from './../../../model/db-product';
 import { CategoryService } from './../../../services/database/category.service';
+
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { EMPTY, switchMap, Observable, Subject, takeUntil, of } from 'rxjs';
+import { DbCategory } from 'src/app/model/db-category';
+
+import { DbProduct } from './../../../model/db-product';
 import { ProductService } from './../../../services/database/product.service';
 
 @Component({
@@ -14,50 +15,64 @@ import { ProductService } from './../../../services/database/product.service';
   templateUrl: './admin-products.component.html',
   styleUrls: ['./admin-products.component.sass']
 })
-export class AdminProductsComponent {
+export class AdminProductsComponent implements AfterViewInit, OnDestroy {
 
-  categories: Observable<DbCategory[]>;
-  products: Observable<DbProduct[]>;
+  displayedColumns: string[] = ['name', 'category', 'price', 'action'];
+  dataSource = new MatTableDataSource<DbProduct>;
 
-  nameControl = new FormControl<string | null>(null, [Validators.required]);
-  priceControl = new FormControl<number | null>(null, [Validators.required]);
-  categoryControl = new FormControl<DbCategory | string | null>(null, [Validators.required]);
-  imageControl = new FormControl<URL | null>(null, [Validators.pattern('^[a-zA-Z0-9+\\.-]+://\\S*')]);
+  categories: { [key: string]: string } = {};
 
-  form = new FormGroup({
-    name: this.nameControl,
-    price: this.priceControl,
-    category: this.categoryControl,
-    imageUrl: this.imageControl
-  });
+  id?: string;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatTable) table!: MatTable<DbProduct>;
+
+  private destroyed$ = new Subject<void>();
 
   constructor(
-    private categoryService: CategoryService,
-    private productService: ProductService
+    private productService: ProductService,
+    private categoryService: CategoryService
   ) {
-    this.categories = this.categoryService.getAll();
-    this.products = this.productService.getAll();
+    this.productService.getAll()
+      .pipe(
+        takeUntil(this.destroyed$)
+      )
+      .subscribe(productArray => {
+        this.dataSource.data = [...productArray];
+        this.table.renderRows();
+      });
+
+    this.categoryService.getAll()
+      .pipe(
+        takeUntil(this.destroyed$)
+      )
+      .subscribe(dbCategories =>
+        dbCategories.forEach(category =>
+          this.categories[category.id] = category.name
+        )
+      );
   }
 
-  saveProduct() {
-    this.productService.create(this.createProductFromForm());
+  ngOnDestroy(): void {
+    this.destroyed$.next();
   }
 
-  private createProductFromForm(): DbProduct {
-    let formData = this.form.value;
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
 
-    if (formData.name == null || formData.price == null || formData.category == null)
-      throw new Error("Data is missing");
+  getCategoryName(id: string) {
+    return this.categories[id] || 'unknown';
+  }
 
-    let newProduct: DbProduct = {
-      id: uuid(),
-      name: formData.name,
-      price: formData.price,
-      category: formData.category as string,
-      imageUrl: formData.imageUrl != null ? formData.imageUrl.toString() : undefined
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
-
-    return newProduct;
   }
-
 }
