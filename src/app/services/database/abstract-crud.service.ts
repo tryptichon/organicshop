@@ -1,6 +1,19 @@
-import { addDoc, collection, collectionData, CollectionReference, deleteDoc, doc, docData, DocumentData, DocumentReference, Firestore, setDoc, updateDoc } from "@angular/fire/firestore";
-import { from, Observable, of, switchMap } from "rxjs";
-import { DbEntry } from "src/app/model/db-entry";
+import {
+  collection,
+  collectionData,
+  CollectionReference,
+  deleteDoc,
+  doc,
+  docData,
+  DocumentData,
+  DocumentReference,
+  Firestore,
+  setDoc,
+  updateDoc,
+} from '@angular/fire/firestore';
+import { Observable, of, switchMap } from 'rxjs';
+
+import { DbEntry } from './../../model/db-entry';
 
 /**
  * Generic CRUD operations on Firebase/Firestore database.

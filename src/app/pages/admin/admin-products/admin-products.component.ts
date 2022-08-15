@@ -1,8 +1,9 @@
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Observable } from 'rxjs';
+
 import { DbCategory } from './../../../model/db-category';
 import { CategoryService } from './../../../services/database/category.service';
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { EMPTY, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-admin-products',

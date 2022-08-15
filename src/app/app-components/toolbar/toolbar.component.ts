@@ -1,6 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { LoginService } from 'src/app/services/auth/login.service';
+
+import { LoginService } from './../../services/auth/login.service';
 
 
 @Component({

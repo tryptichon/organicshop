@@ -1,6 +1,7 @@
-import { Firestore } from '@angular/fire/firestore';
-import { DbCategory } from './../../model/db-category';
 import { Injectable } from '@angular/core';
+import { Firestore } from '@angular/fire/firestore';
+
+import { DbCategory } from './../../model/db-category';
 import { AbstractCrudService } from './abstract-crud.service';
 
 @Injectable({

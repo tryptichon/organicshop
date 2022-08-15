@@ -4,10 +4,14 @@
   "configurations": [
     {
       "name": "ng serve",
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "preLaunchTask": "npm: start",
-      "url": "http://localhost:4200/"
+      "url": "http://localhost:4200/",
+      // Use the default user profile or Google Auth will
+      // not let you log in in debug mode.
+      // See https://stackoverflow.com/questions/55497653/how-do-i-properly-setup-vs-code-to-debug-in-chrome-using-an-existing-logged-in
+      "userDataDir": false
     },
     {
       "name": "ng test",

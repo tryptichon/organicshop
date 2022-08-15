@@ -1,13 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Auth, authState, GoogleAuthProvider, signOut, signInWithRedirect } from '@angular/fire/auth';
-import { traceUntilFirst } from '@angular/fire/performance';
+import { Auth, authState, GoogleAuthProvider, signOut } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { signInWithPopup, UserCredential } from 'firebase/auth';
+import { signInWithPopup } from 'firebase/auth';
 import { EMPTY, map, Observable, of, Subject, switchMap, takeUntil } from 'rxjs';
-import { DbUser } from 'src/app/model/db-user';
-import { UserService } from '../database/user.service';
 
-
+import { DbMappedUser } from './../../model/db-mapped-user';
+import { DbUser } from './../../model/db-user';
+import { UserService } from './../database/user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -28,14 +27,7 @@ export class LoginService implements OnDestroy {
 
     this.user$ = authState(this.auth)
       .pipe(
-        map(user => {
-          return user ? {
-            id: user.uid,
-            name: user.displayName,
-            email: user.email,
-            isAdmin: false
-          } : null;
-        }),
+        map(firebaseUser => firebaseUser ? new DbMappedUser(firebaseUser) : null),
         takeUntil(this.destroyed$)
       );
   }
@@ -44,24 +36,40 @@ export class LoginService implements OnDestroy {
     this.destroyed$.next();
   }
 
+  /**
+   * Obtains user data from the backend database.
+   *
+   * @return An Observable containing the user data from the user database or
+   *         null/void if no such user exists and it cannot be created.
+   */
   get appUser$(): Observable<DbUser | null | void> {
     return this.user$.pipe(
-      switchMap(user => {
-        return user ? this.userService.getOrCreate(user) : of(null);
-      })
-    )
+      switchMap(user => user ? this.userService.getOrCreate(user) : of(null))
+    );
   }
 
-  login() {
-    signInWithPopup(this.auth, new GoogleAuthProvider())
-      .then(() => window.location.reload());
+  /**
+   * Login with provider. This is using a popup, since redirection
+   * currently tends to break on Mozilla Firefox.
+   * After the login has completed, the page is reloaded to trigger
+   * the route redirections defined in app-routing.module.ts.
+   *
+   * @return Promise that gets fulfilled after the reload is done.
+   */
+  async login(): Promise<void> {
+    await signInWithPopup(this.auth, new GoogleAuthProvider());
+    return window.location.reload();
   }
 
-  logout() {
-    signOut(this.auth)
-      .then(() =>
-        this.router.navigate([''])
-      );
+
+  /**
+   * Logout and redirect to home.
+   *
+   * @return Promise that gets fulfilled after navigation is done.
+   */
+  async logout(): Promise<boolean | void> {
+    await signOut(this.auth);
+    return await this.router.navigate(['']);
   }
 
 }

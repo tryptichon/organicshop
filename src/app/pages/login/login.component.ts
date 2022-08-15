@@ -1,8 +1,7 @@
-import { Subscription } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
-import { LoginService } from 'src/app/services/auth/login.service';
+import { LoginService } from './../../services/auth/login.service';
 
 @Component({
   selector: 'app-login',
