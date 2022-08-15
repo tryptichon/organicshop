@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { signInWithPopup } from 'firebase/auth';
 import { EMPTY, map, Observable, of, Subject, switchMap, takeUntil } from 'rxjs';
 
-import { DbMappedUser } from './../../model/db-mapped-user';
+import { MappedUser } from './../../model/db-mapped-user';
 import { DbUser } from './../../model/db-user';
 import { UserService } from './../database/user.service';
 
@@ -27,7 +27,7 @@ export class LoginService implements OnDestroy {
 
     this.user$ = authState(this.auth)
       .pipe(
-        map(firebaseUser => firebaseUser ? new DbMappedUser(firebaseUser) : null),
+        map(firebaseUser => firebaseUser ? new MappedUser(firebaseUser) : null),
         takeUntil(this.destroyed$)
       );
   }

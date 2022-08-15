@@ -5,7 +5,7 @@ import { User } from '@angular/fire/auth';
  * Maps the data of a firebase user to match the
  * interface DbUser.
  */
-export class DbMappedUser implements DbUser {
+export class MappedUser implements DbUser {
 
   public id: string;
   public name: string | null;
