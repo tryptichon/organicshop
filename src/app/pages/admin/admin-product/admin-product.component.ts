@@ -55,8 +55,8 @@ export class AdminProductComponent implements OnInit, OnDestroy {
 
     this.id$ = this.route.params
       .pipe(
-        filter(params => !!params['id']),
-        map(params => params['id'])
+        map(params => params['id']),
+        filter(id => (id && id != 'new'))
       );
 
     this.id$
