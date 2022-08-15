@@ -56,8 +56,8 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    * @param id Id of a document
    * @returns Observable for this document.
    */
-  get(id: string): Observable<T | null> {
-    return docData(this.ref(id), { idField: 'id' }) as Observable<T | null>;
+  get(id: string): Observable<T> {
+    return docData(this.ref(id), { idField: 'id' }) as Observable<T>;
   }
 
   /**

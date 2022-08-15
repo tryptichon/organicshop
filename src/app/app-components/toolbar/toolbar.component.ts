@@ -12,7 +12,7 @@ import { LoginService } from './../../services/auth/login.service';
 export class ToolbarComponent implements OnDestroy {
 
   public isAdmin: boolean = false;
-  public name: string | null = null;
+  public name?: string;
 
   private destroyed$ = new Subject<void>();
 
@@ -23,7 +23,7 @@ export class ToolbarComponent implements OnDestroy {
       )
       .subscribe(appUser => {
         this.isAdmin = appUser?.isAdmin || false;
-        this.name = appUser?.name || null;
+        this.name = appUser?.name;
       });
   }
 

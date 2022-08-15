@@ -47,4 +47,7 @@
       <img *ngIf="imageControl.valid" class="product-field product-image" [src]="imageControl.value"/>
     </mat-card>
   </p>
+  <p>
+    <button mat-flat-button color="primary" (click)="saveProduct()" [disabled]="form.invalid">Save Product</button>
+  </p>
 </form>

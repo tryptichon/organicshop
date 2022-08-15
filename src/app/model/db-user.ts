@@ -4,7 +4,7 @@ import { DbEntry } from './db-entry';
  * data.
  */
 export interface DbUser extends DbEntry {
-  name: string | null,
-  email: string | null,
+  name?: string,
+  email?: string,
   isAdmin: boolean
 }
