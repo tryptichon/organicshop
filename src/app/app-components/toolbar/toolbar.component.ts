@@ -17,6 +17,7 @@ export class ToolbarComponent implements OnDestroy {
   private userSubscription: Subscription;
 
   constructor(public loginService: LoginService) {
+
     this.userSubscription = this.loginService.appUser$
       .subscribe(appUser => {
         this.isAdmin = appUser?.isAdmin || false;
