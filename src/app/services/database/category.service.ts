@@ -10,7 +10,7 @@ import { AbstractCrudService } from './abstract-crud.service';
 })
 export class CategoryService extends AbstractCrudService<DbCategory> implements OnDestroy {
 
-  protected categoryCache: { [key: string]: DbCategory } = {};
+  protected categoryCache = new Map<string, DbCategory>();
 
   private documentSubscription: Subscription;
 
@@ -18,9 +18,9 @@ export class CategoryService extends AbstractCrudService<DbCategory> implements 
     super('categories', firestore);
 
     this.documentSubscription = this.documents$
-      .subscribe(documents =>
-        documents.forEach(document => this.categoryCache[document.id] = document)
-      );
+      .subscribe(documents => {
+        this.categoryCache = new Map<string, DbCategory>(documents.map(document => [document.id, document]));
+      });
 
   }
 
@@ -28,8 +28,18 @@ export class CategoryService extends AbstractCrudService<DbCategory> implements 
     this.documentSubscription.unsubscribe();
   }
 
+  /**
+   * @param category The id of a category
+   * @returns The name of the category obtained from the {@link categoryCache}.
+   */
   getCategoryName(category?: string | null) {
-    return (!category) ? undefined : this.categoryCache[category]?.name;
+    return (!category) ? undefined : this.categoryCache.get(category)?.name;
   }
 
+  /**
+   * @returns An array of the values (DbCategory) from the {@link categoryCache}.
+   */
+  getCachedCategories() {
+    return Array.from(this.categoryCache.values());
+  }
 }
