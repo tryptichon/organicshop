@@ -104,7 +104,7 @@ export class AdminProductComponent implements OnInit {
   }
 
   getCategories() {
-    return this.categoryService.getCachedCategories();
+    return this.categoryService.getCachedCategories().sort((a,b) => a.name.localeCompare(b.name));
   }
 
   isNew(): boolean {
