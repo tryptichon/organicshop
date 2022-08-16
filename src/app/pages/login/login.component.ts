@@ -23,10 +23,9 @@ export class LoginComponent implements OnInit {
    * the login has finished.
    */
   ngOnInit(): void {
-    this.route.paramMap
-      .subscribe(paramMap => {
-        this.returnUrl = paramMap.get('returnUrl') || this.returnUrl;
-      });
+    let returnUrl = this.route.snapshot.paramMap.get('returnUrl');
+    if (returnUrl)
+      this.returnUrl = returnUrl;
   }
 
   login() {

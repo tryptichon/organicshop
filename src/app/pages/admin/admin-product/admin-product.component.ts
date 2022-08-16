@@ -1,10 +1,10 @@
 import { ConfirmDialogComponent } from './../../../app-components/dialogs/confirm-dialog/confirm-dialog.component';
 import { getLocaleCurrencySymbol } from '@angular/common';
-import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { uuidv4 as uuid } from "@firebase/util";
-import { catchError, EMPTY, filter, map, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, filter, map, switchMap, tap, Subscription } from 'rxjs';
 
 
 import { DbProduct } from './../../../model/db-product';
@@ -17,7 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
   templateUrl: './admin-product.component.html',
   styleUrls: ['./admin-product.component.sass']
 })
-export class AdminProductComponent implements OnInit {
+export class AdminProductComponent implements OnInit, OnDestroy {
 
   id: string = 'new';
 
@@ -33,6 +33,8 @@ export class AdminProductComponent implements OnInit {
     imageUrl: this.imageControl
   });
 
+  productServiceSubscription!: Subscription
+
   constructor(
     private categoryService: CategoryService,
     private productService: ProductService,
@@ -44,12 +46,14 @@ export class AdminProductComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.params
+    let id = this.route.snapshot.paramMap.get('id');
+    if (!id || id === 'new')
+      return;
+
+    this.id = id;
+
+    this.productServiceSubscription = this.productService.get(id)
       .pipe(
-        map(params => params['id']),
-        filter(id => (id && id != 'new')),
-        tap(id => this.id = id),
-        switchMap(id => this.productService.get(id)),
         catchError(error => {
           alert(JSON.stringify(error));
           return EMPTY;
@@ -68,6 +72,10 @@ export class AdminProductComponent implements OnInit {
           }
         );
       });
+  }
+
+  ngOnDestroy(): void {
+    this.productServiceSubscription.unsubscribe();
   }
 
   async onSubmit() {
@@ -104,7 +112,7 @@ export class AdminProductComponent implements OnInit {
   }
 
   getCategories() {
-    return this.categoryService.getCachedCategories().sort((a,b) => a.name.localeCompare(b.name));
+    return this.categoryService.getCachedCategories().sort((a, b) => a.name.localeCompare(b.name));
   }
 
   isNew(): boolean {
