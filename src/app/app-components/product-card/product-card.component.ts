@@ -12,7 +12,7 @@ export class ProductCardComponent {
   @Input() name?: string | null;
   @Input() price?: number | null;
   @Input() category?: string | null;
-  @Input() imageUrl?: URL | null;
+  @Input() imageUrl?: string | null;
 
   constructor(
     private categoryService: CategoryService

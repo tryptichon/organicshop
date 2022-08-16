@@ -24,7 +24,7 @@ export class AdminProductComponent implements OnInit, OnDestroy {
   nameControl = new FormControl<string | null>(null, [Validators.required]);
   priceControl = new FormControl<number | null>(null, [Validators.required, Validators.min(0)]);
   categoryControl = new FormControl<string | null>(null, [Validators.required]);
-  imageControl = new FormControl<URL | null>(null, [Validators.pattern('^[a-zA-Z0-9+\\.-]+://\\S*')]);
+  imageControl = new FormControl<string | null>(null, [Validators.pattern('^[a-zA-Z0-9+\\.-]+://\\S*')]);
 
   form = new FormGroup({
     name: this.nameControl,
@@ -63,14 +63,12 @@ export class AdminProductComponent implements OnInit, OnDestroy {
         if (!dbProduct)
           return;
 
-        this.form.setValue(
-          {
-            name: dbProduct.name,
-            price: dbProduct.price,
-            category: dbProduct.category,
-            imageUrl: dbProduct.imageUrl ? new URL(dbProduct.imageUrl) : null
-          }
-        );
+        this.form.setValue({
+          name: dbProduct.name,
+          price: dbProduct.price,
+          category: dbProduct.category,
+          imageUrl: dbProduct.imageUrl
+        });
       });
   }
 
@@ -126,7 +124,7 @@ export class AdminProductComponent implements OnInit, OnDestroy {
   public createProductFromForm(): DbProduct {
     let formData = this.form.value;
 
-    if (!formData.name || formData.price == undefined || !formData.category)
+    if (!formData.name || formData.price == undefined || !formData.category || !formData.imageUrl)
       throw new Error("Data is missing");
 
     this.id = this.isNew() ? uuid() : this.id;
@@ -136,7 +134,7 @@ export class AdminProductComponent implements OnInit, OnDestroy {
       name: formData.name,
       price: formData.price,
       category: formData.category,
-      imageUrl: formData.imageUrl?.toString()
+      imageUrl: formData.imageUrl
     }
 
     return newProduct;
