@@ -16,10 +16,10 @@
     </mat-grid-tile>
     <mat-grid-tile colspan="1" rowspan="4">
       <app-product-card
-        [name]="nameControl.valid ? nameControl.value : null"
-        [price]="priceControl.valid ? priceControl.value : null"
-        [category]="categoryControl.valid ? categoryControl.value : null"
-        [imageUrl]="imageControl.valid ? imageControl.value : null"
+        [name]="nameControl.value"
+        [price]="priceControl.value"
+        [category]="categoryControl.value"
+        [imageUrl]="imageControl.value"
       ></app-product-card>
     </mat-grid-tile>
     <mat-grid-tile colspan="1" rowspan="1">
