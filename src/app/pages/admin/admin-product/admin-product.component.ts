@@ -22,7 +22,7 @@ export class AdminProductComponent implements OnInit {
   id: string = 'new';
 
   nameControl = new FormControl<string | null>(null, [Validators.required]);
-  priceControl = new FormControl<number | null>(null, [Validators.required]);
+  priceControl = new FormControl<number | null>(null, [Validators.required, Validators.min(0)]);
   categoryControl = new FormControl<string | null>(null, [Validators.required]);
   imageControl = new FormControl<URL | null>(null, [Validators.pattern('^[a-zA-Z0-9+\\.-]+://\\S*')]);
 
