@@ -1,0 +1,21 @@
+<div class="app-dialog-title-bar">
+  <div class="app-dialog-icon" *ngIf="data.icon">
+    <mat-icon>{{ data.icon }}</mat-icon>
+  </div>
+  <div class="app-dialog-title">
+    <h1 mat-dialog-title>
+      {{ data.title }}
+    </h1>
+  </div>
+</div>
+<div mat-dialog-content>
+  <p>{{ data.message }}</p>
+</div>
+<div mat-dialog-actions>
+  <button mat-flat-button color="primary" [mat-dialog-close]="getOkButtonText()" cdkFocusInitial>
+    {{ getOkButtonText() }}
+  </button>
+  <button mat-flat-button color="accent" [mat-dialog-close]="getCancelButtonText()">
+    {{ getCancelButtonText() }}
+  </button>
+</div>

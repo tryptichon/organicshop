@@ -1,15 +1,64 @@
-import { Component, OnInit } from '@angular/core';
+import { CategoryService } from './../../../services/database/category.service';
+
+import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { Subscription } from 'rxjs';
+
+import { DbProduct } from './../../../model/db-product';
+import { ProductService } from './../../../services/database/product.service';
 
 @Component({
   selector: 'app-admin-products',
   templateUrl: './admin-products.component.html',
   styleUrls: ['./admin-products.component.sass']
 })
-export class AdminProductsComponent implements OnInit {
+export class AdminProductsComponent implements AfterViewInit, OnDestroy {
 
-  constructor() { }
+  displayedColumns: string[] = ['name', 'category', 'price', 'action'];
+  dataSource = new MatTableDataSource<DbProduct>;
 
-  ngOnInit(): void {
+  id?: string;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatTable) table!: MatTable<DbProduct>;
+
+  private productSubscription?: Subscription;
+
+  constructor(
+    private productService: ProductService,
+    private categoryService: CategoryService
+  ) {
   }
 
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+
+    this.productSubscription = this.productService.getDocuments$()
+      .subscribe(productArray => {
+        this.dataSource.data = [...productArray];
+        this.table.renderRows();
+      });
+  }
+
+  ngOnDestroy(): void {
+    if (this.productSubscription)
+      this.productSubscription.unsubscribe();
+  }
+
+  getCategoryName(id: string) {
+    return this.categoryService.getCategoryName(id);
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
 }

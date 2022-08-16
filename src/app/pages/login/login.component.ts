@@ -1,7 +1,7 @@
-import { Subscription } from 'rxjs';
-import { LoginService } from '../../../services/login.service';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
+import { LoginService } from './../../services/auth/login.service';
 
 @Component({
   selector: 'app-login',
@@ -23,9 +23,9 @@ export class LoginComponent implements OnInit {
    * the login has finished.
    */
   ngOnInit(): void {
-    this.route.paramMap.subscribe(paramMap => {
-        this.returnUrl = paramMap.get('returnUrl') || this.returnUrl;
-    });
+    let returnUrl = this.route.snapshot.paramMap.get('returnUrl');
+    if (returnUrl)
+      this.returnUrl = returnUrl;
   }
 
   login() {

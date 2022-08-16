@@ -1,1 +1,75 @@
-<p>admin-products works!</p>
+<h1>Manage Products</h1>
+
+<mat-toolbar class="transparent">
+  <mat-form-field appearance="standard">
+    <mat-label>Filter</mat-label>
+    <input matInput (keyup)="applyFilter($event)" #input />
+  </mat-form-field>
+  <span class="filling-spacer"></span>
+  <button
+    mat-flat-button
+    color="primary"
+    [routerLink]="['/admin/product/new']"
+  >
+    <mat-icon>add_item</mat-icon>
+    Add Product
+  </button>
+</mat-toolbar>
+
+<div class="mat-elevation-z8">
+  <mat-table [dataSource]="dataSource" matSort>
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Name
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
+    </ng-container>
+
+    <!-- Category Column -->
+    <ng-container matColumnDef="category">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Category
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ getCategoryName(row.category) }} </mat-cell>
+    </ng-container>
+
+    <!-- Fruit Column -->
+    <ng-container matColumnDef="price">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Price
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.price | currency }} </mat-cell>
+    </ng-container>
+
+    <!-- Action Column -->
+    <ng-container matColumnDef="action">
+      <mat-header-cell *matHeaderCellDef></mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        <button
+          mat-button
+          color="accent"
+          [routerLink]="['/admin/product', row.id]"
+        >
+          Edit
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+
+    <!-- Row shown when there is no matching data. -->
+    <div class="mat-row app-no-data-row" *matNoDataRow>
+      <div class="mat-cell app-no-data-cell">
+        No data matching the filter "{{ input.value }}"
+      </div>
+    </div>
+  </mat-table>
+
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    aria-label="Select page of users"
+  ></mat-paginator>
+</div>
+
