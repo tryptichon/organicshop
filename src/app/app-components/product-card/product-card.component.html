@@ -3,7 +3,7 @@
     <mat-card-title>{{ name }}</mat-card-title>
     <mat-card-subtitle>{{ getCategoryName() }}</mat-card-subtitle>
   </mat-card-header>
-  <img mat-card-image *ngIf="imageUrl" [src]="imageUrl" />
+  <img mat-card-image class="product-image" *ngIf="imageUrl" [src]="imageUrl" />
   <mat-card-content>
     <div *ngIf="price" class="product-price">
       <span>Price: {{ price | currency }}</span>
