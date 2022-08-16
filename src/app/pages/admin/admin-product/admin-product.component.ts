@@ -1,16 +1,16 @@
-import { ConfirmDialogComponent } from './../../../app-components/dialogs/confirm-dialog/confirm-dialog.component';
 import { getLocaleCurrencySymbol } from '@angular/common';
-import { Component, Inject, LOCALE_ID, OnInit, OnDestroy } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { uuidv4 as uuid } from "@firebase/util";
-import { catchError, EMPTY, filter, map, switchMap, tap, Subscription } from 'rxjs';
+import { catchError, EMPTY, Subscription } from 'rxjs';
+import { ConfirmDialogComponent } from './../../../app-components/dialogs/confirm-dialog/confirm-dialog.component';
 
 
+import { MatDialog } from '@angular/material/dialog';
 import { DbProduct } from './../../../model/db-product';
 import { CategoryService } from './../../../services/database/category.service';
 import { ProductService } from './../../../services/database/product.service';
-import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-admin-product',
@@ -33,7 +33,7 @@ export class AdminProductComponent implements OnInit, OnDestroy {
     imageUrl: this.imageControl
   });
 
-  productServiceSubscription!: Subscription
+  productServiceSubscription?: Subscription
 
   constructor(
     private categoryService: CategoryService,
@@ -75,7 +75,8 @@ export class AdminProductComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.productServiceSubscription.unsubscribe();
+    if (this.productServiceSubscription)
+      this.productServiceSubscription.unsubscribe();
   }
 
   async onSubmit() {
