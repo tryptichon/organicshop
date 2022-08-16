@@ -1,9 +1,9 @@
 import { getLocaleCurrencySymbol } from '@angular/common';
-import { Component, Inject, LOCALE_ID, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { uuidv4 as uuid } from "@firebase/util";
-import { catchError, EMPTY, filter, map, Subject, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, filter, map, switchMap, tap } from 'rxjs';
 
 
 import { DbProduct } from './../../../model/db-product';
@@ -56,10 +56,14 @@ export class AdminProductComponent implements OnInit {
         if (!dbProduct)
           return;
 
-        this.nameControl.setValue(dbProduct.name);
-        this.priceControl.setValue(dbProduct.price);
-        this.categoryControl.setValue(dbProduct.category);
-        this.imageControl.setValue(dbProduct.imageUrl ? new URL(dbProduct.imageUrl) : null);
+        this.form.setValue(
+          {
+            name: dbProduct.name,
+            price: dbProduct.price,
+            category: dbProduct.category,
+            imageUrl: dbProduct.imageUrl ? new URL(dbProduct.imageUrl) : null
+          }
+        );
       });
   }
 
@@ -81,16 +85,12 @@ export class AdminProductComponent implements OnInit {
     }
   }
 
-  getCategory(id: string | null) {
-    return id ? this.categoryService.get(id) : EMPTY;
-  }
-
   getCurrencySymbol() {
     return getLocaleCurrencySymbol(this.locale_id);
   }
 
-  getCategories$() {
-    return this.categoryService.getDocuments$();
+  getCategories() {
+    return this.categoryService.getCachedCategories();
   }
 
   isNew(): boolean {
