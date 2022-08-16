@@ -1,5 +1,21 @@
 <h1>Manage Products</h1>
 
+<mat-toolbar>
+  <mat-form-field appearance="standard">
+    <mat-label>Filter</mat-label>
+    <input matInput (keyup)="applyFilter($event)" #input />
+  </mat-form-field>
+  <span class="filling-spacer"></span>
+  <button
+    mat-flat-button
+    color="primary"
+    [routerLink]="['/admin/product/new']"
+  >
+    <mat-icon>add_item</mat-icon>
+    Add Product
+  </button>
+</mat-toolbar>
+
 <div class="mat-elevation-z8">
   <mat-table [dataSource]="dataSource" matSort>
     <!-- Name Column -->
@@ -57,21 +73,3 @@
   ></mat-paginator>
 </div>
 
-<mat-toolbar>
-  <mat-form-field appearance="standard">
-    <mat-label>Filter</mat-label>
-    <input matInput (keyup)="applyFilter($event)" #input />
-  </mat-form-field>
-  <span class="filling-spacer"></span>
-  <button
-    mat-flat-button
-    color="primary"
-    matTooltip="Add new product"
-    matTooltipShowDelay="1000"
-    matTooltipPosition="above"
-    [routerLink]="['/admin', 'product', 'new']"
-  >
-    <mat-icon>add_item</mat-icon>
-    Add Product
-  </button>
-</mat-toolbar>

@@ -1,13 +1,11 @@
-import { ProductCardComponent } from './../../../app-components/product-card/product-card.component';
 import { getLocaleCurrencySymbol } from '@angular/common';
-import { Component, Inject, LOCALE_ID, ViewChild, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { uuidv4 as uuid } from "@firebase/util";
-import { filter, map, Observable, Subject, takeUntil, switchMap, catchError, EMPTY, of, lastValueFrom } from 'rxjs';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { catchError, EMPTY, filter, map, Subject, switchMap, tap } from 'rxjs';
 
 
-import { DbCategory } from './../../../model/db-category';
 import { DbProduct } from './../../../model/db-product';
 import { CategoryService } from './../../../services/database/category.service';
 import { ProductService } from './../../../services/database/product.service';
@@ -17,10 +15,7 @@ import { ProductService } from './../../../services/database/product.service';
   templateUrl: './admin-product.component.html',
   styleUrls: ['./admin-product.component.sass']
 })
-export class AdminProductComponent implements OnInit, OnDestroy {
-
-  categories$: Observable<DbCategory[]>;
-  id$: Observable<string> = EMPTY;
+export class AdminProductComponent implements OnInit {
 
   id: string = 'new';
 
@@ -36,8 +31,6 @@ export class AdminProductComponent implements OnInit, OnDestroy {
     imageUrl: this.imageControl
   });
 
-  private destroyed$ = new Subject<void>();
-
   constructor(
     private categoryService: CategoryService,
     private productService: ProductService,
@@ -45,25 +38,14 @@ export class AdminProductComponent implements OnInit, OnDestroy {
     private router: Router,
     @Inject(LOCALE_ID) public locale_id: string
   ) {
-    this.categories$ = this.categoryService.getAll()
-      .pipe(
-        takeUntil(this.destroyed$)
-      );
   }
 
   ngOnInit(): void {
-
-    this.id$ = this.route.params
+    this.route.params
       .pipe(
         map(params => params['id']),
-        filter(id => (id && id != 'new'))
-      );
-
-    this.id$
-      .subscribe(id => this.id = id);
-
-    this.id$
-      .pipe(
+        filter(id => (id && id != 'new')),
+        tap(id => this.id = id),
         switchMap(id => this.productService.get(id)),
         catchError(error => {
           alert(JSON.stringify(error));
@@ -79,16 +61,20 @@ export class AdminProductComponent implements OnInit, OnDestroy {
         this.categoryControl.setValue(dbProduct.category);
         this.imageControl.setValue(dbProduct.imageUrl ? new URL(dbProduct.imageUrl) : null);
       });
-
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed$.next();
   }
 
   async onSubmit() {
     try {
       await this.productService.create(this.createProductFromForm());
+      await this.router.navigate(['/admin', 'products']);
+    } catch (error) {
+      alert(JSON.stringify(error));
+    }
+  }
+
+  async onDelete() {
+    try {
+      await this.productService.delete(this.id);
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
       alert(JSON.stringify(error));
@@ -101,6 +87,10 @@ export class AdminProductComponent implements OnInit, OnDestroy {
 
   getCurrencySymbol() {
     return getLocaleCurrencySymbol(this.locale_id);
+  }
+
+  getCategories$() {
+    return this.categoryService.getDocuments$();
   }
 
   isNew(): boolean {

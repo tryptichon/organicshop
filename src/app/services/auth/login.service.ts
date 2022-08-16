@@ -1,8 +1,8 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Auth, authState, GoogleAuthProvider, signOut } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { signInWithPopup, User } from 'firebase/auth';
-import { EMPTY, map, Observable, of, Subject, switchMap, takeUntil } from 'rxjs';
+import { EMPTY, map, Observable, switchMap } from 'rxjs';
 
 import { DbUser } from './../../model/db-user';
 import { UserService } from './../database/user.service';
@@ -10,11 +10,9 @@ import { UserService } from './../database/user.service';
 @Injectable({
   providedIn: 'root'
 })
-export class LoginService implements OnDestroy {
+export class LoginService {
 
   private user$: Observable<DbUser | null> = EMPTY;
-
-  private destroyed$ = new Subject<void>();
 
   constructor(
     public auth: Auth,
@@ -26,13 +24,8 @@ export class LoginService implements OnDestroy {
 
     this.user$ = authState(this.auth)
       .pipe(
-        map(firebaseUser => firebaseUser ? this.getMappedUser(firebaseUser) : null),
-        takeUntil(this.destroyed$)
+        map(firebaseUser => firebaseUser ? this.getMappedUser(firebaseUser) : null)
       );
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed$.next();
   }
 
   /**
@@ -66,17 +59,18 @@ export class LoginService implements OnDestroy {
    *
    * @return Promise that gets fulfilled after navigation is done.
    */
-  async logout(): Promise<boolean | void> {
+  async logout(): Promise<void> {
     await signOut(this.auth);
-    return await this.router.navigate(['']);
+    await this.router.navigate(['']);
+    return window.location.reload();
   }
 
 
   private getMappedUser(firebaseUser: User): DbUser {
     let newUser: DbUser = {
       id: firebaseUser.uid,
-      name:  firebaseUser.displayName != null ? firebaseUser.displayName : undefined,
-      email: firebaseUser.email != null ?  firebaseUser.email : undefined,
+      name: firebaseUser.displayName != null ? firebaseUser.displayName : undefined,
+      email: firebaseUser.email != null ? firebaseUser.email : undefined,
       isAdmin: false
     };
 

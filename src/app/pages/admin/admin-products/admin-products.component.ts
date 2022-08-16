@@ -1,11 +1,10 @@
 import { CategoryService } from './../../../services/database/category.service';
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { EMPTY, switchMap, Observable, Subject, takeUntil, of } from 'rxjs';
-import { DbCategory } from 'src/app/model/db-category';
+import { Subject, takeUntil } from 'rxjs';
 
 import { DbProduct } from './../../../model/db-product';
 import { ProductService } from './../../../services/database/product.service';
@@ -20,8 +19,6 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
   displayedColumns: string[] = ['name', 'category', 'price', 'action'];
   dataSource = new MatTableDataSource<DbProduct>;
 
-  categories: { [key: string]: string } = {};
-
   id?: string;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -34,24 +31,6 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
     private productService: ProductService,
     private categoryService: CategoryService
   ) {
-    this.productService.getAll()
-      .pipe(
-        takeUntil(this.destroyed$)
-      )
-      .subscribe(productArray => {
-        this.dataSource.data = [...productArray];
-        this.table.renderRows();
-      });
-
-    this.categoryService.getAll()
-      .pipe(
-        takeUntil(this.destroyed$)
-      )
-      .subscribe(dbCategories =>
-        dbCategories.forEach(category =>
-          this.categories[category.id] = category.name
-        )
-      );
   }
 
   ngOnDestroy(): void {
@@ -61,10 +40,19 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+
+    this.productService.getDocuments$()
+      .pipe(
+        takeUntil(this.destroyed$)
+      )
+      .subscribe(productArray => {
+        this.dataSource.data = [...productArray];
+        this.table.renderRows();
+      });
   }
 
   getCategoryName(id: string) {
-    return this.categories[id] || 'unknown';
+    return this.categoryService.getCategoryName(id);
   }
 
   applyFilter(event: Event) {

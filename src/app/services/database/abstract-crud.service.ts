@@ -1,3 +1,4 @@
+import { Injectable, OnDestroy } from '@angular/core';
 import {
   collection,
   collectionData,
@@ -11,7 +12,7 @@ import {
   setDoc,
   updateDoc,
 } from '@angular/fire/firestore';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, of, Subject, switchMap, takeUntil, catchError, EMPTY } from 'rxjs';
 
 import { DbEntry } from './../../model/db-entry';
 
@@ -27,6 +28,12 @@ export abstract class AbstractCrudService<T extends DbEntry> {
 
   private documentCollection: CollectionReference<DocumentData>;
 
+  protected documents$: Observable<T[]>;
+
+  protected documentCache: { [key: string]: T } = {};
+
+  protected destroyed$ = new Subject<void>();
+
   /**
    * Construct the CRUD service.
    *
@@ -38,6 +45,30 @@ export abstract class AbstractCrudService<T extends DbEntry> {
     protected firestore: Firestore
   ) {
     this.documentCollection = collection(this.firestore, nameOfCollection);
+
+    this.documents$ = this.getAll()
+      .pipe(
+        catchError(err => {
+          alert(JSON.stringify(err));
+          return EMPTY;
+        }),
+      );
+
+    this.documents$
+      .pipe(
+        takeUntil(this.destroyed$)
+      )
+      .subscribe(documents =>
+        documents.forEach(document => this.documentCache[document.id] = document)
+      );
+  }
+
+  /**
+   * Unsubscribes from the docuuments$ observable. Needs to be called via
+   * ngOnDestroy() of derived Angular services.
+   */
+  protected unsubscribe() {
+    this.destroyed$.next();
   }
 
   /**
@@ -48,6 +79,13 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    */
   protected ref(id: string): DocumentReference<DocumentData> {
     return doc(this.firestore, this.nameOfCollection, id);
+  }
+
+  /**
+   * @returns Observable<T[]> An observable over the array of documents.
+   */
+  getDocuments$() {
+    return this.documents$;
   }
 
   /**
