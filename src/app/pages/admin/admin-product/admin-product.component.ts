@@ -1,3 +1,4 @@
+import { ConfirmDialogComponent } from './../../../app-components/dialogs/confirm-dialog/confirm-dialog.component';
 import { getLocaleCurrencySymbol } from '@angular/common';
 import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -9,6 +10,7 @@ import { catchError, EMPTY, filter, map, switchMap, tap } from 'rxjs';
 import { DbProduct } from './../../../model/db-product';
 import { CategoryService } from './../../../services/database/category.service';
 import { ProductService } from './../../../services/database/product.service';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-admin-product',
@@ -36,6 +38,7 @@ export class AdminProductComponent implements OnInit {
     private productService: ProductService,
     private route: ActivatedRoute,
     private router: Router,
+    private confirmDialog: MatDialog,
     @Inject(LOCALE_ID) public locale_id: string
   ) {
   }
@@ -74,6 +77,17 @@ export class AdminProductComponent implements OnInit {
     } catch (error) {
       alert(JSON.stringify(error));
     }
+  }
+
+  onConfirmDelete() {
+    const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
+      data: { title: 'Delete product?', message: 'Do you want to delete product ' + this.nameControl.value + '?', icon: 'warning' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result == 'Ok')
+        this.onDelete();
+    })
   }
 
   async onDelete() {

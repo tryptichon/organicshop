@@ -28,6 +28,7 @@ import { MyOrdersComponent } from './pages/my/my-orders/my-orders.component';
 import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
+import { ConfirmDialogComponent } from './app-components/dialogs/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -49,7 +50,8 @@ import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.compo
     ForbiddenComponent,
     FooterComponent,
     ProductCardComponent,
-    AdminProductComponent
+    AdminProductComponent,
+    ConfirmDialogComponent
   ],
   imports: [
     FormsModule,
