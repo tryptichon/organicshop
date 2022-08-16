@@ -63,12 +63,7 @@ export class AdminProductComponent implements OnInit, OnDestroy {
         if (!dbProduct)
           return;
 
-        this.form.setValue({
-          name: dbProduct.name,
-          price: dbProduct.price,
-          category: dbProduct.category,
-          imageUrl: dbProduct.imageUrl
-        });
+        this.form.setValue(this.productToFormData(dbProduct));
       });
   }
 
@@ -77,13 +72,16 @@ export class AdminProductComponent implements OnInit, OnDestroy {
       this.productServiceSubscription.unsubscribe();
   }
 
-  async onSubmit() {
-    try {
-      await this.productService.create(this.createProductFromForm());
-      await this.router.navigate(['/admin', 'products']);
-    } catch (error) {
-      alert(JSON.stringify(error));
-    }
+  getCategories() {
+    return this.categoryService.getCachedCategories().sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  getCurrencySymbol() {
+    return getLocaleCurrencySymbol(this.locale_id);
+  }
+
+  isNew(): boolean {
+    return (this.id === 'new');
   }
 
   onConfirmDelete() {
@@ -97,6 +95,15 @@ export class AdminProductComponent implements OnInit, OnDestroy {
     })
   }
 
+  async onSubmit() {
+    try {
+      await this.productService.create(this.formDataToProduct());
+      await this.router.navigate(['/admin', 'products']);
+    } catch (error) {
+      alert(JSON.stringify(error));
+    }
+  }
+
   async onDelete() {
     try {
       await this.productService.delete(this.id);
@@ -106,22 +113,10 @@ export class AdminProductComponent implements OnInit, OnDestroy {
     }
   }
 
-  getCurrencySymbol() {
-    return getLocaleCurrencySymbol(this.locale_id);
-  }
-
-  getCategories() {
-    return this.categoryService.getCachedCategories().sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  isNew(): boolean {
-    return (this.id === 'new');
-  }
-
   /**
-   * @returns Map with data matching interface DbProduct.
+   * @returns DbProduct created from form data.
    */
-  public createProductFromForm(): DbProduct {
+  public formDataToProduct(): DbProduct {
     let formData = this.form.value;
 
     if (!formData.name || formData.price == undefined || !formData.category || !formData.imageUrl)
@@ -140,4 +135,16 @@ export class AdminProductComponent implements OnInit, OnDestroy {
     return newProduct;
   }
 
+  /**
+   * @param product The DbProduct as source for the form.
+   * @returns An object matching the form data.
+   */
+  public productToFormData(product: DbProduct) {
+    return {
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      imageUrl: product.imageUrl
+    };
+  }
 }
