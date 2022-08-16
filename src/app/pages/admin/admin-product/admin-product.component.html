@@ -35,6 +35,9 @@
         <mat-error *ngIf="priceControl.hasError('required')">
           Price is required
         </mat-error>
+        <mat-error *ngIf="priceControl.hasError('min')">
+          Price cannot be less than zero.
+        </mat-error>
       </mat-form-field>
     </mat-grid-tile>
     <mat-grid-tile colspan="1" rowspan="1">
@@ -66,7 +69,7 @@
       </mat-form-field>
     </mat-grid-tile>
   </mat-grid-list>
-  <mat-toolbar>
+  <mat-toolbar class="transparent">
     <button
       mat-flat-button
       color="primary"
