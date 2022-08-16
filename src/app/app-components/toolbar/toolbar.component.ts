@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { LoginService } from './../../services/auth/login.service';
 
@@ -14,13 +14,10 @@ export class ToolbarComponent implements OnDestroy {
   public isAdmin: boolean = false;
   public name?: string;
 
-  private destroyed$ = new Subject<void>();
+  private userSubscription: Subscription;
 
   constructor(public loginService: LoginService) {
-    this.loginService.appUser$
-      .pipe(
-        takeUntil(this.destroyed$)
-      )
+    this.userSubscription = this.loginService.appUser$
       .subscribe(appUser => {
         this.isAdmin = appUser?.isAdmin || false;
         this.name = appUser?.name;
@@ -28,7 +25,7 @@ export class ToolbarComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.destroyed$.next();
+    this.userSubscription.unsubscribe();
   }
 
   logout() {

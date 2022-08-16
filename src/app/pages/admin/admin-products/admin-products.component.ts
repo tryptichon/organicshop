@@ -4,7 +4,7 @@ import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { Subject, takeUntil } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { DbProduct } from './../../../model/db-product';
 import { ProductService } from './../../../services/database/product.service';
@@ -25,7 +25,7 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<DbProduct>;
 
-  private destroyed$ = new Subject<void>();
+  private productSubscription?: Subscription;
 
   constructor(
     private productService: ProductService,
@@ -33,22 +33,20 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
   ) {
   }
 
-  ngOnDestroy(): void {
-    this.destroyed$.next();
-  }
-
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
 
-    this.productService.getDocuments$()
-      .pipe(
-        takeUntil(this.destroyed$)
-      )
+    this.productSubscription = this.productService.getDocuments$()
       .subscribe(productArray => {
         this.dataSource.data = [...productArray];
         this.table.renderRows();
       });
+  }
+
+  ngOnDestroy(): void {
+    if (this.productSubscription)
+      this.productSubscription.unsubscribe();
   }
 
   getCategoryName(id: string) {
