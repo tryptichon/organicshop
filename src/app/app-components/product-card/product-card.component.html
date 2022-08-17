@@ -5,8 +5,21 @@
   </mat-card-header>
   <img mat-card-image class="product-image" *ngIf="imageUrl" [src]="imageUrl" />
   <mat-card-content>
-    <div *ngIf="price" class="product-price">
-      <span>Price: {{ price | currency }}</span>
+    <div class="button-bar">
+      <div *ngIf="price" class="product-price">
+        <span>Price: {{ price | currency }}</span>
+      </div>
+      <span class="filling-spacer"></span>
+      <button
+        *ngIf="!!id"
+        mat-flat-button
+        color="accent"
+        type="button"
+        class="product-button"
+        (click)="onButtonClick()"
+      >
+        {{ idButtonLabel }}
+      </button>
     </div>
   </mat-card-content>
 </mat-card>

@@ -13,7 +13,7 @@ import { SelectionModel } from '@angular/cdk/collections';
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.sass']
 })
-export class ProductsComponent implements OnInit, OnDestroy {
+export class ProductsComponent implements OnDestroy {
 
   categories$: Observable<DbCategory[]> = EMPTY;
 
@@ -42,9 +42,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
           (this.selectedCategory) ? (product.category === this.selectedCategory) : true
         )
       );
-  }
-
-  ngOnInit(): void {
   }
 
   ngOnDestroy(): void {

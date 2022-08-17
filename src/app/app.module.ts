@@ -51,7 +51,7 @@ import { ConfirmDialogComponent } from './app-components/dialogs/confirm-dialog/
     FooterComponent,
     ProductCardComponent,
     AdminProductComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
   ],
   imports: [
     FormsModule,
