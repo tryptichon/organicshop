@@ -20,7 +20,7 @@
     </mat-selection-list>
   </div>
   <div fxLayout="column" fxFlex="shrink">
-    <div gdGap="10px" gdColumns="repeat(auto-fill, minmax(350px, 1fr))">
+    <div gdGap="10px" gdColumns="repeat(auto-fit, minmax(350px, min-content))">
       <div
         *ngFor="let product of filteredProducts"
         class="box"
