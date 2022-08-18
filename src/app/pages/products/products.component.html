@@ -1,26 +1,12 @@
 <h1>List of Products</h1>
 <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="1vh">
-  <div fxLayout="column" fxFlex="250px" fxFlex.xs="shrink">
-    <mat-selection-list ngModel multiple="false" name="categorySelect">
-      <mat-list-option
-        value="all"
-        [selected]="!selectedCategory"
-        routerLink="/products"
-      >
-        All
-      </mat-list-option>
-      <mat-list-option
-        *ngFor="let entry of categories$ | async"
-        routerLink="/products"
-        [queryParams]="{ category: entry.id }"
-        [selected]="selectedCategory === entry.id"
-        [value]="entry.id"
-        >{{ entry.name }}
-      </mat-list-option>
-    </mat-selection-list>
+  <div fxFlex="250px" fxFlex.xs="shrink">
+    <app-product-filter
+      [(selected)]="selectedCategory"
+    ></app-product-filter>
   </div>
   <div fxLayout="column" fxFlex="shrink">
-    <div gdGap="10px" gdColumns="repeat(auto-fit, minmax(350px, min-content))">
+    <div gdGap="1vh" gdColumns="repeat(auto-fit, minmax(350px, min-content))">
       <div
         *ngFor="let product of filteredProducts"
         class="box"

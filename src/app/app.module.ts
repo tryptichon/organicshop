@@ -29,6 +29,7 @@ import { OrderSuccessComponent } from './pages/my/order-success/order-success.co
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
 import { ConfirmDialogComponent } from './app-components/dialogs/confirm-dialog/confirm-dialog.component';
+import { ProductFilterComponent } from './app-components/product-filter/product-filter.component';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { ConfirmDialogComponent } from './app-components/dialogs/confirm-dialog/
     ProductCardComponent,
     AdminProductComponent,
     ConfirmDialogComponent,
+    ProductFilterComponent,
   ],
   imports: [
     FormsModule,

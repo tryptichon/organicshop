@@ -3,7 +3,7 @@ import { EMPTY, Observable, Subscription, tap, switchMap, concatMap, concat, sha
 import { DbCategory } from './../../model/db-category';
 import { ProductService } from './../../services/database/product.service';
 import { CategoryService } from './../../services/database/category.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnInit, OnDestroy, EventEmitter } from '@angular/core';
 import { MatListOption, MatSelectionListChange } from '@angular/material/list';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -15,9 +15,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 })
 export class ProductsComponent implements OnDestroy {
 
-  categories$: Observable<DbCategory[]> = EMPTY;
-
-  selectedCategory: string | null = null;
+  private _selectedCategory: string | null = null;
 
   filteredProducts: DbProduct[] = [];
 
@@ -26,10 +24,9 @@ export class ProductsComponent implements OnDestroy {
   constructor(
     private activatedRoute: ActivatedRoute,
     public categoryService: CategoryService,
-    private productService: ProductService
+    private productService: ProductService,
+    private router: Router
   ) {
-    this.categories$ = this.categoryService.getDocuments$();
-
     this.productSubscription = activatedRoute.queryParamMap
       .pipe(
         switchMap((params) => {
@@ -47,6 +44,15 @@ export class ProductsComponent implements OnDestroy {
   ngOnDestroy(): void {
     if (this.productSubscription)
       this.productSubscription.unsubscribe();
+  }
+
+  get selectedCategory(): string | null {
+    return this._selectedCategory;
+  }
+
+  set selectedCategory($event: string | null) {
+    this._selectedCategory = $event;
+    this.router.navigate(['.'], { relativeTo: this.activatedRoute, queryParams: { 'category': $event } });
   }
 
 }
