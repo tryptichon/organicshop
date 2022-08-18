@@ -1,12 +1,9 @@
-import { DbProduct } from './../../model/db-product';
-import { EMPTY, Observable, Subscription, tap, switchMap, concatMap, concat, shareReplay } from 'rxjs';
-import { DbCategory } from './../../model/db-category';
-import { ProductService } from './../../services/database/product.service';
-import { CategoryService } from './../../services/database/category.service';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Component, OnInit, OnDestroy, EventEmitter } from '@angular/core';
-import { MatListOption, MatSelectionListChange } from '@angular/material/list';
-import { SelectionModel } from '@angular/cdk/collections';
+import { Subscription, switchMap } from 'rxjs';
+import { DbProduct } from './../../model/db-product';
+import { CategoryService } from './../../services/database/category.service';
+import { ProductService } from './../../services/database/product.service';
 
 @Component({
   selector: 'app-products',

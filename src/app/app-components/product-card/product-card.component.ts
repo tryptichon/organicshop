@@ -1,5 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { of } from 'rxjs';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CategoryService } from './../../services/database/category.service';
 
 @Component({

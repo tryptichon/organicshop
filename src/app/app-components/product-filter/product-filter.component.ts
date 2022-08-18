@@ -1,9 +1,8 @@
-import { ActivatedRoute } from '@angular/router';
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MatSelectionListChange } from '@angular/material/list';
 import { EMPTY, Observable } from 'rxjs';
 import { DbCategory } from 'src/app/model/db-category';
 import { CategoryService } from 'src/app/services/database/category.service';
-import { MatSelectionListChange } from '@angular/material/list';
 
 @Component({
   selector: 'app-product-filter',
