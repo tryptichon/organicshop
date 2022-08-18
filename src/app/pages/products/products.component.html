@@ -1,44 +1,41 @@
 <h1>List of Products</h1>
-<mat-drawer-container class="drawer-container" autosize="true">
-  <mat-drawer mode="side" opened disableClose="true" class="category-select">
-    <div class="category-content">
-      <mat-selection-list
-        ngModel
-        multiple="false"
-        name="categorySelect"
+<div fxLayout="row" fxLayout.xs="column" fxLayoutGap="1vh">
+  <div fxLayout="column" fxFlex="250px" fxFlex.xs="shrink">
+    <mat-selection-list ngModel multiple="false" name="categorySelect">
+      <mat-list-option
+        value="all"
+        [selected]="!selectedCategory"
+        routerLink="/products"
       >
-        <mat-list-option
-          value="all"
-          [selected]="!selectedCategory"
-          routerLink="/products"
-        >
-          All
-        </mat-list-option>
-        <mat-list-option
-          *ngFor="let entry of categories$ | async"
-          routerLink="/products"
-          [queryParams]="{ category: entry.id }"
-          [selected]="selectedCategory === entry.id"
-          [value]="entry.id"
-          >{{ entry.name }}
-        </mat-list-option>
-      </mat-selection-list>
+        All
+      </mat-list-option>
+      <mat-list-option
+        *ngFor="let entry of categories$ | async"
+        routerLink="/products"
+        [queryParams]="{ category: entry.id }"
+        [selected]="selectedCategory === entry.id"
+        [value]="entry.id"
+        >{{ entry.name }}
+      </mat-list-option>
+    </mat-selection-list>
+  </div>
+  <div fxLayout="column" fxFlex="shrink">
+    <div gdGap="10px" gdColumns="repeat(auto-fill, minmax(350px, 1fr))">
+      <div
+        *ngFor="let product of filteredProducts"
+        class="box"
+        fxLayout="column"
+      >
+        <app-product-card
+          [name]="product.name"
+          [price]="product.price"
+          [category]="product.category"
+          [imageUrl]="product.imageUrl"
+          [id]="product.id"
+          idButtonLabel="Add to Cart"
+          fxFlexAlign="center"
+        ></app-product-card>
+      </div>
     </div>
-  </mat-drawer>
-  <mat-drawer-content class="product-select">
-    <div class="product-content">
-      <mat-grid-list cols="2">
-        <mat-grid-tile *ngFor="let product of filteredProducts">
-          <app-product-card
-            [name]="product.name"
-            [price]="product.price"
-            [category]="product.category"
-            [imageUrl]="product.imageUrl"
-            [id]="product.id"
-            idButtonLabel="Buy"
-          ></app-product-card>
-        </mat-grid-tile>
-      </mat-grid-list>
-    </div>
-  </mat-drawer-content>
-</mat-drawer-container>
+  </div>
+</div>

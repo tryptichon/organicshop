@@ -4,71 +4,85 @@
   <p class="mat-small">Product ID: {{ id }}</p>
 </ng-template>
 <form [formGroup]="form" class="product-form" (ngSubmit)="onSubmit()">
-  <mat-grid-list cols="2" rowHeight="6em" gutterSize="1em">
-    <mat-grid-tile colspan="1" rowspan="1">
-      <mat-form-field appearance="fill" class="product-field">
-        <mat-label>Product name</mat-label>
-        <input matInput type="text" [formControl]="nameControl" name="name" />
-        <mat-error *ngIf="nameControl.hasError('required')">
-          Product name is required
-        </mat-error>
-      </mat-form-field>
-    </mat-grid-tile>
-    <mat-grid-tile colspan="1" rowspan="4">
+  <div
+    fxLayout="row"
+    fxLayout.lt-md="column"
+    fxLayoutAlign="start"
+    fxLayoutGap="1vh"
+  >
+    <div
+      fxLayout="column"
+      fxLayoutAlign="start"
+      fxLayoutGap="1vh"
+      fxFlex="grow"
+    >
+      <div>
+        <mat-form-field appearance="fill" class="product-field">
+          <mat-label>Product name</mat-label>
+          <input matInput type="text" [formControl]="nameControl" name="name" />
+          <mat-error *ngIf="nameControl.hasError('required')">
+            Product name is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill" class="product-field">
+          <mat-label>Price</mat-label>
+          <span matPrefix>{{ getCurrencySymbol() }} &nbsp;</span>
+          <input
+            matInput
+            type="number"
+            [formControl]="priceControl"
+            name="price"
+          />
+          <mat-error *ngIf="priceControl.hasError('required')">
+            Price is required
+          </mat-error>
+          <mat-error *ngIf="priceControl.hasError('min')">
+            Price cannot be less than zero.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill" class="product-field">
+          <mat-label>Food Category</mat-label>
+          <mat-select [formControl]="categoryControl" name="category">
+            <mat-option
+              *ngFor="let category of getCategories()"
+              [value]="category.id"
+            >
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="categoryControl.hasError('required')">
+            Category is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="fill" class="product-field">
+          <mat-label>Product image URL</mat-label>
+          <input
+            matInput
+            type="url"
+            [formControl]="imageControl"
+            name="imageUrl"
+          />
+          <mat-error *ngIf="imageControl.invalid"> Invalid URL </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+    <div fxLayout="column" fxLayoutGap="1vh">
       <app-product-card
+        fxLayoutAlign="start"
+        fxLayoutAlign.lt-md="center"
         [name]="nameControl.value"
         [price]="priceControl.value"
         [category]="categoryControl.value"
         [imageUrl]="imageControl.value"
       ></app-product-card>
-    </mat-grid-tile>
-    <mat-grid-tile colspan="1" rowspan="1">
-      <mat-form-field appearance="fill" class="product-field">
-        <mat-label>Price</mat-label>
-        <span matPrefix>{{ getCurrencySymbol() }} &nbsp;</span>
-        <input
-          matInput
-          type="number"
-          [formControl]="priceControl"
-          name="price"
-        />
-        <mat-error *ngIf="priceControl.hasError('required')">
-          Price is required
-        </mat-error>
-        <mat-error *ngIf="priceControl.hasError('min')">
-          Price cannot be less than zero.
-        </mat-error>
-      </mat-form-field>
-    </mat-grid-tile>
-    <mat-grid-tile colspan="1" rowspan="1">
-      <mat-form-field appearance="fill" class="product-field">
-        <mat-label>Food Category</mat-label>
-        <mat-select [formControl]="categoryControl" name="category">
-          <mat-option
-            *ngFor="let category of getCategories()"
-            [value]="category.id"
-          >
-            {{ category.name }}
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="categoryControl.hasError('required')">
-          Category is required
-        </mat-error>
-      </mat-form-field>
-    </mat-grid-tile>
-    <mat-grid-tile colspan="1" rowspan="1">
-      <mat-form-field appearance="fill" class="product-field">
-        <mat-label>Product image URL</mat-label>
-        <input
-          matInput
-          type="url"
-          [formControl]="imageControl"
-          name="imageUrl"
-        />
-        <mat-error *ngIf="imageControl.invalid"> Invalid URL </mat-error>
-      </mat-form-field>
-    </mat-grid-tile>
-  </mat-grid-list>
+    </div>
+  </div>
   <mat-toolbar class="transparent">
     <button
       mat-flat-button
