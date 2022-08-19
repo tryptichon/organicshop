@@ -1,1 +1,27 @@
-<p>products works!</p>
+<h1>List of Products</h1>
+<div fxLayout="row" fxLayout.xs="column" fxLayoutGap="1vh">
+  <div fxFlex="250px" fxFlex.xs="shrink">
+    <app-product-filter
+      [(selected)]="selectedCategory"
+    ></app-product-filter>
+  </div>
+  <div fxLayout="column" fxFlex="shrink">
+    <div gdGap="1vh" gdColumns="repeat(auto-fit, minmax(350px, min-content))">
+      <div
+        *ngFor="let product of filteredProducts"
+        class="box"
+        fxLayout="column"
+      >
+        <app-product-card
+          [name]="product.name"
+          [price]="product.price"
+          [category]="product.category"
+          [imageUrl]="product.imageUrl"
+          [id]="product.id"
+          idButtonLabel="Add to Cart"
+          fxFlexAlign="center"
+        ></app-product-card>
+      </div>
+    </div>
+  </div>
+</div>

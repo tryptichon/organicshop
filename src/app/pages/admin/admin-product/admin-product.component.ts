@@ -1,13 +1,12 @@
 import { getLocaleCurrencySymbol } from '@angular/common';
-import { Component, Inject, LOCALE_ID, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { uuidv4 as uuid } from "@firebase/util";
-import { catchError, EMPTY, Subscription } from 'rxjs';
+import { catchError, EMPTY, take } from 'rxjs';
+
 import { ConfirmDialogComponent } from './../../../app-components/dialogs/confirm-dialog/confirm-dialog.component';
-
-
-import { MatDialog } from '@angular/material/dialog';
 import { DbProduct } from './../../../model/db-product';
 import { CategoryService } from './../../../services/database/category.service';
 import { ProductService } from './../../../services/database/product.service';
@@ -17,7 +16,7 @@ import { ProductService } from './../../../services/database/product.service';
   templateUrl: './admin-product.component.html',
   styleUrls: ['./admin-product.component.sass']
 })
-export class AdminProductComponent implements OnInit, OnDestroy {
+export class AdminProductComponent implements OnInit {
 
   id: string = 'new';
 
@@ -32,8 +31,6 @@ export class AdminProductComponent implements OnInit, OnDestroy {
     category: this.categoryControl,
     imageUrl: this.imageControl
   });
-
-  productServiceSubscription?: Subscription
 
   constructor(
     private categoryService: CategoryService,
@@ -52,12 +49,16 @@ export class AdminProductComponent implements OnInit, OnDestroy {
 
     this.id = id;
 
-    this.productServiceSubscription = this.productService.get(id)
+    // Only take the product to edit from the database
+    // once, therefore ignoring all further updates
+    // that might happen in the backend.
+    this.productService.get(id)
       .pipe(
         catchError(error => {
           alert(JSON.stringify(error));
           return EMPTY;
-        })
+        }),
+        take(1)
       )
       .subscribe(dbProduct => {
         if (!dbProduct)
@@ -65,11 +66,6 @@ export class AdminProductComponent implements OnInit, OnDestroy {
 
         this.form.setValue(this.productToFormData(dbProduct));
       });
-  }
-
-  ngOnDestroy(): void {
-    if (this.productServiceSubscription)
-      this.productServiceSubscription.unsubscribe();
   }
 
   getCategories() {

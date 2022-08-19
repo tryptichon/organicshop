@@ -32,14 +32,14 @@ export class CategoryService extends AbstractCrudService<DbCategory> implements 
    * @param category The id of a category
    * @returns The name of the category obtained from the {@link categoryCache}.
    */
-  getCategoryName(category?: string | null) {
+   getCategoryName(category?: string | null): string | undefined {
     return (!category) ? undefined : this.categoryCache.get(category)?.name;
   }
 
   /**
    * @returns An array of the values (DbCategory) from the {@link categoryCache}.
    */
-  getCachedCategories() {
+  getCachedCategories() : DbCategory[] {
     return Array.from(this.categoryCache.values());
   }
 }

@@ -1,0 +1,18 @@
+<mat-selection-list
+  multiple="false"
+  class="category-list"
+  (selectionChange)="setSelectedCategory($event)"
+>
+  <mat-list-option
+    [selected]="!selected"
+    queryParamsHandling="merge"
+  >
+    All
+  </mat-list-option>
+  <mat-list-option
+    *ngFor="let entry of categories$ | async"
+    [selected]="selected === entry.id"
+    [value]="entry.id"
+    >{{ entry.name }}
+  </mat-list-option>
+</mat-selection-list>

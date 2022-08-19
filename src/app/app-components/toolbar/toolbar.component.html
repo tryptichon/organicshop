@@ -7,13 +7,31 @@
     ariaCurrentWhenActive="page"
     >Organic Shop</a
   >
+  <button
+    mat-button
+    type="button"
+    [routerLink]="['/products']"
+    ariaCurrentWhenActive="page"
+    matTooltip="Products"
+    matTooltipShowDelay="1000"
+  >
+    <mat-icon aria-hidden="false">input</mat-icon>
+  </button>
   <span class="filling-spacer"></span>
-  <button mat-button routerLink="/shopping-cart" ariaCurrentWhenActive="page">
-    <mat-icon aria-hidden="false" title="Shopping cart">shopping_cart</mat-icon>
+  <button
+    mat-button
+    type="button"
+    routerLink="/shopping-cart"
+    ariaCurrentWhenActive="page"
+    matTooltip="Your Shopping Cart"
+    matTooltipShowDelay="1000"
+  >
+    <mat-icon aria-hidden="false">shopping_cart</mat-icon>
   </button>
   <button
     *ngIf="name; else anonymousUser"
     mat-button
+    type="button"
     [matMenuTriggerFor]="menu"
   >
     {{ name }}
@@ -23,7 +41,12 @@
     <button mat-stroked-button routerLink="login">Login</button>
   </ng-template>
   <mat-menu #menu>
-    <button mat-menu-item routerLink="/my/orders" ariaCurrentWhenActive="page">
+    <button
+      mat-menu-item
+      type="button"
+      routerLink="/my/orders"
+      ariaCurrentWhenActive="page"
+    >
       My Orders
     </button>
     <button
@@ -31,6 +54,7 @@
       mat-menu-item
       routerLink="/admin/orders"
       ariaCurrentWhenActive="page"
+      type="button"
     >
       Manage Orders
     </button>
@@ -39,9 +63,10 @@
       mat-menu-item
       routerLink="/admin/products"
       ariaCurrentWhenActive="page"
+      type="button"
     >
       Manage Products
     </button>
-    <button mat-menu-item (click)="logout()">Log Out</button>
+    <button mat-menu-item type="button" (click)="logout()">Log Out</button>
   </mat-menu>
 </mat-toolbar>
