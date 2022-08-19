@@ -3,7 +3,6 @@ import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { uuidv4 as uuid } from "@firebase/util";
 import { catchError, EMPTY, take } from 'rxjs';
 
 import { ConfirmDialogComponent } from './../../../app-components/dialogs/confirm-dialog/confirm-dialog.component';
@@ -118,7 +117,8 @@ export class AdminProductComponent implements OnInit {
     if (!formData.name || formData.price == undefined || !formData.category || !formData.imageUrl)
       throw new Error("Data is missing");
 
-    this.id = this.isNew() ? uuid() : this.id;
+    if (this.isNew())
+      this.id = this.productService.getUniqueId();
 
     let newProduct: DbProduct = {
       id: this.id,

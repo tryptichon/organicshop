@@ -12,6 +12,7 @@ import {
   updateDoc
 } from '@angular/fire/firestore';
 import { catchError, EMPTY, Observable, of, switchMap } from 'rxjs';
+import { uuidv4 as uuid } from "@firebase/util";
 
 import { DbEntry } from './../../model/db-entry';
 
@@ -61,6 +62,13 @@ export abstract class AbstractCrudService<T extends DbEntry> {
   }
 
   /**
+   * @returns A new unique Id for a database entry.
+   */
+  getUniqueId() {
+    return uuid();
+  }
+
+  /**
    * @returns Observable<T[]> An observable over the array of documents.
    */
   getDocuments$() {
@@ -78,7 +86,8 @@ export abstract class AbstractCrudService<T extends DbEntry> {
   }
 
   /**
-   * Get single document or create it if it does not exist yet.
+   * Get single document or create it if it does not exist yet. If the incoming
+   * document does not have an id, a unique id will be set.
    *
    * @param document: The full document
    * @returns Observable for this document or the document obtained from Firestore.

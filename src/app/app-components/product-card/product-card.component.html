@@ -10,16 +10,11 @@
         <span>Price: {{ price | currency }}</span>
       </div>
       <span class="filling-spacer"></span>
-      <button
-        *ngIf="!!id"
-        mat-flat-button
-        color="accent"
-        type="button"
-        class="product-button"
-        (click)="onButtonClick()"
-      >
-        {{ idButtonLabel }}
-      </button>
+      <div class="product-button" *ngIf="!!productId">
+        <app-product-cart-button
+        [productId]="productId"
+        ></app-product-cart-button>
+      </div>
     </div>
   </mat-card-content>
 </mat-card>

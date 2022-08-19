@@ -30,6 +30,7 @@ import { MyOrdersComponent } from './pages/my/my-orders/my-orders.component';
 import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
+import { ProductCartButtonComponent } from './app-components/product-cart-button/product-cart-button.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.compo
     AdminProductComponent,
     ConfirmDialogComponent,
     ProductFilterComponent,
+    ProductCartButtonComponent,
   ],
   imports: [
     FormsModule,
