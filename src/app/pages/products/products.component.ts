@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, switchMap } from 'rxjs';
 import { DbProduct } from './../../model/db-product';
@@ -10,7 +10,7 @@ import { ProductService } from './../../services/database/product.service';
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.sass']
 })
-export class ProductsComponent implements OnDestroy {
+export class ProductsComponent implements OnInit, OnDestroy {
 
   private _selectedCategory: string | null = null;
 
@@ -24,7 +24,10 @@ export class ProductsComponent implements OnDestroy {
     private productService: ProductService,
     private router: Router
   ) {
-    this.productSubscription = activatedRoute.queryParamMap
+  }
+
+  ngOnInit(): void {
+    this.productSubscription = this.activatedRoute.queryParamMap
       .pipe(
         switchMap((params) => {
           this.selectedCategory = params.get('category');

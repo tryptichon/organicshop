@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { Auth, authState, GoogleAuthProvider, signOut } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { signInWithPopup, User } from 'firebase/auth';
-import { EMPTY, map, Observable, switchMap } from 'rxjs';
+import { EMPTY, map, tap, Observable, switchMap, of } from 'rxjs';
 
 import { DbUser } from './../../model/db-user';
 import { UserService } from './../database/user.service';
@@ -19,9 +19,6 @@ export class LoginService {
     public userService: UserService,
     private router: Router
   ) {
-    if (!auth)
-      return;
-
     this.user$ = authState(this.auth)
       .pipe(
         map(firebaseUser => firebaseUser ? this.getMappedUser(firebaseUser) : null)
@@ -32,11 +29,11 @@ export class LoginService {
    * Obtains user data from the backend database.
    *
    * @return An Observable containing the user data from the user database
-   *         or EMPTY if no such user exists and it cannot be created.
+   *         or of(null) if no such user exists and it cannot be created.
    */
-  get appUser$(): Observable<DbUser | void> {
+  get appUser$(): Observable<DbUser | null | void> {
     return this.user$.pipe(
-      switchMap(user => user ? this.userService.getOrCreate(user) : EMPTY)
+      switchMap(user => user ? this.userService.getOrCreate(user) : of(null))
     );
   }
 

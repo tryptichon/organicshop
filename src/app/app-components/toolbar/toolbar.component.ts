@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { LoginService } from './../../services/auth/login.service';
@@ -9,15 +9,17 @@ import { LoginService } from './../../services/auth/login.service';
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.sass']
 })
-export class ToolbarComponent implements OnDestroy {
+export class ToolbarComponent implements OnInit, OnDestroy {
 
   public isAdmin: boolean = false;
   public name?: string;
 
-  private userSubscription: Subscription;
+  private userSubscription?: Subscription;
 
   constructor(public loginService: LoginService) {
+  }
 
+  ngOnInit(): void {
     this.userSubscription = this.loginService.appUser$
       .subscribe(appUser => {
         this.isAdmin = appUser?.isAdmin || false;
@@ -26,7 +28,8 @@ export class ToolbarComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.userSubscription.unsubscribe();
+    if (this.userSubscription)
+      this.userSubscription.unsubscribe();
   }
 
   logout() {

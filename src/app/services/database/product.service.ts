@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
 
 import { DbProduct } from './../../model/db-product';

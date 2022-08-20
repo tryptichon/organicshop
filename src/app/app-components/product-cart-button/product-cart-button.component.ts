@@ -47,6 +47,7 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
 
     this.valueSubscription = this.shoppingCartService.get(this.shoppingCartId)
       .pipe(
+        filter(shoppingCart => !!shoppingCart),
         map(shoppingCart => (this.productId) ? shoppingCart.products[this.productId] : undefined)
       )
       .subscribe(count => {

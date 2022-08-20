@@ -1,35 +1,46 @@
+import { LoginService } from './auth/login.service';
 import { DbShoppingCart } from './../model/db-shopping-cart';
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { ShoppingCartService } from './database/shopping-cart.service';
-import { filter, firstValueFrom, Observable, Subscription, take } from 'rxjs'
+import { catchError, filter, firstValueFrom, Observable, of, Subscription, take, switchMap } from 'rxjs'
 import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ShoppingCartHandlerService implements OnDestroy {
+export class ShoppingCartHandlerService {
 
   shoppingCartId: string;
+  userId: string | null = null;
 
-  shoppingCartsSubscription?: Subscription;
-
-  shoppingCarts = new Map<string, DbShoppingCart>();
+  shoppingCart: DbShoppingCart | null = null;
 
   constructor(
-    private shoppingCartService: ShoppingCartService
+    private shoppingCartService: ShoppingCartService,
+    private loginService: LoginService
   ) {
     this.shoppingCartId = shoppingCartService.getUniqueId();
 
-    this.shoppingCartsSubscription = shoppingCartService.getDocuments$()
-      .subscribe(shoppingCarts => {
-        this.shoppingCarts.clear();
-        shoppingCarts.forEach(shoppingCart => this.shoppingCarts.set(shoppingCart.id, shoppingCart));
+    this.shoppingCartService.get(this.shoppingCartId)
+      .subscribe(shoppingCart => {
+        if (shoppingCart)
+          this.shoppingCart = shoppingCart;
       });
-  }
 
-  ngOnDestroy(): void {
-    if (this.shoppingCartsSubscription)
-      this.shoppingCartsSubscription.unsubscribe();
+    this.loginService.appUser$
+      .pipe(
+        switchMap(user => {
+          this.userId = user ? user.id : null;
+          return this.shoppingCartService.get(this.shoppingCartId);
+        })
+      )
+      .subscribe(shoppingCart => {
+        if (shoppingCart && shoppingCart.userId !== this.userId) {
+          shoppingCart.userId = this.userId;
+          this.updateShoppingCart(shoppingCart);
+        }
+      });
+
   }
 
   private createShoppingCart(initialProducts?: { [id: string]: number }): DbShoppingCart {
@@ -37,7 +48,7 @@ export class ShoppingCartHandlerService implements OnDestroy {
       id: this.shoppingCartId,
       dateCreated: new Date().getTime(),
       dateOrdered: null,
-      userId: null,
+      userId: this.userId,
       products: initialProducts || {}
     };
   }
@@ -56,39 +67,59 @@ export class ShoppingCartHandlerService implements OnDestroy {
    * @returns A promise that resolves when the process has finished.
    */
   async setShoppingCartProduct(productId: string, count: number) {
-    let shoppingCart: DbShoppingCart | undefined | void = this.shoppingCarts.get(this.shoppingCartId);
+    let shoppingCart = this.shoppingCart;
 
-    if (!shoppingCart && count > 0) {
-      shoppingCart = await firstValueFrom(
-        this.shoppingCartService.getOrCreate(this.createShoppingCart({ [productId]: count }))
-      )
-      if (shoppingCart)
-        this.shoppingCarts.set(shoppingCart.id, shoppingCart);
+    if (!shoppingCart) {
 
-      return;
-    }
-
-    if (!shoppingCart)
-      return;
-
-    if (count > 0) {
-
-      shoppingCart.products[productId] = count;
-
-      await this.shoppingCartService.update(shoppingCart)
-      this.shoppingCarts.set(shoppingCart.id, shoppingCart);
+      if (count > 0)
+        this.newShoppingCart(productId, count);
 
     } else {
 
-      delete shoppingCart.products[productId];
+      return (count > 0) ?
+        this.setProductCount(shoppingCart, productId, count) :
+        this.removeProductOrShoppingCart(shoppingCart, productId);
 
+    }
+  }
+
+  private async newShoppingCart(productId: string, count: number) {
+    try {
+      let shoppingCart = await firstValueFrom(
+        this.shoppingCartService.getOrCreate(this.createShoppingCart({ [productId]: count }))
+      );
+      if (shoppingCart)
+        this.shoppingCart = shoppingCart;
+    } catch (error) {
+      alert(JSON.stringify(error));
+    }
+  }
+
+  private async setProductCount(shoppingCart: DbShoppingCart, productId: string, count: number) {
+    shoppingCart.products[productId] = count;
+    return this.updateShoppingCart(shoppingCart);
+  }
+
+  private async updateShoppingCart(shoppingCart: DbShoppingCart) {
+    try {
+      await this.shoppingCartService.update(shoppingCart);
+    } catch (error) {
+      alert(JSON.stringify(error));
+    }
+  }
+
+  private async removeProductOrShoppingCart(shoppingCart: DbShoppingCart, productId: string) {
+    delete shoppingCart.products[productId];
+
+    try {
       if (Object.keys(shoppingCart.products).length === 0) {
-        await this.shoppingCartService.delete(shoppingCart.id)
-        this.shoppingCarts.delete(shoppingCart.id);
+        await this.shoppingCartService.delete(shoppingCart.id);
+        this.shoppingCart = null;
       } else {
         await this.shoppingCartService.update(shoppingCart);
       }
-
+    } catch (error) {
+      alert(JSON.stringify(error));
     }
   }
 

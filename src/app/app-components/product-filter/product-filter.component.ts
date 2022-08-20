@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatSelectionListChange } from '@angular/material/list';
 import { EMPTY, Observable } from 'rxjs';
 import { DbCategory } from 'src/app/model/db-category';
@@ -9,7 +9,7 @@ import { CategoryService } from 'src/app/services/database/category.service';
   templateUrl: './product-filter.component.html',
   styleUrls: ['./product-filter.component.sass']
 })
-export class ProductFilterComponent {
+export class ProductFilterComponent implements OnInit {
 
   categories$: Observable<DbCategory[]> = EMPTY;
 
@@ -20,6 +20,9 @@ export class ProductFilterComponent {
   constructor(
     private categoryService: CategoryService
   ) {
+  }
+
+  ngOnInit(): void {
     this.categories$ = this.categoryService.getDocuments$();
   }
 

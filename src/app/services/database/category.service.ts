@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
 import { Subscription } from 'rxjs';
 
@@ -8,24 +8,17 @@ import { AbstractCrudService } from './abstract-crud.service';
 @Injectable({
   providedIn: 'root'
 })
-export class CategoryService extends AbstractCrudService<DbCategory> implements OnDestroy {
+export class CategoryService extends AbstractCrudService<DbCategory> {
 
   protected categoryCache = new Map<string, DbCategory>();
-
-  private documentSubscription: Subscription;
 
   constructor(firestore: Firestore) {
     super('categories', firestore);
 
-    this.documentSubscription = this.documents$
+    this.documents$
       .subscribe(documents => {
         this.categoryCache = new Map<string, DbCategory>(documents.map(document => [document.id, document]));
       });
-
-  }
-
-  ngOnDestroy(): void {
-    this.documentSubscription.unsubscribe();
   }
 
   /**
