@@ -52,13 +52,12 @@ export class LoginService {
 
 
   /**
-   * Logout and redirect to home.
+   * Logout.
    *
    * @return Promise that gets fulfilled after navigation is done.
    */
   async logout(): Promise<void> {
     await signOut(this.auth);
-    await this.router.navigate(['']);
     return window.location.reload();
   }
 
