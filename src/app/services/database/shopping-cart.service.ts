@@ -1,4 +1,4 @@
-import { Firestore } from '@angular/fire/firestore';
+import { deleteDoc, doc, Firestore, setDoc } from '@angular/fire/firestore';
 import { DbShoppingCart } from './../../model/db-shopping-cart';
 import { Injectable } from '@angular/core';
 import { AbstractCrudService } from './abstract-crud.service';
@@ -18,7 +18,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart>{
    * @returns The shoppingCartId saved in the localStorage or create a new
    * unique shoppingCartId and save that in localStorage.
    */
-  override getUniqueId() : string {
+  override getUniqueId(): string {
     let shoppingCartId = localStorage.getItem('shoppingCartId');
     if (!shoppingCartId) {
       shoppingCartId = super.getUniqueId();
@@ -28,3 +28,5 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart>{
   }
 
 }
+
+
