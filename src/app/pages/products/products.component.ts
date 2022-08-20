@@ -47,9 +47,9 @@ export class ProductsComponent implements OnDestroy {
     return this._selectedCategory;
   }
 
-  set selectedCategory($event: string | null) {
-    this._selectedCategory = $event;
-    this.router.navigate(['.'], { relativeTo: this.activatedRoute, queryParams: { 'category': $event } });
+  set selectedCategory(category: string | null) {
+    this._selectedCategory = category;
+    this.router.navigate(['.'], { relativeTo: this.activatedRoute, queryParams: { 'category': category } });
   }
 
 }

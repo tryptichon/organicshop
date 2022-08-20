@@ -53,12 +53,21 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
     return this.categoryService.getCategoryName(id);
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
+  applyFilter($event: KeyboardEvent) {
+    const filterValue = ($event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.dataSource.filterPredicate =
+      (product: DbProduct, filter: string) =>
+        this.filterMatch(product.name, filter) ||
+        this.filterMatch(product.category, filter);
 
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
   }
+
+  private filterMatch(value: string, filter: string): boolean {
+    return value.toLowerCase().indexOf(filter) >= 0;
+  };
+
 }

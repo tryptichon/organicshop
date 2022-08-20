@@ -12,18 +12,20 @@ export class ProductCartButtonComponent {
 
   @Input() productId?: string | null;
 
+
   private _value: number = 0;
   @Output() valueChange = new EventEmitter<number>();
 
   @Input()
-  set value($event: number) {
-    this._value = $event;
-    this.valueChange.emit($event);
+  set value(value: number) {
+    this._value = value;
+    this.valueChange.emit(value);
   }
 
   get value(): number {
     return this._value;
   }
+
 
   constructor(
     private shoppingCartService: ShoppingCartService
