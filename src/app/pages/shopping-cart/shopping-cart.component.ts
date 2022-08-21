@@ -20,8 +20,10 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private tableData$!: Observable<TableEntry[]>;
 
-  totalPrice: number | null = null;
-  totalCount: number | null = null;
+  /** Be aware, that this number contains rounding errors, so do NOT use this directly without
+   * conversion to the precision you need! */
+  totalPrice: number = 0;
+  totalCount: number = 0;
 
   displayedColumns: string[] = ['name', 'category', 'price', 'count'];
   dataSource = new MatTableDataSource<TableEntry>;
@@ -64,8 +66,12 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataSource.sort = this.sort;
 
     this.tableDataSubscription = this.tableData$.subscribe(tableData => {
-      this.totalCount = tableData.map(t => t.count).reduce((sum, value) => sum + value, 0);
-      this.totalPrice = tableData.map(t => t.price * t.count).reduce((sum, value) => sum + value, 0);
+      this.totalCount = 0;
+      this.totalPrice = 0;
+      tableData.forEach(t => {
+        this.totalCount += t.count;
+        this.totalPrice += t.count * t.price;
+      });
 
       this.dataSource.data = [...tableData];
       this.table.renderRows();
