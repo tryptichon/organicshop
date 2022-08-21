@@ -10,7 +10,7 @@ import { AbstractCrudService } from './abstract-crud.service';
 })
 export class CategoryService extends AbstractCrudService<DbCategory> {
 
-  protected categoryCache = new Map<string, DbCategory>();
+  private categoryCache = new Map<string, DbCategory>();
 
   constructor(firestore: Firestore) {
     super('categories', firestore);

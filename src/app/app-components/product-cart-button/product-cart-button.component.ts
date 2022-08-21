@@ -25,7 +25,7 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
     this._value = value;
 
     if (this.productId)
-      this.shoppingCartHandlerService.setShoppingCartProduct(this.productId, value);
+      this.shoppingCartHandlerService.handleShoppingCartProduct(this.productId, value);
 
     this.valueChange.emit(value);
   }

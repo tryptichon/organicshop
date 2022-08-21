@@ -1,5 +1,6 @@
+import { ProductService } from './database/product.service';
 import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable, Subject, switchMap } from 'rxjs';
+import { firstValueFrom, map, Observable, Subject, switchMap } from 'rxjs';
 import { DbShoppingCart } from './../model/db-shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ShoppingCartService } from './database/shopping-cart.service';
@@ -12,7 +13,9 @@ import { ShoppingCartService } from './database/shopping-cart.service';
 })
 export class ShoppingCartHandlerService {
 
-  shoppingCart$: Observable<DbShoppingCart>;
+  /** Observable for the current shopping cart of the shop. */
+  shoppingCart$: Observable<DbShoppingCart | null>;
+  /** Observable for the sum of all products in the shopping cart. */
   shoppingCartCount$ = new Subject<number | null>();
 
 
@@ -22,8 +25,8 @@ export class ShoppingCartHandlerService {
   /** Will be set according to the current logged in user. */
   userId: string | null = null;
 
-  /** The current shopping cart. */
-  shoppingCart: DbShoppingCart | null = null;
+  /** Local copy of the current shopping cart. */
+  private shoppingCart: DbShoppingCart | null = null;
 
   /**
    * This service handles the shopping cart.
@@ -33,10 +36,13 @@ export class ShoppingCartHandlerService {
    */
   constructor(
     private shoppingCartService: ShoppingCartService,
+    private productService: ProductService,
     private loginService: LoginService
   ) {
     this.shoppingCartId = shoppingCartService.getUniqueId();
-    this.shoppingCart$ = this.shoppingCartService.get(this.shoppingCartId);
+    this.shoppingCart$ = this.shoppingCartService.get(this.shoppingCartId).pipe(
+      map(shoppingCart => shoppingCart || null)
+    );
 
     this.shoppingCart$
       .subscribe(shoppingCart => {
@@ -62,7 +68,6 @@ export class ShoppingCartHandlerService {
   }
 
   /**
-   *
    * @returns The sum of all products or null if no shopping cart exists.
    */
   productCount(): number | null {
@@ -87,7 +92,7 @@ export class ShoppingCartHandlerService {
    * @param count The amount of this product
    * @returns A promise that resolves when the process has finished.
    */
-  async setShoppingCartProduct(productId: string, count: number) {
+  async handleShoppingCartProduct(productId: string, count: number) {
     let shoppingCart = this.shoppingCart;
 
     if (!shoppingCart) {
@@ -129,13 +134,13 @@ export class ShoppingCartHandlerService {
 
   private async setProductCount(shoppingCart: DbShoppingCart, productId: string, count: number) {
     shoppingCart.products[productId] = count;
-    this.shoppingCartCount$.next(count);
     return this.updateShoppingCart(shoppingCart);
   }
 
   private async updateShoppingCart(shoppingCart: DbShoppingCart) {
     try {
       await this.shoppingCartService.update(shoppingCart);
+      this.shoppingCartCount$.next(this.productCount());
     } catch (error) {
       alert(JSON.stringify(error));
     }

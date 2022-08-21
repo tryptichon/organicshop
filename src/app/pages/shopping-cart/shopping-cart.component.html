@@ -1,1 +1,61 @@
-<p>shopping-cart works!</p>
+<h1>Shopping Cart</h1>
+
+<div class="mat-elevation-z8">
+  <mat-table
+    [dataSource]="dataSource"
+    matSort
+    matSortActive="name"
+    matSortDirection="asc"
+  >
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Name
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
+      <mat-footer-cell *matFooterCellDef>
+        Total
+      </mat-footer-cell>
+    </ng-container>
+
+    <!-- Category Column -->
+    <ng-container matColumnDef="category">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Category
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        {{ getCategoryName(row.category) }}
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef>
+      </mat-footer-cell>
+    </ng-container>
+
+    <!-- Price Column -->
+    <ng-container matColumnDef="price">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Price
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.price | currency }} </mat-cell>
+      <mat-footer-cell *matFooterCellDef>
+        {{ getTotalPrice() | currency }}
+      </mat-footer-cell>
+    </ng-container>
+
+    <!-- Count Column -->
+    <ng-container matColumnDef="count">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Number of products
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        <app-product-cart-button [productId]="row.id"></app-product-cart-button>
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef>
+        {{ getTotalCount() }}
+      </mat-footer-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
+  </mat-table>
+</div>
