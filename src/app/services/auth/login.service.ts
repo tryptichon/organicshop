@@ -1,8 +1,9 @@
-import { Injectable, OnInit } from '@angular/core';
+import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { Injectable } from '@angular/core';
 import { Auth, authState, GoogleAuthProvider, signOut } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { signInWithPopup, User } from 'firebase/auth';
-import { EMPTY, map, tap, Observable, switchMap, of } from 'rxjs';
+import { EMPTY, map, Observable, of, switchMap } from 'rxjs';
 
 import { DbUser } from './../../model/db-user';
 import { UserService } from './../database/user.service';
@@ -16,8 +17,7 @@ export class LoginService {
 
   constructor(
     public auth: Auth,
-    public userService: UserService,
-    private router: Router
+    public userService: UserService
   ) {
     this.user$ = authState(this.auth)
       .pipe(

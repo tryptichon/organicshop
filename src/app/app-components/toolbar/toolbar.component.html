@@ -26,7 +26,13 @@
     matTooltip="Your Shopping Cart"
     matTooltipShowDelay="1000"
   >
-    <mat-icon aria-hidden="false">shopping_cart</mat-icon>
+    <mat-icon
+      [matBadge]="shoppingCartCount$ | async"
+      matBadgeColor="accent"
+      matBadgeOverlap="true"
+      aria-hidden="false"
+      >shopping_cart</mat-icon
+    >
   </button>
   <button
     *ngIf="name; else anonymousUser"

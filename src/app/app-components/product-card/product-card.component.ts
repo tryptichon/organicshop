@@ -1,3 +1,4 @@
+import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CategoryService } from './../../services/database/category.service';
 

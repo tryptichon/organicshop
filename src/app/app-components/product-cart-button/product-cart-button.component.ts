@@ -1,11 +1,13 @@
-import { Observable, switchMap, filter, map, Subscription } from 'rxjs';
-import { DbShoppingCart } from './../../model/db-shopping-cart';
-import { ShoppingCartService } from './../../services/database/shopping-cart.service';
-import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { filter, map, Subscription } from 'rxjs';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { ShoppingCartService } from './../../services/database/shopping-cart.service';
 
+/**
+ * Note: requires the [productId] attribute to be passed.
+ */
 @Component({
-  selector: 'app-product-cart-button',
+  selector: 'app-product-cart-button[productId]',
   templateUrl: './product-cart-button.component.html',
   styleUrls: ['./product-cart-button.component.sass']
 })
@@ -13,7 +15,7 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
 
   shoppingCartId: string;
 
-  @Input() productId?: string | null;
+  @Input() productId!: string;
 
   private _value: number = 0;
   @Output() valueChange = new EventEmitter<number>();
@@ -42,13 +44,10 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (!this.productId)
-      return;
-
     this.valueSubscription = this.shoppingCartService.get(this.shoppingCartId)
       .pipe(
         filter(shoppingCart => !!shoppingCart),
-        map(shoppingCart => (this.productId) ? shoppingCart.products[this.productId] : undefined)
+        map(shoppingCart => shoppingCart.products[this.productId])
       )
       .subscribe(count => {
         if (count !== undefined)

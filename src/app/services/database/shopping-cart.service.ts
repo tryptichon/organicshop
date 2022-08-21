@@ -15,6 +15,9 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   }
 
   /**
+   * This id is bound to the localStorage of the browser, therefore each browser
+   * can only have at most one shopping cart.
+   *
    * @returns The shoppingCartId saved in the localStorage or create a new
    * unique shoppingCartId and save that in localStorage.
    */

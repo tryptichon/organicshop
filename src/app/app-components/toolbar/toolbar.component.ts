@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 
 import { LoginService } from './../../services/auth/login.service';
 
@@ -14,9 +15,14 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   public isAdmin: boolean = false;
   public name?: string;
 
+  public shoppingCartCount$! : Observable<number | null>;
+
   private userSubscription?: Subscription;
 
-  constructor(public loginService: LoginService) {
+  constructor(
+    public loginService: LoginService,
+    private shoppingCartHandlerService: ShoppingCartHandlerService
+  ) {
   }
 
   ngOnInit(): void {
@@ -25,6 +31,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         this.isAdmin = appUser?.isAdmin || false;
         this.name = appUser?.name;
       });
+
+    this.shoppingCartCount$ = this.shoppingCartHandlerService.shoppingCartCount$;
   }
 
   ngOnDestroy(): void {
