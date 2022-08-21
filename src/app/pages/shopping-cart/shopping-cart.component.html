@@ -37,7 +37,7 @@
       </mat-header-cell>
       <mat-cell *matCellDef="let row"> {{ row.price | currency }} </mat-cell>
       <mat-footer-cell *matFooterCellDef>
-        {{ getTotalPrice() | currency }}
+        {{ totalPrice | currency }}
       </mat-footer-cell>
     </ng-container>
 
@@ -50,7 +50,7 @@
         <app-product-cart-button [productId]="row.id"></app-product-cart-button>
       </mat-cell>
       <mat-footer-cell *matFooterCellDef>
-        {{ getTotalCount() }}
+        {{ totalCount }}
       </mat-footer-cell>
     </ng-container>
 

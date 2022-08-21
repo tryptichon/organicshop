@@ -19,7 +19,9 @@ interface TableEntry extends DbProduct {
 export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private tableData$!: Observable<TableEntry[]>;
-  private tableData: TableEntry[] = [];
+
+  totalPrice: number | null = null;
+  totalCount: number | null = null;
 
   displayedColumns: string[] = ['name', 'category', 'price', 'count'];
   dataSource = new MatTableDataSource<TableEntry>;
@@ -61,9 +63,11 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
 
-    this.tableDataSubscription = this.tableData$.subscribe(tableArray => {
-      this.tableData = tableArray;
-      this.dataSource.data = [...this.tableData];
+    this.tableDataSubscription = this.tableData$.subscribe(tableData => {
+      this.totalCount = tableData.map(t => t.count).reduce((sum, value) => sum + value, 0);
+      this.totalPrice = tableData.map(t => t.price * t.count).reduce((sum, value) => sum + value, 0);
+
+      this.dataSource.data = [...tableData];
       this.table.renderRows();
     })
 
@@ -76,14 +80,6 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getCategoryName(id: string) {
     return this.categoryService.getCategoryName(id);
-  }
-
-  getTotalPrice() : number | null {
-    return this.tableData.map(t => t.price * t.count).reduce((sum, value) => sum + value, 0);
-  }
-
-  getTotalCount() : number | null {
-    return this.tableData.map(t => t.count).reduce((sum, value) => sum + value, 0);
   }
 
 }
