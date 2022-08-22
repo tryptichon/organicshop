@@ -8,13 +8,23 @@ import {
   DocumentData,
   DocumentReference,
   Firestore,
+  query,
   setDoc,
-  updateDoc
+  updateDoc,
+  where,
+  WhereFilterOp,
+  QuerySnapshot
 } from '@angular/fire/firestore';
-import { catchError, EMPTY, Observable, of, switchMap } from 'rxjs';
 import { uuidv4 as uuid } from "@firebase/util";
+import { getDocs } from 'firebase/firestore';
+import { catchError, EMPTY, Observable, of, switchMap } from 'rxjs';
 
 import { DbEntry } from './../../model/db-entry';
+
+
+export interface DbDataEntry {
+  id?: string;
+}
 
 /**
  * Generic CRUD operations on Firebase/Firestore database.
@@ -25,6 +35,8 @@ import { DbEntry } from './../../model/db-entry';
  *             extend {@link DbEntry}.
  */
 export abstract class AbstractCrudService<T extends DbEntry> {
+
+  private collectionRoot: string;
 
   private documentCollection: CollectionReference<DocumentData>;
 
@@ -40,7 +52,8 @@ export abstract class AbstractCrudService<T extends DbEntry> {
     protected nameOfCollection: string,
     protected firestore: Firestore
   ) {
-    this.documentCollection = collection(this.firestore, nameOfCollection);
+    this.collectionRoot = nameOfCollection;
+    this.documentCollection = collection(this.firestore, this.collectionRoot);
 
     this.documents$ = this.getAll()
       .pipe(
@@ -59,6 +72,18 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    */
   protected ref(id: string): DocumentReference<DocumentData> {
     return doc(this.firestore, this.nameOfCollection, id);
+  }
+
+  /**
+   * Remove the id from the document for write and update operations.
+   *
+   * @param document Thhe original document with id.
+   * @returns A DbDataEntry where the field 'id' has been removed.
+   */
+  protected removeId(document: DbEntry): DbDataEntry {
+    let documentData: DbDataEntry = document;
+    delete documentData.id;
+    return documentData;
   }
 
   /**
@@ -115,6 +140,18 @@ export abstract class AbstractCrudService<T extends DbEntry> {
   }
 
   /**
+   * Query document
+   */
+  async query(field: string, operator: string, value: string) {
+    const q = query(
+      this.documentCollection,
+      where(field, operator as WhereFilterOp, value)
+    );
+
+    return await getDocs(q) as QuerySnapshot<T>;
+  }
+
+  /**
    * Create or update new document in Firestore.
    * This does NOT create a new ID automatically. It has to be included in 'document'.
    *
@@ -122,7 +159,7 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    * @returns A promise that finishes when the process completes.
    */
   create(document: DbEntry): Promise<void> {
-    return setDoc(this.ref(document.id), document);
+    return setDoc(this.ref(document.id), this.removeId(document), { merge: true });
   }
 
   /**
@@ -132,7 +169,7 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    * @returns A promise that finishes when the process completes.
    */
   update(document: DbEntry): Promise<void> {
-    return updateDoc(this.ref(document.id), { ...document });
+    return updateDoc(this.ref(document.id), { ...this.removeId(document) });
   }
 
   /**

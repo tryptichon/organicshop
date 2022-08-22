@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { filter, map, Subscription } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
-import { ShoppingCartService } from './../../services/database/shopping-cart.service';
 
 /**
  * Note: requires the [productId] attribute to be passed.
@@ -13,8 +12,6 @@ import { ShoppingCartService } from './../../services/database/shopping-cart.ser
 })
 export class ProductCartButtonComponent implements OnInit, OnDestroy {
 
-  shoppingCartId: string;
-
   @Input() productId!: string;
 
   private _value: number = 0;
@@ -24,8 +21,7 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   set value(value: number) {
     this._value = value;
 
-    if (this.productId)
-      this.shoppingCartHandlerService.handleShoppingCartProduct(this.productId, value);
+    this.shoppingCartHandlerService.handleShoppingCartProduct(this.productId, { count: value});
 
     this.valueChange.emit(value);
   }
@@ -37,21 +33,17 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   private valueSubscription?: Subscription;
 
   constructor(
-    private shoppingCartHandlerService: ShoppingCartHandlerService,
-    private shoppingCartService: ShoppingCartService
+    private shoppingCartHandlerService: ShoppingCartHandlerService
   ) {
-    this.shoppingCartId = this.shoppingCartHandlerService.shoppingCartId;
   }
 
   ngOnInit(): void {
-    this.valueSubscription = this.shoppingCartService.get(this.shoppingCartId)
+    this.valueSubscription = this.shoppingCartHandlerService.shoppingCartProductService.get(this.productId)
       .pipe(
-        filter(shoppingCart => !!shoppingCart),
-        map(shoppingCart => shoppingCart.products[this.productId])
+        filter(product => !!product),
       )
-      .subscribe(count => {
-        if (count !== undefined)
-          this._value = count;
+      .subscribe(product => {
+        this._value = product.count;
       });
   }
 

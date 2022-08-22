@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
+import { DbShoppingCart } from 'src/app/model/shopping-cart';
 
-import { DbShoppingCart } from './../../model/db-shopping-cart';
 import { AbstractCrudService } from './abstract-crud.service';
 
 

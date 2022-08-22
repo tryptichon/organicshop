@@ -1,8 +1,10 @@
-import { ProductService } from './database/product.service';
+import { ShoppingCartProduct } from './../model/shopping-cart';
 import { Injectable } from '@angular/core';
-import { firstValueFrom, map, Observable, Subject, switchMap } from 'rxjs';
-import { DbShoppingCart } from './../model/db-shopping-cart';
+import { Firestore } from '@angular/fire/firestore';
+import { firstValueFrom, map, Observable, of, Subject, switchMap } from 'rxjs';
+import { DbShoppingCart, DbShoppingCartProduct, ShoppingCart } from '../model/shopping-cart';
 import { LoginService } from './auth/login.service';
+import { ShoppingCartProductService } from './database/shopping-cart-product.service';
 import { ShoppingCartService } from './database/shopping-cart.service';
 
 /**
@@ -15,6 +17,9 @@ export class ShoppingCartHandlerService {
 
   /** Observable for the current shopping cart of the shop. */
   shoppingCart$: Observable<DbShoppingCart | null>;
+  /** Observable for the products within the current shopping cart of the shop. */
+  shoppingCartProducts$: Observable<DbShoppingCartProduct[]>;
+
   /** Observable for the sum of all products in the shopping cart. */
   shoppingCartCount$ = new Subject<number | null>();
 
@@ -26,7 +31,9 @@ export class ShoppingCartHandlerService {
   userId: string | null = null;
 
   /** Local copy of the current shopping cart. */
-  private shoppingCart: DbShoppingCart | null = null;
+  private shoppingCart: ShoppingCart | null = null;
+
+  shoppingCartProductService!: ShoppingCartProductService
 
   /**
    * This service handles the shopping cart.
@@ -36,19 +43,47 @@ export class ShoppingCartHandlerService {
    */
   constructor(
     private shoppingCartService: ShoppingCartService,
-    private productService: ProductService,
-    private loginService: LoginService
+    private loginService: LoginService,
+    firestore: Firestore
   ) {
     this.shoppingCartId = shoppingCartService.getUniqueId();
-    this.shoppingCart$ = this.shoppingCartService.get(this.shoppingCartId).pipe(
-      map(shoppingCart => shoppingCart || null)
-    );
+
+    this.shoppingCartProductService = new ShoppingCartProductService(firestore);
+
+    this.shoppingCart$ = this.shoppingCartService.get(this.shoppingCartId)
+      .pipe(
+        map(shoppingCart => shoppingCart || null)
+      );
+
+    this.shoppingCartProducts$ = this.shoppingCartProductService.getAll()
+      .pipe(
+        map(shoppingCartProducts => shoppingCartProducts || null)
+      );
+
 
     this.shoppingCart$
-      .subscribe(shoppingCart => {
-        if (shoppingCart)
-          this.shoppingCart = shoppingCart;
-        this.shoppingCartCount$.next(this.productCount());
+      .pipe(
+        switchMap(shoppingCart => {
+          if (shoppingCart) {
+            this.shoppingCart = {
+              ...shoppingCart,
+              products: {}
+            }
+          } else {
+            of(null);
+          }
+
+          return this.shoppingCartProducts$;
+        })
+      )
+      .subscribe(shoppingCartProducts => {
+        if (shoppingCartProducts) {
+          shoppingCartProducts.forEach(product => {
+            if (this.shoppingCart && product.shoppingCartId === this.shoppingCartId) {
+              this.shoppingCart.products[product.id] = { count: product.count };
+            }
+          })
+        }
       });
 
     this.loginService.appUser$
@@ -75,7 +110,7 @@ export class ShoppingCartHandlerService {
       return null;
 
     let count: number = 0;
-    Object.values(this.shoppingCart.products).forEach(amount => count += amount);
+    Object.values(this.shoppingCart.products).forEach(amount => count += amount.count);
     return count;
   }
 
@@ -92,70 +127,114 @@ export class ShoppingCartHandlerService {
    * @param count The amount of this product
    * @returns A promise that resolves when the process has finished.
    */
-  async handleShoppingCartProduct(productId: string, count: number) {
+  async handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
     let shoppingCart = this.shoppingCart;
 
     if (!shoppingCart) {
 
-      if (count > 0)
-        this.newShoppingCart(productId, count);
+      if (product.count > 0)
+        this.newShoppingCart(productId, product);
 
     } else {
 
-      return (count > 0) ?
-        this.setProductCount(shoppingCart, productId, count) :
-        this.removeProductOrShoppingCart(shoppingCart, productId);
+      return (product.count > 0) ?
+        this.updateShoppingCartProduct(shoppingCart, productId, product) :
+        this.removeProduct(shoppingCart, productId);
 
     }
   }
 
-  private createShoppingCart(initialProducts?: { [id: string]: number }): DbShoppingCart {
+  private createShoppingCart(productIds: string[]): DbShoppingCart {
     return {
       id: this.shoppingCartId,
       dateCreated: new Date().getTime(),
       dateOrdered: null,
       userId: this.userId,
-      products: initialProducts || {}
+      products: productIds
     };
   }
 
-  private async newShoppingCart(productId: string, count: number) {
-    try {
-      this.shoppingCart = await firstValueFrom(
-        this.shoppingCartService.getOrCreate(
-          this.createShoppingCart({ [productId]: count }))
-      ) || null;
+  private createShoppingCartProduct(productId: string, product: ShoppingCartProduct): DbShoppingCartProduct {
+    return {
+      id: productId,
+      shoppingCartId: this.shoppingCartId,
+      count: product.count
+    };
+  }
 
-      this.shoppingCartCount$.next(count);
+  private async newShoppingCart(productId: string, product: ShoppingCartProduct) {
+    try {
+      let shoppingCart = await firstValueFrom(
+        this.shoppingCartService.getOrCreate(
+          this.createShoppingCart([productId])
+        ));
+
+      let shoppingCartProduct = await firstValueFrom(
+        this.shoppingCartProductService.getOrCreate(
+          this.createShoppingCartProduct(productId, product)
+        ));
+
+      if (shoppingCart) {
+        this.shoppingCart = {
+          ...shoppingCart,
+          products: {}
+        }
+
+        if (shoppingCartProduct && this.shoppingCart) {
+          this.shoppingCart.products[productId] = { count: product.count };
+          this.shoppingCartCount$.next(product.count);
+        }
+      }
+
     } catch (error) {
       alert(JSON.stringify(error));
     }
   }
 
-  private async setProductCount(shoppingCart: DbShoppingCart, productId: string, count: number) {
-    shoppingCart.products[productId] = count;
-    return this.updateShoppingCart(shoppingCart);
-  }
-
   private async updateShoppingCart(shoppingCart: DbShoppingCart) {
     try {
       await this.shoppingCartService.update(shoppingCart);
+    } catch (error) {
+      alert(JSON.stringify(error));
+    }
+  }
+
+  private async updateShoppingCartProduct(shoppingCart: ShoppingCart, productId: string, product: ShoppingCartProduct) {
+    try {
+      let newProduct = (shoppingCart.products[productId] === undefined);
+
+      shoppingCart.products[productId] = { count: product.count };
+
+      if (newProduct) {
+        await this.shoppingCartService.update(
+          this.createShoppingCart(Object.keys(shoppingCart.products))
+        );
+      }
+
+      await this.shoppingCartProductService.create(this.createShoppingCartProduct(
+        productId,
+        product
+      ));
       this.shoppingCartCount$.next(this.productCount());
     } catch (error) {
       alert(JSON.stringify(error));
     }
   }
 
-  private async removeProductOrShoppingCart(shoppingCart: DbShoppingCart, productId: string) {
+  private async removeProduct(shoppingCart: ShoppingCart, productId: string) {
     delete shoppingCart.products[productId];
 
     try {
 
+      await this.shoppingCartProductService.delete(productId);
+
       if (Object.keys(shoppingCart.products).length === 0) {
-        await this.shoppingCartService.delete(shoppingCart.id);
+        await this.shoppingCartService.delete(this.shoppingCartId);
         this.shoppingCart = null;
       } else {
-        await this.shoppingCartService.update(shoppingCart);
+        await this.shoppingCartService.update(
+          this.createShoppingCart(Object.keys(shoppingCart.products))
+        );
       }
 
       this.shoppingCartCount$.next(this.productCount());
