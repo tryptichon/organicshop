@@ -1,12 +1,11 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { firstValueFrom, map, Subscription, switchMap, take, Observable, merge, tap } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { DbProduct } from 'src/app/model/db-product';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ResolvedShoppingCartProduct, ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
-import { DbShoppingCartProduct } from './../../model/shopping-cart';
 
 @Component({
   selector: 'app-shopping-cart',

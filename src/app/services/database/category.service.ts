@@ -1,6 +1,5 @@
-import { Injectable, OnDestroy, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { Subscription } from 'rxjs';
 
 import { DbCategory } from './../../model/db-category';
 import { AbstractCrudService } from './abstract-crud.service';

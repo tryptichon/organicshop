@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { filter, firstValueFrom, map, Observable, of, switchMap, take, withLatestFrom, tap } from 'rxjs';
+import { firstValueFrom, map, Observable, switchMap, tap } from 'rxjs';
 import { DbProduct } from '../model/db-product';
-import { DbShoppingCart, DbShoppingCartProduct, ShoppingCart } from '../model/shopping-cart';
+import { DbShoppingCart, DbShoppingCartProduct } from '../model/shopping-cart';
 import { ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ProductService } from './database/product.service';
@@ -120,7 +120,7 @@ export class ShoppingCartHandlerService {
   handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
     return firstValueFrom(this.shoppingCartProducts$
       .pipe(
-        map(shoppingCartProducts => {
+        tap(shoppingCartProducts => {
           if (shoppingCartProducts.length == 0) {
 
             if (product.count > 0)

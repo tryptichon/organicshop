@@ -1,7 +1,5 @@
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 import { Injectable } from '@angular/core';
 import { Auth, authState, GoogleAuthProvider, signOut } from '@angular/fire/auth';
-import { Router } from '@angular/router';
 import { signInWithPopup, User } from 'firebase/auth';
 import { EMPTY, map, Observable, of, switchMap } from 'rxjs';
 
