@@ -5,21 +5,15 @@ import { firstValueFrom, map, Subscription, switchMap, take, Observable, merge, 
 import { DbProduct } from 'src/app/model/db-product';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { ResolvedShoppingCartProduct, ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 import { DbShoppingCartProduct } from './../../model/shopping-cart';
-
-interface TableEntry extends DbProduct {
-  count: number
-}
 
 @Component({
   selector: 'app-shopping-cart',
   templateUrl: './shopping-cart.component.html',
   styleUrls: ['./shopping-cart.component.sass']
 })
-export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
-
-  tableData$!: Observable<TableEntry[]>;
+export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
   /** Be aware, that this number contains rounding errors, so do NOT use this directly without
    * conversion to the precision you need! */
@@ -27,7 +21,7 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
   totalCount: number = 0;
 
   displayedColumns: string[] = ['name', 'category', 'price', 'count'];
-  dataSource = new MatTableDataSource<TableEntry>;
+  dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<DbProduct>;
@@ -41,39 +35,16 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
   ) { }
 
   /**
-   * Adds an observable for combined product and shoppingCartProduct data.
-   */
-  ngOnInit(): void {
-
-    this.tableData$ = this.shoppingCartHandlerService.shoppingCartProductService.getDocuments$()
-      .pipe(
-        switchMap(shoppingCartProducts => {
-          let promises: Promise<TableEntry>[] = [];
-
-          shoppingCartProducts.forEach(shoppingCartProduct => {
-            promises.push(
-              firstValueFrom(this.productService.get(shoppingCartProduct.id)
-                .pipe(
-                  map(product => ({ ...product, count: shoppingCartProduct.count }))
-                )
-              )
-            )
-          })
-
-          return Promise.all(promises);
-        })
-      );
-
-  }
-
-  /**
    * Calculates table data and table sums
    */
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
 
-    this.tableSumSubscription = this.tableData$
+    this.tableSumSubscription = this.shoppingCartHandlerService.resolvedShoppingCartProducts$
       .subscribe(tableData => {
+        if (!tableData)
+          return;
+
         this.totalCount = 0;
         this.totalPrice = 0;
         tableData.forEach(t => {

@@ -1,12 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
 import { filter, firstValueFrom, map, Observable, of, switchMap, take, withLatestFrom } from 'rxjs';
+import { DbProduct } from '../model/db-product';
 import { DbShoppingCart, DbShoppingCartProduct, ShoppingCart } from '../model/shopping-cart';
 import { ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ProductService } from './database/product.service';
 import { ShoppingCartProductService } from './database/shopping-cart-product.service';
 import { ShoppingCartService } from './database/shopping-cart.service';
+
+export interface ResolvedShoppingCartProduct extends DbProduct {
+  count: number
+}
 
 /**
  * This service handles the shopping cart.
@@ -21,6 +26,11 @@ export class ShoppingCartHandlerService {
 
   /** Observable for the products within the current shopping cart of the shop. */
   shoppingCartProducts$: Observable<DbShoppingCartProduct[]>;
+
+  /**
+   * A merge of full data of products within this shopping cart including their counts.
+   */
+  resolvedShoppingCartProducts$: Observable<ResolvedShoppingCartProduct[] | null>;
 
   /** This id is bound to a browser. */
   shoppingCartId: string;
@@ -59,6 +69,28 @@ export class ShoppingCartHandlerService {
         map(shoppingCartProducts => shoppingCartProducts || null)
       );
 
+    this.resolvedShoppingCartProducts$ = this.shoppingCartProducts$
+      .pipe(
+        switchMap(dbShoppingCartProducts => {
+          if (!dbShoppingCartProducts)
+            return of(null);
+
+          let promises: Promise<ResolvedShoppingCartProduct>[] = [];
+
+          dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
+            promises.push(
+              firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
+                .pipe(
+                  map(product => ({ ...product, count: dbShoppingCartProduct.count }))
+                )
+              )
+            )
+          })
+
+          return Promise.all(promises);
+        })
+      );
+
     this.loginService.appUser$
       .pipe(
         switchMap(user => {
@@ -90,26 +122,8 @@ export class ShoppingCartHandlerService {
    */
   async handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
 
-    let shoppingCart = await firstValueFrom(this.shoppingCartProducts$
+    let shoppingCart = await firstValueFrom(this.resolvedShoppingCartProducts$
       .pipe(
-        switchMap(dbShoppingCartProducts => {
-          if (!dbShoppingCartProducts)
-            return of(null);
-
-          let promises: Promise<DbShoppingCartProduct>[] = [];
-
-          dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
-            promises.push(
-              firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
-                .pipe(
-                  map(product => ({ ...product, count: dbShoppingCartProduct.count }))
-                )
-              )
-            )
-          })
-
-          return Promise.all(promises);
-        }),
         filter(shoppingCartProducts => !!shoppingCartProducts),
         withLatestFrom(this.shoppingCart$),
         map(([shoppingCartProducts, dbShoppingCart]) => {
@@ -121,12 +135,9 @@ export class ShoppingCartHandlerService {
             products: {}
           }
 
-          if (shoppingCartProducts) {
-            shoppingCartProducts.forEach(shoppingCartProduct => {
-              if (shoppingCart)
-                shoppingCart.products[shoppingCartProduct.id] = { count: shoppingCartProduct.count };
-            });
-          }
+          shoppingCartProducts?.forEach(shoppingCartProduct => {
+            shoppingCart.products[shoppingCartProduct.id] = { count: shoppingCartProduct.count };
+          });
 
           return shoppingCart;
         }),
@@ -141,9 +152,11 @@ export class ShoppingCartHandlerService {
 
     } else {
 
-      return (product.count > 0) ?
-        this.updateShoppingCartProduct(shoppingCart, productId, product) :
+      if (product.count > 0) {
+        this.updateShoppingCartProduct(shoppingCart, productId, product);
+      } else {
         this.removeProduct(shoppingCart, productId);
+      }
 
     }
   }
