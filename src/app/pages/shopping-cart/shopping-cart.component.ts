@@ -28,7 +28,6 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   private tableSumSubscription?: Subscription;
 
   constructor(
-    private productService: ProductService,
     private categoryService: CategoryService,
     private shoppingCartHandlerService: ShoppingCartHandlerService
   ) { }
