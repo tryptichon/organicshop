@@ -42,9 +42,6 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
     this.tableSumSubscription = this.shoppingCartHandlerService.resolvedShoppingCartProducts$
       .subscribe(tableData => {
-        if (!tableData)
-          return;
-
         this.totalCount = 0;
         this.totalPrice = 0;
         tableData.forEach(t => {

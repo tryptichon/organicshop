@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { filter, firstValueFrom, map, Observable, of, switchMap, take, withLatestFrom } from 'rxjs';
+import { filter, firstValueFrom, map, Observable, of, switchMap, take, withLatestFrom, tap } from 'rxjs';
 import { DbProduct } from '../model/db-product';
 import { DbShoppingCart, DbShoppingCartProduct, ShoppingCart } from '../model/shopping-cart';
 import { ShoppingCartProduct } from './../model/shopping-cart';
@@ -24,13 +24,16 @@ export class ShoppingCartHandlerService {
   /** Observable for the current shopping cart of the shop. */
   shoppingCart$: Observable<DbShoppingCart | null>;
 
-  /** Observable for the products within the current shopping cart of the shop. */
+  /** Observable for the products within the current shopping cart of the shop.
+   * if this Observable returns an empty array, then there is no shopping cart.
+   */
   shoppingCartProducts$: Observable<DbShoppingCartProduct[]>;
 
   /**
    * A merge of full data of products within this shopping cart including their counts.
+   * if this Observable returns an empty array, then there is no shopping cart.
    */
-  resolvedShoppingCartProducts$: Observable<ResolvedShoppingCartProduct[] | null>;
+  resolvedShoppingCartProducts$: Observable<ResolvedShoppingCartProduct[]>;
 
   /** This id is bound to a browser. */
   shoppingCartId: string;
@@ -64,17 +67,11 @@ export class ShoppingCartHandlerService {
         map(shoppingCart => shoppingCart || null)
       );
 
-    this.shoppingCartProducts$ = this.shoppingCartProductService.getDocuments$()
-      .pipe(
-        map(shoppingCartProducts => shoppingCartProducts || null)
-      );
+    this.shoppingCartProducts$ = this.shoppingCartProductService.getDocuments$();
 
     this.resolvedShoppingCartProducts$ = this.shoppingCartProducts$
       .pipe(
         switchMap(dbShoppingCartProducts => {
-          if (!dbShoppingCartProducts)
-            return of(null);
-
           let promises: Promise<ResolvedShoppingCartProduct>[] = [];
 
           dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
@@ -117,48 +114,30 @@ export class ShoppingCartHandlerService {
    * Shopping cart has no products at all anymore? delete this shopping cart from the array of shopping carts.
    *
    * @param productId The id of the product.
-   * @param product The shoppingCartProduct-data itself.
+   * @param product The shoppingCartProduct-data itself. Contains the current count.
    * @returns A promise that resolves when the process has finished.
    */
-  async handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
-
-    let shoppingCart = await firstValueFrom(this.resolvedShoppingCartProducts$
+  handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
+    return firstValueFrom(this.shoppingCartProducts$
       .pipe(
-        filter(shoppingCartProducts => !!shoppingCartProducts),
-        withLatestFrom(this.shoppingCart$),
-        map(([shoppingCartProducts, dbShoppingCart]) => {
-          if (!dbShoppingCart)
-            return null;
+        map(shoppingCartProducts => {
+          if (shoppingCartProducts.length == 0) {
 
-          let shoppingCart: ShoppingCart = {
-            ...dbShoppingCart,
-            products: {}
+            if (product.count > 0)
+              this.newShoppingCart(productId, product);
+
+          } else {
+
+            if (product.count > 0) {
+              this.updateShoppingCartProduct(productId, product);
+            } else {
+              this.removeProduct(shoppingCartProducts, productId);
+            }
+
           }
-
-          shoppingCartProducts?.forEach(shoppingCartProduct => {
-            shoppingCart.products[shoppingCartProduct.id] = { count: shoppingCartProduct.count };
-          });
-
-          return shoppingCart;
-        }),
-        take(1)
+        })
       )
     );
-
-    if (!shoppingCart) {
-
-      if (product.count > 0)
-        this.newShoppingCart(productId, product);
-
-    } else {
-
-      if (product.count > 0) {
-        this.updateShoppingCartProduct(shoppingCart, productId, product);
-      } else {
-        this.removeProduct(shoppingCart, productId);
-      }
-
-    }
   }
 
   private createShoppingCart(): DbShoppingCart {
@@ -179,13 +158,13 @@ export class ShoppingCartHandlerService {
 
   private async newShoppingCart(productId: string, product: ShoppingCartProduct) {
     try {
-      let shoppingCart = await firstValueFrom(
+      await firstValueFrom(
         this.shoppingCartService.getOrCreate(
           this.createShoppingCart()
-        ));
+        ))
 
 
-      let shoppingCartProduct = await firstValueFrom(
+      await firstValueFrom(
         this.shoppingCartProductService.getOrCreate(
           this.createShoppingCartProduct(productId, product)
         ));
@@ -203,10 +182,8 @@ export class ShoppingCartHandlerService {
     }
   }
 
-  private async updateShoppingCartProduct(shoppingCart: ShoppingCart, productId: string, product: ShoppingCartProduct) {
+  private async updateShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
     try {
-      shoppingCart.products[productId] = { count: product.count };
-
       await this.shoppingCartProductService.create(this.createShoppingCartProduct(
         productId,
         product
@@ -217,14 +194,11 @@ export class ShoppingCartHandlerService {
     }
   }
 
-  private async removeProduct(shoppingCart: ShoppingCart, productId: string) {
-    delete shoppingCart.products[productId];
-
+  private async removeProduct(products: DbShoppingCartProduct[], productId: string) {
     try {
-
       await this.shoppingCartProductService.delete(productId);
 
-      if (Object.keys(shoppingCart.products).length === 0) {
+      if ((products.filter(product => product.id != productId)).length === 0) {
         await this.shoppingCartService.delete(this.shoppingCartId);
       }
 

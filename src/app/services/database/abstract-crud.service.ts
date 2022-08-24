@@ -115,7 +115,7 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    * @returns Observable for this document or the document obtained from Firestore.
    */
   getOrCreate(document: T): Observable<T | void> {
-    return (docData(this.ref(document.id), { idField: 'id' }) as Observable<T>)
+    return this.get(document.id)
       .pipe(
         switchMap(dbDocument => {
           return (dbDocument) ?
