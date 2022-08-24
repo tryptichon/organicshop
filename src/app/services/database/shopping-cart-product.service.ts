@@ -5,8 +5,9 @@ import { AbstractCrudService } from './abstract-crud.service';
 export class ShoppingCartProductService extends AbstractCrudService<DbShoppingCartProduct> {
 
   constructor(
+    shoppingCartId: string,
     firestore: Firestore
   ) {
-    super('shopping-cart-products', firestore);
+    super('shopping-carts/' + shoppingCartId + '/products', firestore);
   }
 }

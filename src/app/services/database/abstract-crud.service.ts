@@ -36,8 +36,6 @@ export interface DbDataEntry {
  */
 export abstract class AbstractCrudService<T extends DbEntry> {
 
-  private collectionRoot: string;
-
   private documentCollection: CollectionReference<DocumentData>;
 
   protected documents$: Observable<T[]>;
@@ -52,8 +50,7 @@ export abstract class AbstractCrudService<T extends DbEntry> {
     protected nameOfCollection: string,
     protected firestore: Firestore
   ) {
-    this.collectionRoot = nameOfCollection;
-    this.documentCollection = collection(this.firestore, this.collectionRoot);
+    this.documentCollection = collection(this.firestore, nameOfCollection);
 
     this.documents$ = this.getAll()
       .pipe(

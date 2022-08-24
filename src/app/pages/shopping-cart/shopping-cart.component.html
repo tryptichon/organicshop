@@ -32,24 +32,24 @@
 
     <!-- Price Column -->
     <ng-container matColumnDef="price">
-      <mat-header-cell *matHeaderCellDef mat-sort-header>
+      <mat-header-cell *matHeaderCellDef mat-sort-header  class="content-right">
         Price
       </mat-header-cell>
-      <mat-cell *matCellDef="let row"> {{ row.price | currency }} </mat-cell>
-      <mat-footer-cell *matFooterCellDef>
+      <mat-cell *matCellDef="let row" class="content-right"> {{ row.price | currency }} </mat-cell>
+      <mat-footer-cell *matFooterCellDef  class="content-right">
         {{ totalPrice | currency }}
       </mat-footer-cell>
     </ng-container>
 
     <!-- Count Column -->
     <ng-container matColumnDef="count">
-      <mat-header-cell *matHeaderCellDef mat-sort-header>
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="content-right">
         Number of products
       </mat-header-cell>
-      <mat-cell *matCellDef="let row">
+      <mat-cell *matCellDef="let row" class="content-right">
         <app-product-cart-button [productId]="row.id"></app-product-cart-button>
       </mat-cell>
-      <mat-footer-cell *matFooterCellDef>
+      <mat-footer-cell *matFooterCellDef class="content-right">
         {{ totalCount }}
       </mat-footer-cell>
     </ng-container>

@@ -1,13 +1,9 @@
-<div *ngIf="value > 0; else initialButton">
-  <button mat-button (click)="dec()" class="dec-button">
-    -
-  </button>
+<div *ngIf="value !== null && value > 0; else initialButton" class="button-block">
+  <button mat-button (click)="dec()" class="dec-button">-</button>
   <div class="amount">
     <span> {{ value }} in cart </span>
   </div>
-  <button mat-button (click)="inc()" class="inc-button">
-    +
-  </button>
+  <button mat-button (click)="inc()" class="inc-button">+</button>
 </div>
 <ng-template #initialButton>
   <button mat-flat-button color="accent" type="button" (click)="inc()">

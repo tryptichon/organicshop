@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, map } from 'rxjs';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 
 import { LoginService } from './../../services/auth/login.service';
@@ -15,7 +15,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   public isAdmin: boolean = false;
   public name?: string;
 
-  public shoppingCartCount$! : Observable<number | null>;
+  public shoppingCartCount$!: Observable<number | null>;
 
   private userSubscription?: Subscription;
 
@@ -32,7 +32,18 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         this.name = appUser?.name;
       });
 
-    this.shoppingCartCount$ = this.shoppingCartHandlerService.shoppingCartCount$;
+    this.shoppingCartCount$ = this.shoppingCartHandlerService.shoppingCartProductService.getDocuments$()
+      .pipe(
+        map(shoppingCartDocuments => {
+          if (!shoppingCartDocuments)
+            return null;
+
+          let sum = shoppingCartDocuments.map(shoppingCartDocument => shoppingCartDocument.count).reduce((sum, current) => sum += current, 0);
+
+          return sum > 0 ? sum : null;
+        }
+        )
+      )
   }
 
   ngOnDestroy(): void {

@@ -1,11 +1,12 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { map, Observable, Subscription, from, firstValueFrom, switchMap } from 'rxjs';
+import { firstValueFrom, map, Subscription, switchMap, take, Observable, merge, tap } from 'rxjs';
 import { DbProduct } from 'src/app/model/db-product';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { DbShoppingCartProduct } from './../../model/shopping-cart';
 
 interface TableEntry extends DbProduct {
   count: number
@@ -18,7 +19,7 @@ interface TableEntry extends DbProduct {
 })
 export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  private tableData$!: Observable<TableEntry[]>;
+  tableData$!: Observable<TableEntry[]>;
 
   /** Be aware, that this number contains rounding errors, so do NOT use this directly without
    * conversion to the precision you need! */
@@ -31,7 +32,7 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<DbProduct>;
 
-  private tableDataSubscription?: Subscription;
+  private tableSumSubscription?: Subscription;
 
   constructor(
     private productService: ProductService,
@@ -39,32 +40,39 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
     private shoppingCartHandlerService: ShoppingCartHandlerService
   ) { }
 
+  /**
+   * Adds an observable for combined product and shoppingCartProduct data.
+   */
   ngOnInit(): void {
 
-    this.tableData$ = from(this.shoppingCartHandlerService.shoppingCartProductService.query('shoppingCartId', '==', this.shoppingCartHandlerService.shoppingCartId))
+    this.tableData$ = this.shoppingCartHandlerService.shoppingCartProductService.getDocuments$()
       .pipe(
-        switchMap(products => {
+        switchMap(shoppingCartProducts => {
           let promises: Promise<TableEntry>[] = [];
 
-          products.forEach(productRef => {
+          shoppingCartProducts.forEach(shoppingCartProduct => {
             promises.push(
-              firstValueFrom(this.productService.get(productRef.id)
+              firstValueFrom(this.productService.get(shoppingCartProduct.id)
                 .pipe(
-                  map(dbProduct => ({ ...dbProduct, count: productRef.data().count }))
+                  map(product => ({ ...product, count: shoppingCartProduct.count }))
                 )
               )
-            );
-          });
+            )
+          })
 
           return Promise.all(promises);
         })
       );
+
   }
 
+  /**
+   * Calculates table data and table sums
+   */
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
 
-    this.tableDataSubscription = this.tableData$
+    this.tableSumSubscription = this.tableData$
       .subscribe(tableData => {
         this.totalCount = 0;
         this.totalPrice = 0;
@@ -73,19 +81,20 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
           this.totalPrice += t.count * t.price;
         });
 
-        this.dataSource.data = [...tableData];
-        this.table.renderRows();
+        if (this.dataSource.data.length != tableData.length) {
+          this.dataSource.data = [...tableData];
+          this.table.renderRows();
+        }
       })
 
   }
 
   ngOnDestroy(): void {
-    if (this.tableDataSubscription)
-      this.tableDataSubscription.unsubscribe();
+    if (this.tableSumSubscription)
+      this.tableSumSubscription.unsubscribe();
   }
 
   getCategoryName(id: string) {
     return this.categoryService.getCategoryName(id);
   }
-
 }

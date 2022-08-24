@@ -33,14 +33,11 @@ export interface ShoppingCart extends ShoppingCartData {
  * Database model for a shopping cart entry.
  */
 export interface DbShoppingCart extends ShoppingCartData, DbEntry {
-  /** Array of ids of assigned shopping cart products. */
-  products: string[]
 }
 
 /**
  * Database model for products within a shopping cart.
  */
 export interface DbShoppingCartProduct extends ShoppingCartProduct, DbEntry {
-  shoppingCartId: string
 }
 
