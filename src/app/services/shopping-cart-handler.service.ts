@@ -3,6 +3,7 @@ import { Firestore } from '@angular/fire/firestore';
 import { firstValueFrom, map, Observable, switchMap, tap } from 'rxjs';
 import { DbProduct } from '../model/db-product';
 import { DbShoppingCart, DbShoppingCartProduct } from '../model/shopping-cart';
+import { Alert } from '../util/error-alert';
 import { ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ProductService } from './database/product.service';
@@ -170,7 +171,7 @@ export class ShoppingCartHandlerService {
         ));
 
     } catch (error) {
-      alert(JSON.stringify(error));
+      Alert.show(error);
     }
   }
 
@@ -178,7 +179,7 @@ export class ShoppingCartHandlerService {
     try {
       await this.shoppingCartService.update(shoppingCart);
     } catch (error) {
-      alert(JSON.stringify(error));
+      Alert.show(error);
     }
   }
 
@@ -190,7 +191,7 @@ export class ShoppingCartHandlerService {
       ));
 
     } catch (error) {
-      alert(JSON.stringify(error));
+      Alert.show(error);
     }
   }
 
@@ -203,7 +204,7 @@ export class ShoppingCartHandlerService {
       }
 
     } catch (error) {
-      alert(JSON.stringify(error));
+      Alert.show(error);
     }
   }
 

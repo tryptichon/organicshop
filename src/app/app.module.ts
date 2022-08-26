@@ -17,6 +17,7 @@ import { AppComponent } from './app.component';
 import { MaterialComponentsModule } from './material-components/material-components.module';
 
 import { ConfirmDialogComponent } from './app-components/dialogs/confirm-dialog/confirm-dialog.component';
+import { ProductCartButtonComponent } from './app-components/product-cart-button/product-cart-button.component';
 import { ProductFilterComponent } from './app-components/product-filter/product-filter.component';
 import { AdminOrdersComponent } from './pages/admin/admin-orders/admin-orders.component';
 import { AdminProductComponent } from './pages/admin/admin-product/admin-product.component';
@@ -30,7 +31,7 @@ import { MyOrdersComponent } from './pages/my/my-orders/my-orders.component';
 import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
-import { ProductCartButtonComponent } from './app-components/product-cart-button/product-cart-button.component';
+
 
 @NgModule({
   declarations: [
@@ -55,7 +56,7 @@ import { ProductCartButtonComponent } from './app-components/product-cart-button
     AdminProductComponent,
     ConfirmDialogComponent,
     ProductFilterComponent,
-    ProductCartButtonComponent,
+    ProductCartButtonComponent
   ],
   imports: [
     FormsModule,

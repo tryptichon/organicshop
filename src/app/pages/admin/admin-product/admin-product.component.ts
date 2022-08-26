@@ -4,6 +4,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, EMPTY, take } from 'rxjs';
+import { Alert } from 'src/app/util/error-alert';
 
 import { ConfirmDialogComponent } from './../../../app-components/dialogs/confirm-dialog/confirm-dialog.component';
 import { DbProduct } from './../../../model/db-product';
@@ -54,7 +55,7 @@ export class AdminProductComponent implements OnInit {
     this.productService.get(id)
       .pipe(
         catchError(error => {
-          alert(JSON.stringify(error));
+          Alert.show(error);
           return EMPTY;
         }),
         take(1)
@@ -95,7 +96,7 @@ export class AdminProductComponent implements OnInit {
       await this.productService.create(this.formDataToProduct());
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
-      alert(JSON.stringify(error));
+      Alert.show(error);
     }
   }
 
@@ -104,7 +105,7 @@ export class AdminProductComponent implements OnInit {
       await this.productService.delete(this.id);
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
-      alert(JSON.stringify(error));
+      Alert.show(error);
     }
   }
 

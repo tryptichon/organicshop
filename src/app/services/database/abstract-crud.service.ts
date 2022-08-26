@@ -18,6 +18,7 @@ import {
 import { uuidv4 as uuid } from "@firebase/util";
 import { getDocs } from 'firebase/firestore';
 import { catchError, EMPTY, Observable, of, switchMap } from 'rxjs';
+import { Alert } from 'src/app/util/error-alert';
 
 import { DbEntry } from './../../model/db-entry';
 
@@ -54,8 +55,8 @@ export abstract class AbstractCrudService<T extends DbEntry> {
 
     this.documents$ = this.getAll()
       .pipe(
-        catchError(err => {
-          alert(JSON.stringify(err));
+        catchError(error => {
+          Alert.show(error);
           return EMPTY;
         }),
       );
@@ -117,13 +118,10 @@ export abstract class AbstractCrudService<T extends DbEntry> {
   getOrCreate(document: T): Observable<T | void> {
     return this.get(document.id)
       .pipe(
-        switchMap(dbDocument => {
-          return (dbDocument) ?
-            of(dbDocument) :
-            this.create(document)
-              .then(() => document)
-              .catch(error => alert(JSON.stringify(error)));
-        })
+        switchMap(dbDocument => (dbDocument) ? of(dbDocument) :
+          this.create(document)
+            .then(() => document)
+            .catch(error => alert(JSON.stringify(error))))
       );
   }
 
