@@ -1,6 +1,7 @@
+import { DialogHandler } from './../../app-components/dialogs/DialogHandler';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, switchMap } from 'rxjs';
+import { catchError, of, Subscription, switchMap } from 'rxjs';
 import { DbProduct } from './../../model/db-product';
 import { CategoryService } from './../../services/database/category.service';
 import { ProductService } from './../../services/database/product.service';
@@ -22,6 +23,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     public categoryService: CategoryService,
     private productService: ProductService,
+    private dialogs: DialogHandler,
     private router: Router
   ) {
   }
@@ -31,14 +33,21 @@ export class ProductsComponent implements OnInit, OnDestroy {
       .pipe(
         switchMap((params) => {
           this.selectedCategory = params.get('category');
-          return this.productService.getDocuments$();
+          return this.productService.getAll();
         }),
+        catchError(error => {
+          this.dialogs.error({ title: "Product Service Error", message: error });
+          return of(null);
+        })
       )
-      .subscribe(products =>
+      .subscribe(products => {
+        if (!products)
+          return;
+
         this.filteredProducts = products.filter(product =>
           (this.selectedCategory) ? (product.category === this.selectedCategory) : true
         )
-      );
+      });
   }
 
   ngOnDestroy(): void {

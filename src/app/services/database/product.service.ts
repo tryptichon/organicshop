@@ -9,15 +9,8 @@ import { AbstractCrudService } from './abstract-crud.service';
 })
 export class ProductService extends AbstractCrudService<DbProduct> {
 
-  productCache = new Map<string, DbProduct>();
-
   constructor(firestore: Firestore) {
     super('products', firestore);
-
-    this.documents$
-      .subscribe(documents => {
-        this.productCache = new Map<string, DbProduct>(documents.map(document => [document.id, document]));
-      });
   }
 
 }

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { firstValueFrom, map, Observable, switchMap, tap } from 'rxjs';
+import { catchError, firstValueFrom, from, of, Subject, switchMap, take, tap, withLatestFrom } from 'rxjs';
 import { DbProduct } from '../model/db-product';
 import { DbShoppingCart, DbShoppingCartProduct } from '../model/shopping-cart';
-import { Alert } from '../util/error-alert';
+import { DialogHandler } from './../app-components/dialogs/DialogHandler';
 import { ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ProductService } from './database/product.service';
@@ -22,30 +22,16 @@ export interface ResolvedShoppingCartProduct extends DbProduct {
 })
 export class ShoppingCartHandlerService {
 
-  /** Observable for the current shopping cart of the shop. */
-  shoppingCart$: Observable<DbShoppingCart | null>;
+  /** Observable for changes to the shoppingCartId. */
+  shoppingCartId$ = new Subject<string>();
 
-  /** Observable for the products within the current shopping cart of the shop.
-   * if this Observable returns an empty array, then there is no shopping cart.
-   */
-  shoppingCartProducts$: Observable<DbShoppingCartProduct[]>;
-
-  /**
-   * A merge of full data of products within this shopping cart including their counts.
-   * if this Observable returns an empty array, then there is no shopping cart.
-   */
-  resolvedShoppingCartProducts$: Observable<ResolvedShoppingCartProduct[]>;
-
-  /** This id is bound to a browser. */
+  /** The current shoppingCartId */
   shoppingCartId: string;
 
-  /** Will be set according to the current logged in user. */
-  userId: string | null = null;
+  private shoppingCartProductService!: ShoppingCartProductService
 
-  /** Local copy of the current shopping cart. */
-  // shoppingCart: ShoppingCart | null = null;
-
-  shoppingCartProductService!: ShoppingCartProductService
+  /** Track current status of login */
+  private userId: string | null = null;
 
   /**
    * This service handles the shopping cart.
@@ -57,52 +43,89 @@ export class ShoppingCartHandlerService {
     private productService: ProductService,
     private shoppingCartService: ShoppingCartService,
     private loginService: LoginService,
-    firestore: Firestore
+    private dialogs: DialogHandler,
+    private firestore: Firestore
   ) {
-    this.shoppingCartId = shoppingCartService.getUniqueId();
-
-    this.shoppingCartProductService = new ShoppingCartProductService(this.shoppingCartId, firestore);
-
-    this.shoppingCart$ = this.shoppingCartService.get(this.shoppingCartId)
-      .pipe(
-        map(shoppingCart => shoppingCart || null)
-      );
-
-    this.shoppingCartProducts$ = this.shoppingCartProductService.getDocuments$();
-
-    this.resolvedShoppingCartProducts$ = this.shoppingCartProducts$
-      .pipe(
-        switchMap(dbShoppingCartProducts => {
-          let promises: Promise<ResolvedShoppingCartProduct>[] = [];
-
-          dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
-            promises.push(
-              firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
-                .pipe(
-                  map(product => ({ ...product, count: dbShoppingCartProduct.count }))
-                )
-              )
-            )
-          })
-
-          return Promise.all(promises);
-        })
-      );
+    this.shoppingCartId = shoppingCartService.getDefaultShoppingCartId();
+    this.changeShoppingCart(this.shoppingCartId);
 
     this.loginService.appUser$
       .pipe(
-        switchMap(user => {
-          this.userId = user ? user.id : null;
-          return this.shoppingCart$;
-        })
+        switchMap(user => (!user) ? of(null) : from(shoppingCartService.getShoppingCarts(user.id))
+          .pipe(
+            catchError(error => {
+              dialogs.error({
+                title: "Get Shopping Carts of User",
+                message: error
+              });
+              return of(null);
+            })
+          )
+        ),
+        withLatestFrom(this.loginService.appUser$)
       )
-      .subscribe(shoppingCart => {
-        if (shoppingCart && shoppingCart.userId !== this.userId) {
-          shoppingCart.userId = this.userId;
-          this.updateShoppingCart(shoppingCart);
+      .subscribe(([shoppingCarts, dbUser]) => {
+        let oldShoppingCartId = this.shoppingCartId;
+
+        if (dbUser === null) {
+          // Logout
+          if (this.userId !== null) {
+            // If a user has been logged in before, create a new default
+            // shopping cart Id so it does not overwrite the cart of the
+            // previous user.
+            this.shoppingCartId = shoppingCartService.nextShoppingCartId();
+          }
+
+          this.userId = null;
+        } else {
+          // Login
+          if (!shoppingCarts?.length) {
+            // No shopping cart assigned to user => assign the default shopping cart
+            // if it exists.
+            this.shoppingCartService.get(this.shoppingCartId)
+              .pipe(
+                take(1),
+                catchError(error => {
+                  dialogs.error({
+                    title: "Get Default Shopping Cart",
+                    message: error
+                  });
+                  return of(null);
+                })
+              )
+              .subscribe(
+                defaultShoppingCart => {
+                  if (!defaultShoppingCart)
+                    return;
+
+                  defaultShoppingCart.userId = dbUser.id;
+                  this.updateShoppingCart(defaultShoppingCart);
+                }
+              );
+
+          } else {
+            // Use the shopping cart of the user
+            let shoppingCart = shoppingCarts[0];
+            this.shoppingCartId = shoppingCart.id;
+          }
+
+          this.userId = dbUser.id;
         }
+
+        if (oldShoppingCartId != this.shoppingCartId)
+          this.changeShoppingCart(this.shoppingCartId);
       });
 
+  }
+
+  private changeShoppingCart(shoppingCartId: string) {
+    this.shoppingCartProductService = new ShoppingCartProductService(shoppingCartId, this.firestore);
+
+    this.shoppingCartId$.next(shoppingCartId);
+  }
+
+  getShoppingCartProductService(shoppingCartId: string) {
+    return new ShoppingCartProductService(shoppingCartId, this.firestore);
   }
 
   /**
@@ -119,7 +142,7 @@ export class ShoppingCartHandlerService {
    * @returns A promise that resolves when the process has finished.
    */
   handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
-    return firstValueFrom(this.shoppingCartProducts$
+    return firstValueFrom(this.shoppingCartProductService.getAll()
       .pipe(
         tap(shoppingCartProducts => {
           if (shoppingCartProducts.length == 0) {
@@ -171,7 +194,7 @@ export class ShoppingCartHandlerService {
         ));
 
     } catch (error) {
-      Alert.show(error);
+      this.dialogs.error({ title: 'New Shopping Cart Communication Error', message: error });
     }
   }
 
@@ -179,7 +202,7 @@ export class ShoppingCartHandlerService {
     try {
       await this.shoppingCartService.update(shoppingCart);
     } catch (error) {
-      Alert.show(error);
+      this.dialogs.error({ title: 'Update Shopping Cart Communication Error', message: error });
     }
   }
 
@@ -191,7 +214,7 @@ export class ShoppingCartHandlerService {
       ));
 
     } catch (error) {
-      Alert.show(error);
+      this.dialogs.error({ title: 'Update Shopping Cart Product Communication Error', message: error });
     }
   }
 
@@ -204,7 +227,7 @@ export class ShoppingCartHandlerService {
       }
 
     } catch (error) {
-      Alert.show(error);
+      this.dialogs.error({ title: 'Remove Product from Shopping Cart Communication Error', message: error });
     }
   }
 

@@ -1,10 +1,11 @@
+import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 import { CategoryService } from './../../../services/database/category.service';
 
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { Subscription } from 'rxjs';
+import { catchError, of, Subscription } from 'rxjs';
 
 import { DbProduct } from './../../../model/db-product';
 import { ProductService } from './../../../services/database/product.service';
@@ -29,7 +30,8 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private productService: ProductService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private dialogs: DialogHandler
   ) {
   }
 
@@ -37,8 +39,17 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
 
-    this.productSubscription = this.productService.getDocuments$()
+    this.productSubscription = this.productService.getAll()
+      .pipe(
+        catchError(error => {
+          this.dialogs.error({ title: "Product Service Error", message: error });
+          return of(null);
+        })
+      )
       .subscribe(productArray => {
+        if (!productArray)
+          return;
+
         this.dataSource.data = [...productArray];
         this.table.renderRows();
       });

@@ -14,7 +14,7 @@ export class CategoryService extends AbstractCrudService<DbCategory> {
   constructor(firestore: Firestore) {
     super('categories', firestore);
 
-    this.documents$
+    this.getAll()
       .subscribe(documents => {
         this.categoryCache = new Map<string, DbCategory>(documents.map(document => [document.id, document]));
       });

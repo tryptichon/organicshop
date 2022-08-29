@@ -1,12 +1,10 @@
 import { getLocaleCurrencySymbol } from '@angular/common';
 import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, EMPTY, take } from 'rxjs';
-import { Alert } from 'src/app/util/error-alert';
+import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 
-import { ConfirmDialogComponent } from './../../../app-components/dialogs/confirm-dialog/confirm-dialog.component';
 import { DbProduct } from './../../../model/db-product';
 import { CategoryService } from './../../../services/database/category.service';
 import { ProductService } from './../../../services/database/product.service';
@@ -37,7 +35,7 @@ export class AdminProductComponent implements OnInit {
     private productService: ProductService,
     private route: ActivatedRoute,
     private router: Router,
-    private confirmDialog: MatDialog,
+    private dialogs: DialogHandler,
     @Inject(LOCALE_ID) public locale_id: string
   ) {
   }
@@ -55,7 +53,7 @@ export class AdminProductComponent implements OnInit {
     this.productService.get(id)
       .pipe(
         catchError(error => {
-          Alert.show(error);
+          this.dialogs.error({ title: 'Product Service Communication Error', message: error });
           return EMPTY;
         }),
         take(1)
@@ -81,14 +79,16 @@ export class AdminProductComponent implements OnInit {
   }
 
   onConfirmDelete() {
-    const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete product?', message: 'Do you want to delete product ' + this.nameControl.value + '?', icon: 'warning' }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result == 'Ok')
-        this.onDelete();
-    })
+    this.dialogs
+      .confirm({
+        title: 'Delete product?',
+        message: 'Do you want to delete product ' + this.nameControl.value + '?',
+        icon: 'warning'
+      })
+      .subscribe(result => {
+        if (result === 'Ok')
+          this.onDelete();
+      });
   }
 
   async onSubmit() {
@@ -96,7 +96,7 @@ export class AdminProductComponent implements OnInit {
       await this.productService.create(this.formDataToProduct());
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
-      Alert.show(error);
+      this.dialogs.error({ title: 'On Submit Communication Error', message: error });
     }
   }
 
@@ -105,7 +105,7 @@ export class AdminProductComponent implements OnInit {
       await this.productService.delete(this.id);
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
-      Alert.show(error);
+      this.dialogs.error({ title: 'On Delete Communication Error', message: error });
     }
   }
 

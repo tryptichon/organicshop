@@ -16,18 +16,27 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
 
   /**
    * This id is bound to the localStorage of the browser, therefore each browser
-   * can only have at most one shopping cart.
+   * can only have at most one default shopping cart.
    *
    * @returns The shoppingCartId saved in the localStorage or create a new
    * unique shoppingCartId and save that in localStorage.
    */
-  override getUniqueId(): string {
+  getDefaultShoppingCartId(): string {
     let shoppingCartId = localStorage.getItem('shoppingCartId');
     if (!shoppingCartId) {
-      shoppingCartId = super.getUniqueId();
-      localStorage.setItem('shoppingCartId', shoppingCartId);
+      shoppingCartId = this.nextShoppingCartId();
     }
     return shoppingCartId;
+  }
+
+  nextShoppingCartId() : string {
+    let shoppingCartId = super.getUniqueId();
+    localStorage.setItem('shoppingCartId', shoppingCartId);
+    return shoppingCartId;
+  }
+
+  async getShoppingCarts(userId: string): Promise<DbShoppingCart[]> {
+    return await this.query('userId', '==', userId);
   }
 
 }

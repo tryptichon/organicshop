@@ -8,17 +8,14 @@ import {
   DocumentData,
   DocumentReference,
   Firestore,
-  query,
-  setDoc,
+  query, QuerySnapshot, setDoc,
   updateDoc,
   where,
-  WhereFilterOp,
-  QuerySnapshot
+  WhereFilterOp
 } from '@angular/fire/firestore';
 import { uuidv4 as uuid } from "@firebase/util";
 import { getDocs } from 'firebase/firestore';
-import { catchError, EMPTY, Observable, of, switchMap } from 'rxjs';
-import { Alert } from 'src/app/util/error-alert';
+import { Observable, of, switchMap } from 'rxjs';
 
 import { DbEntry } from './../../model/db-entry';
 
@@ -39,7 +36,6 @@ export abstract class AbstractCrudService<T extends DbEntry> {
 
   private documentCollection: CollectionReference<DocumentData>;
 
-  protected documents$: Observable<T[]>;
 
   /**
    * Construct the CRUD service.
@@ -52,14 +48,6 @@ export abstract class AbstractCrudService<T extends DbEntry> {
     protected firestore: Firestore
   ) {
     this.documentCollection = collection(this.firestore, nameOfCollection);
-
-    this.documents$ = this.getAll()
-      .pipe(
-        catchError(error => {
-          Alert.show(error);
-          return EMPTY;
-        }),
-      );
   }
 
   /**
@@ -89,13 +77,6 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    */
   getUniqueId() {
     return uuid();
-  }
-
-  /**
-   * @returns Observable<T[]> An observable over the array of documents.
-   */
-  getDocuments$() {
-    return this.documents$;
   }
 
   /**
@@ -143,7 +124,16 @@ export abstract class AbstractCrudService<T extends DbEntry> {
       where(field, operator as WhereFilterOp, value)
     );
 
-    return await getDocs(q) as QuerySnapshot<T>;
+    let queryResult = await getDocs(q);
+
+    let documents: T[] = [];
+    queryResult.forEach(result => {
+      let current: T = result.data() as T;
+      current.id = result.id;
+      documents.push(current);
+    });
+
+    return documents;
   }
 
   /**
