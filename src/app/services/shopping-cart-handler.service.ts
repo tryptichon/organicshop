@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { catchError, firstValueFrom, from, of, Subject, switchMap, take, tap, withLatestFrom } from 'rxjs';
+import { catchError, firstValueFrom, from, of, startWith, Subject, Subscription, switchMap, take, tap, withLatestFrom } from 'rxjs';
 import { DbProduct } from '../model/db-product';
 import { DbShoppingCart, DbShoppingCartProduct } from '../model/shopping-cart';
 import { DialogHandler } from './../app-components/dialogs/DialogHandler';
@@ -65,21 +65,23 @@ export class ShoppingCartHandlerService {
         withLatestFrom(this.loginService.appUser$)
       )
       .subscribe(([shoppingCarts, dbUser]) => {
-        let oldShoppingCartId = this.shoppingCartId;
-
         if (dbUser === null) {
+
           // Logout
           if (this.userId !== null) {
-            // If a user has been logged in before, create a new default
+
+            // If a user has been logged in before, get back the default
             // shopping cart Id so it does not overwrite the cart of the
             // previous user.
-            this.shoppingCartId = shoppingCartService.nextShoppingCartId();
+            this.changeShoppingCart(shoppingCartService.getDefaultShoppingCartId());
           }
 
           this.userId = null;
         } else {
+
           // Login
           if (!shoppingCarts?.length) {
+
             // No shopping cart assigned to user => assign the default shopping cart
             // if it exists.
             this.shoppingCartService.get(this.shoppingCartId)
@@ -104,27 +106,47 @@ export class ShoppingCartHandlerService {
               );
 
           } else {
+
             // Use the shopping cart of the user
             let shoppingCart = shoppingCarts[0];
-            this.shoppingCartId = shoppingCart.id;
+            this.changeShoppingCart(shoppingCart.id);
           }
 
           this.userId = dbUser.id;
         }
 
-        if (oldShoppingCartId != this.shoppingCartId)
-          this.changeShoppingCart(this.shoppingCartId);
       });
 
   }
 
   private changeShoppingCart(shoppingCartId: string) {
-    this.shoppingCartProductService = new ShoppingCartProductService(shoppingCartId, this.firestore);
+    this.shoppingCartId = shoppingCartId;
+    this.shoppingCartProductService = this.getShoppingCartProductService(shoppingCartId);
 
     this.shoppingCartId$.next(shoppingCartId);
   }
 
-  getShoppingCartProductService(shoppingCartId: string) {
+  /**
+   * Install a callback for changes of the shoppingCartId. When the callback is installed,
+   * it gets called once with the current this.shoppingCartId.
+   *
+   * @param callback Callback function that gets called whenever the shoppingCartId changes.
+   * @returns A reference to the Subscription to this.shoppingCartId$. Calling modules need
+   *          this reference to be able to unsubscribe the installed callback function.
+   */
+  onShoppingCartChanged(callback: (shoppingCartId: string) => void): Subscription {
+    return this.shoppingCartId$
+      .pipe(
+        startWith(this.shoppingCartId)
+      )
+      .subscribe(shoppingCartId => callback(shoppingCartId));
+  }
+
+  /**
+   * @param shoppingCartId The id of the shopping cart containing the products.
+   * @returns A new instance of a ShoppingCartProductService.
+   */
+  getShoppingCartProductService(shoppingCartId: string): ShoppingCartProductService {
     return new ShoppingCartProductService(shoppingCartId, this.firestore);
   }
 

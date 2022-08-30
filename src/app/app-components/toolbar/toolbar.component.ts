@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { map, startWith, Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 import { DialogHandler } from '../dialogs/DialogHandler';
 
@@ -36,38 +36,28 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         this.name = appUser?.name;
       });
 
-    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
-      .pipe(
-        startWith(this.shoppingCartHandlerService.shoppingCartId)
-      )
-      .subscribe(shoppingCartId => {
-        this.connectShoppingCartProductService(shoppingCartId);
-      });
+    this.idSubscription = this.shoppingCartHandlerService.onShoppingCartChanged(shoppingCartId => {
+      if (this.productSumSubscription)
+        this.productSumSubscription.unsubscribe();
 
+      this.productSumSubscription = this.shoppingCartHandlerService
+        .getShoppingCartProductService(shoppingCartId)
+        .getAll()
+        .pipe(
+          map(shoppingCartDocuments => {
+            if (!shoppingCartDocuments)
+              return null;
+
+            let sum = shoppingCartDocuments.map(shoppingCartDocument => shoppingCartDocument.count).reduce((sum, current) => sum += current, 0);
+
+            return sum > 0 ? sum : null;
+          })
+        )
+        .subscribe(sum => {
+          this.shoppingCartCount = sum;
+        });
+    });
   }
-
-  private connectShoppingCartProductService(shoppingCartId: string) {
-    if (this.productSumSubscription)
-      this.productSumSubscription.unsubscribe();
-
-    this.productSumSubscription = this.shoppingCartHandlerService
-      .getShoppingCartProductService(shoppingCartId)
-      .getAll()
-      .pipe(
-        map(shoppingCartDocuments => {
-          if (!shoppingCartDocuments)
-            return null;
-
-          let sum = shoppingCartDocuments.map(shoppingCartDocument => shoppingCartDocument.count).reduce((sum, current) => sum += current, 0);
-
-          return sum > 0 ? sum : null;
-        })
-      )
-      .subscribe(sum => {
-        this.shoppingCartCount = sum;
-      });
-  }
-
 
   ngOnDestroy(): void {
     if (this.userSubscription)

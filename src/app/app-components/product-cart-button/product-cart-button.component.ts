@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { startWith, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 
 export interface ProductCartButtonEvent {
@@ -49,25 +49,18 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
-      .pipe(
-        startWith(this.shoppingCartHandlerService.shoppingCartId)
-      )
-      .subscribe(shoppingCartId => {
-        this.connectShoppingCartProductService(shoppingCartId);
-      });
-  }
+    this.idSubscription = this.shoppingCartHandlerService.onShoppingCartChanged(shoppingCartId => {
+      if (this.valueSubscription)
+        this.valueSubscription.unsubscribe();
 
-  private connectShoppingCartProductService(shoppingCartId: string) {
-    if (this.valueSubscription)
-      this.valueSubscription.unsubscribe();
+      this.valueSubscription = this.shoppingCartHandlerService
+        .getShoppingCartProductService(shoppingCartId)
+        .get(this.productId)
+        .subscribe(product => {
+          this._value = (product) ? product.count : 0;
+        });
+    });
 
-    this.valueSubscription = this.shoppingCartHandlerService
-      .getShoppingCartProductService(shoppingCartId)
-      .get(this.productId)
-      .subscribe(product => {
-        this._value = (product) ? product.count : 0;
-      });
   }
 
   ngOnDestroy(): void {

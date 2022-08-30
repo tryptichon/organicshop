@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { firstValueFrom, map, startWith, Subscription, switchMap } from 'rxjs';
+import { firstValueFrom, map, Subscription, switchMap } from 'rxjs';
 import { DbProduct } from 'src/app/model/db-product';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
@@ -12,7 +12,7 @@ import { ResolvedShoppingCartProduct, ShoppingCartHandlerService } from 'src/app
   templateUrl: './shopping-cart.component.html',
   styleUrls: ['./shopping-cart.component.sass']
 })
-export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
   /** Be aware, that this number contains rounding errors, so do NOT use this directly without
    * conversion to the precision you need! */
@@ -34,70 +34,50 @@ export class ShoppingCartComponent implements OnInit, AfterViewInit, OnDestroy {
     private shoppingCartHandlerService: ShoppingCartHandlerService
   ) { }
 
-  ngOnInit(): void {
-    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
-      .pipe(
-        startWith(this.shoppingCartHandlerService.shoppingCartId)
-      )
-      .subscribe(shoppingCartId => {
-        this.connectShoppingCartProductService(shoppingCartId);
-      });
-  }
-
   /**
    * Calculates table data and table sums
    */
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
 
-    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
-      .pipe(
-        startWith(this.shoppingCartHandlerService.shoppingCartId)
-      )
-      .subscribe(shoppingCartId => {
-        this.connectShoppingCartProductService(shoppingCartId);
-      });
+    this.idSubscription = this.shoppingCartHandlerService.onShoppingCartChanged(shoppingCartId => {
+      if (this.tableSumSubscription)
+        this.tableSumSubscription.unsubscribe();
 
-  }
+      this.tableSumSubscription = this.shoppingCartHandlerService
+        .getShoppingCartProductService(shoppingCartId)
+        .getAll()
+        .pipe(
+          switchMap(dbShoppingCartProducts => {
+            let promises: Promise<ResolvedShoppingCartProduct>[] = [];
 
-  private connectShoppingCartProductService(shoppingCartId: string) {
-    if (this.tableSumSubscription)
-      this.tableSumSubscription.unsubscribe();
-
-    this.tableSumSubscription = this.shoppingCartHandlerService
-      .getShoppingCartProductService(shoppingCartId)
-      .getAll()
-      .pipe(
-        switchMap(dbShoppingCartProducts => {
-          let promises: Promise<ResolvedShoppingCartProduct>[] = [];
-
-          dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
-            promises.push(
-              firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
-                .pipe(
-                  map(product => ({ ...product, count: dbShoppingCartProduct.count }))
+            dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
+              promises.push(
+                firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
+                  .pipe(
+                    map(product => ({ ...product, count: dbShoppingCartProduct.count }))
+                  )
                 )
               )
-            )
+            })
+
+            return Promise.all(promises);
           })
+        )
+        .subscribe(tableData => {
+          this.totalCount = 0;
+          this.totalPrice = 0;
+          tableData.forEach(t => {
+            this.totalCount += t.count;
+            this.totalPrice += t.count * t.price;
+          });
 
-          return Promise.all(promises);
+          if (this.dataSource.data.length != tableData.length) {
+            this.dataSource.data = [...tableData];
+            this.table.renderRows();
+          }
         })
-      )
-      .subscribe(tableData => {
-        this.totalCount = 0;
-        this.totalPrice = 0;
-        tableData.forEach(t => {
-          this.totalCount += t.count;
-          this.totalPrice += t.count * t.price;
-        });
-
-        if (this.dataSource.data.length != tableData.length) {
-          this.dataSource.data = [...tableData];
-          this.table.renderRows();
-        }
-      })
-
+    });
   }
 
   ngOnDestroy(): void {
