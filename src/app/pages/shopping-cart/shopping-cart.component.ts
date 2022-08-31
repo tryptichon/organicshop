@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { firstValueFrom, map, Subscription, switchMap } from 'rxjs';
+import { firstValueFrom, map, Subscription, switchMap, catchError, of, filter } from 'rxjs';
 import { DbProduct } from 'src/app/model/db-product';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
@@ -49,18 +49,17 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
         if (this.tableSumSubscription)
           this.tableSumSubscription.unsubscribe();
 
-        this.tableSumSubscription = this.shoppingCartHandlerService
-          .getShoppingCartProductService(shoppingCartId)
+        this.tableSumSubscription = this.shoppingCartHandlerService.shoppingCartProductService
           .getAll()
           .pipe(
             switchMap(dbShoppingCartProducts => {
-              let promises: Promise<ResolvedShoppingCartProduct>[] = [];
+              let promises: Promise<ResolvedShoppingCartProduct | null>[] = [];
 
               dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
                 promises.push(
                   firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
                     .pipe(
-                      map(product => ({ ...product, count: dbShoppingCartProduct.count }))
+                      map(product => (product ? { ...product, count: dbShoppingCartProduct.count } : null))
                     )
                   )
                 )
@@ -69,7 +68,14 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
               return Promise.all(promises);
             })
           )
-          .subscribe(tableData => {
+          .subscribe(resolvedProducts => {
+            let tableData: ResolvedShoppingCartProduct[] = [];
+
+            resolvedProducts.forEach(entry => {
+              if (entry)
+                tableData.push(entry);
+            })
+
             this.totalCount = 0;
             this.totalPrice = 0;
             tableData.forEach(t => {
@@ -77,7 +83,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
               this.totalPrice += t.count * t.price;
             });
 
-            if (this.dataSource.data.length != tableData.length) {
+            if (this.dataSource.data.length != resolvedProducts.length) {
               this.dataSource.data = [...tableData];
               this.table.renderRows();
             }

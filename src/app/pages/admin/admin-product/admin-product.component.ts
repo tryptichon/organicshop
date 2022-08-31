@@ -2,7 +2,8 @@ import { getLocaleCurrencySymbol } from '@angular/common';
 import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, EMPTY, take } from 'rxjs';
+import { catchError, of, take } from 'rxjs';
+import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 
 import { DbProduct } from './../../../model/db-product';
@@ -33,6 +34,7 @@ export class AdminProductComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private productService: ProductService,
+    private shoppingCartHandlerService: ShoppingCartHandlerService,
     private route: ActivatedRoute,
     private router: Router,
     private dialogs: DialogHandler,
@@ -54,7 +56,7 @@ export class AdminProductComponent implements OnInit {
       .pipe(
         catchError(error => {
           this.dialogs.error({ title: 'Product Service Communication Error', message: error });
-          return EMPTY;
+          return of(null);
         }),
         take(1)
       )
@@ -103,6 +105,7 @@ export class AdminProductComponent implements OnInit {
   async onDelete() {
     try {
       await this.productService.delete(this.id);
+      await this.shoppingCartHandlerService.removeProductFromAllCarts(this.id);
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
       this.dialogs.error({ title: 'On Delete Communication Error', message: error });

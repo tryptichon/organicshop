@@ -15,9 +15,9 @@ export class ErrorDialogComponent {
   ) {
     this.data = {
       title: data.title,
-      message: (typeof data.message === 'string') ? data.message : JSON.stringify(data.message)
+      message: (typeof data.message === 'string') || ('toString' in data.message) ? data.message : JSON.stringify(data.message)
     }
-   }
+  }
 
   onClick(): void {
     this.dialogRef.close();

@@ -41,8 +41,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         if (this.productSumSubscription)
           this.productSumSubscription.unsubscribe();
 
-        this.productSumSubscription = this.shoppingCartHandlerService
-          .getShoppingCartProductService(shoppingCartId)
+        this.productSumSubscription = this.shoppingCartHandlerService.shoppingCartProductService
           .getAll()
           .pipe(
             map(shoppingCartDocuments => {

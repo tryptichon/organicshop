@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { catchError, firstValueFrom, from, of, ReplaySubject, Subscription, switchMap, take, tap, withLatestFrom } from 'rxjs';
+import { catchError, firstValueFrom, from, of, ReplaySubject, switchMap, take, withLatestFrom } from 'rxjs';
 import { DialogHandler } from './../app-components/dialogs/DialogHandler';
 import { DbShoppingCart, DbShoppingCartProduct, ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
-import { ProductService } from './database/product.service';
 import { ShoppingCartProductService } from './database/shopping-cart-product.service';
 import { ShoppingCartService } from './database/shopping-cart.service';
 
@@ -23,7 +22,7 @@ export class ShoppingCartHandlerService {
   /** The current shoppingCartId */
   private shoppingCartId: string;
 
-  private shoppingCartProductService!: ShoppingCartProductService
+  shoppingCartProductService!: ShoppingCartProductService
 
   /** Track current status of login */
   private userId: string | null = null;
@@ -133,21 +132,9 @@ export class ShoppingCartHandlerService {
 
   private changeShoppingCart(shoppingCartId: string) {
     this.shoppingCartId = shoppingCartId;
-    this.shoppingCartProductService = this.getShoppingCartProductService(shoppingCartId);
+    this.shoppingCartProductService = new ShoppingCartProductService(shoppingCartId, this.firestore);
 
     this.shoppingCartId$.next(shoppingCartId);
-  }
-
-  /**
-   * @param shoppingCartId The id of the shopping cart containing the products.
-   * @returns A new instance of a ShoppingCartProductService.
-   */
-  getShoppingCartProductService(shoppingCartId: string): ShoppingCartProductService {
-    return new ShoppingCartProductService(shoppingCartId, this.firestore);
-  }
-
-  getShoppingCartService(): ShoppingCartService {
-    return this.shoppingCartService;
   }
 
   /**
@@ -166,18 +153,21 @@ export class ShoppingCartHandlerService {
   handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
     return firstValueFrom(this.shoppingCartProductService.getAll()
       .pipe(
-        tap(shoppingCartProducts => {
+        switchMap(shoppingCartProducts => {
           if (shoppingCartProducts.length == 0) {
 
-            if (product.count > 0)
-              this.newShoppingCart(productId, product);
+            if (product.count > 0) {
+              return this.newShoppingCart(productId, product);
+            } else {
+              return of();
+            }
 
           } else {
 
             if (product.count > 0) {
-              this.updateShoppingCartProduct(productId, product);
+              return this.updateShoppingCartProduct(productId, product);
             } else {
-              this.removeProduct(shoppingCartProducts, productId);
+              return this.removeProduct(this.shoppingCartProductService, shoppingCartProducts, this.shoppingCartId, productId);
             }
 
           }
@@ -240,17 +230,44 @@ export class ShoppingCartHandlerService {
     }
   }
 
-  private async removeProduct(products: DbShoppingCartProduct[], productId: string) {
+  private async removeProduct(shoppingCartProductService: ShoppingCartProductService, products: DbShoppingCartProduct[], shoppingCartId: string, productId: string) {
     try {
-      await this.shoppingCartProductService.delete(productId);
+      await shoppingCartProductService.delete(productId);
 
       if ((products.filter(product => product.id != productId)).length === 0) {
-        await this.shoppingCartService.delete(this.shoppingCartId);
+        await this.shoppingCartService.delete(shoppingCartId);
       }
 
     } catch (error) {
       this.dialogs.error({ title: 'Remove Product from Shopping Cart Communication Error', message: error });
     }
+  }
+
+  /**
+   * Remove a product from all shopping carts.
+   *
+   * @param productId The productId of the product to remove.
+   * @returns A promise that completes when the process has finished.
+   */
+  async removeProductFromAllCarts(productId: string) {
+    return await firstValueFrom(this.shoppingCartService.getAll()
+      .pipe(
+        switchMap(shoppingCarts => {
+          let promises: Promise<void>[] = [];
+
+          shoppingCarts.forEach(shoppingCart => {
+            let shoppingCartProductService = new ShoppingCartProductService(shoppingCart.id, this.firestore);
+
+            promises.push(firstValueFrom(shoppingCartProductService.getAll()
+              .pipe(
+                switchMap(products => this.removeProduct(shoppingCartProductService, products, shoppingCart.id, productId))
+              )
+            ));
+          });
+
+          return Promise.all(promises);
+        })
+      ));
   }
 
 }
