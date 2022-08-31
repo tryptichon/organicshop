@@ -15,21 +15,10 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
 
   @Input() productId!: string;
 
-  private _value: number = 0;
-
-  @Input()
-  set value(value: number) {
-    this._value = value;
-
-    this.shoppingCartHandlerService.handleShoppingCartProduct(this.productId, { count: value });
-  }
-
-  get value(): number {
-    return this._value;
-  }
+  productCount: number = 0;
 
   private idSubscription?: Subscription;
-  private valueSubscription?: Subscription;
+  private productCountSubscription?: Subscription;
 
   constructor(
     private shoppingCartHandlerService: ShoppingCartHandlerService
@@ -38,33 +27,40 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.idSubscription = this.shoppingCartHandlerService.onShoppingCartChanged(shoppingCartId => {
-      if (this.valueSubscription)
-        this.valueSubscription.unsubscribe();
+      if (this.productCountSubscription)
+        this.productCountSubscription.unsubscribe();
 
-      this.valueSubscription = this.shoppingCartHandlerService
+      this.productCountSubscription = this.shoppingCartHandlerService
         .getShoppingCartProductService(shoppingCartId)
         .get(this.productId)
         .subscribe(product => {
-          this._value = (product) ? product.count : 0;
+          this.productCount = (product) ? product.count : 0;
         });
     });
 
   }
 
   ngOnDestroy(): void {
-    if (this.valueSubscription)
-      this.valueSubscription.unsubscribe();
+    if (this.productCountSubscription)
+      this.productCountSubscription.unsubscribe();
     if (this.idSubscription)
       this.idSubscription.unsubscribe();
   }
 
   inc() {
-    this.value++;
+    this.setProductCount(this.productCount + 1);
   }
 
   dec() {
-    if (this.value > 0)
-      this.value--;
+    this.setProductCount(this.productCount - 1);
+  }
+
+  private setProductCount(productCount: number) {
+    if (productCount < 0)
+      return;
+
+    this.productCount = productCount;
+    this.shoppingCartHandlerService.handleShoppingCartProduct(this.productId, { count: productCount });
   }
 
 }

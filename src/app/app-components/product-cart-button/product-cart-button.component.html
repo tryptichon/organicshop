@@ -1,7 +1,7 @@
-<div *ngIf="value !== null && value > 0; else initialButton" class="button-block">
+<div *ngIf="productCount !== null && productCount > 0; else initialButton" class="button-block">
   <button mat-button (click)="dec()" class="dec-button">-</button>
   <div class="amount">
-    <span> {{ value }} in cart </span>
+    <span> {{ productCount }} in cart </span>
   </div>
   <button mat-button (click)="inc()" class="inc-button">+</button>
 </div>
