@@ -26,17 +26,18 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.idSubscription = this.shoppingCartHandlerService.onShoppingCartChanged(shoppingCartId => {
-      if (this.productCountSubscription)
-        this.productCountSubscription.unsubscribe();
+    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
+      .subscribe(shoppingCartId => {
+        if (this.productCountSubscription)
+          this.productCountSubscription.unsubscribe();
 
-      this.productCountSubscription = this.shoppingCartHandlerService
-        .getShoppingCartProductService(shoppingCartId)
-        .get(this.productId)
-        .subscribe(product => {
-          this.productCount = (product) ? product.count : 0;
-        });
-    });
+        this.productCountSubscription = this.shoppingCartHandlerService
+          .getShoppingCartProductService(shoppingCartId)
+          .get(this.productId)
+          .subscribe(product => {
+            this.productCount = (product) ? product.count : 0;
+          });
+      });
 
   }
 

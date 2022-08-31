@@ -36,27 +36,28 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         this.name = appUser?.name;
       });
 
-    this.idSubscription = this.shoppingCartHandlerService.onShoppingCartChanged(shoppingCartId => {
-      if (this.productSumSubscription)
-        this.productSumSubscription.unsubscribe();
+    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
+      .subscribe(shoppingCartId => {
+        if (this.productSumSubscription)
+          this.productSumSubscription.unsubscribe();
 
-      this.productSumSubscription = this.shoppingCartHandlerService
-        .getShoppingCartProductService(shoppingCartId)
-        .getAll()
-        .pipe(
-          map(shoppingCartDocuments => {
-            if (!shoppingCartDocuments)
-              return null;
+        this.productSumSubscription = this.shoppingCartHandlerService
+          .getShoppingCartProductService(shoppingCartId)
+          .getAll()
+          .pipe(
+            map(shoppingCartDocuments => {
+              if (!shoppingCartDocuments)
+                return null;
 
-            let sum = shoppingCartDocuments.map(shoppingCartDocument => shoppingCartDocument.count).reduce((sum, current) => sum += current, 0);
+              let sum = shoppingCartDocuments.map(shoppingCartDocument => shoppingCartDocument.count).reduce((sum, current) => sum += current, 0);
 
-            return sum > 0 ? sum : null;
-          })
-        )
-        .subscribe(sum => {
-          this.shoppingCartCount = sum;
-        });
-    });
+              return sum > 0 ? sum : null;
+            })
+          )
+          .subscribe(sum => {
+            this.shoppingCartCount = sum;
+          });
+      });
   }
 
   ngOnDestroy(): void {

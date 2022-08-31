@@ -44,44 +44,45 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
 
-    this.idSubscription = this.shoppingCartHandlerService.onShoppingCartChanged(shoppingCartId => {
-      if (this.tableSumSubscription)
-        this.tableSumSubscription.unsubscribe();
+    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
+      .subscribe(shoppingCartId => {
+        if (this.tableSumSubscription)
+          this.tableSumSubscription.unsubscribe();
 
-      this.tableSumSubscription = this.shoppingCartHandlerService
-        .getShoppingCartProductService(shoppingCartId)
-        .getAll()
-        .pipe(
-          switchMap(dbShoppingCartProducts => {
-            let promises: Promise<ResolvedShoppingCartProduct>[] = [];
+        this.tableSumSubscription = this.shoppingCartHandlerService
+          .getShoppingCartProductService(shoppingCartId)
+          .getAll()
+          .pipe(
+            switchMap(dbShoppingCartProducts => {
+              let promises: Promise<ResolvedShoppingCartProduct>[] = [];
 
-            dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
-              promises.push(
-                firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
-                  .pipe(
-                    map(product => ({ ...product, count: dbShoppingCartProduct.count }))
+              dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
+                promises.push(
+                  firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
+                    .pipe(
+                      map(product => ({ ...product, count: dbShoppingCartProduct.count }))
+                    )
                   )
                 )
-              )
+              })
+
+              return Promise.all(promises);
             })
+          )
+          .subscribe(tableData => {
+            this.totalCount = 0;
+            this.totalPrice = 0;
+            tableData.forEach(t => {
+              this.totalCount += t.count;
+              this.totalPrice += t.count * t.price;
+            });
 
-            return Promise.all(promises);
+            if (this.dataSource.data.length != tableData.length) {
+              this.dataSource.data = [...tableData];
+              this.table.renderRows();
+            }
           })
-        )
-        .subscribe(tableData => {
-          this.totalCount = 0;
-          this.totalPrice = 0;
-          tableData.forEach(t => {
-            this.totalCount += t.count;
-            this.totalPrice += t.count * t.price;
-          });
-
-          if (this.dataSource.data.length != tableData.length) {
-            this.dataSource.data = [...tableData];
-            this.table.renderRows();
-          }
-        })
-    });
+      });
   }
 
   ngOnDestroy(): void {

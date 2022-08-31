@@ -18,7 +18,7 @@ export class ShoppingCartHandlerService {
 
   /** Observable for changes to the shoppingCartId. Replays the last
    *  emitted shoppingCartId on subscription. */
-  private shoppingCartId$ = new ReplaySubject<string>(1);
+  shoppingCartId$ = new ReplaySubject<string>(1);
 
   /** The current shoppingCartId */
   private shoppingCartId: string;
@@ -136,19 +136,6 @@ export class ShoppingCartHandlerService {
     this.shoppingCartProductService = this.getShoppingCartProductService(shoppingCartId);
 
     this.shoppingCartId$.next(shoppingCartId);
-  }
-
-  /**
-   * Install a callback for changes of the shoppingCartId. When the callback is installed,
-   * it gets called once with the current shoppingCartId (ReplaySubject).
-   *
-   * @param callback Callback function that gets called whenever the shoppingCartId changes.
-   * @returns A reference to the Subscription to this.shoppingCartId$. Calling components need
-   *          this reference to be able to unsubscribe from the installed callback function.
-   */
-  onShoppingCartChanged(callback: (shoppingCartId: string) => void): Subscription {
-    return this.shoppingCartId$
-      .subscribe(callback);
   }
 
   /**
