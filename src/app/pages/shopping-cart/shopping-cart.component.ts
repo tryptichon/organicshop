@@ -5,7 +5,11 @@ import { firstValueFrom, map, Subscription, switchMap } from 'rxjs';
 import { DbProduct } from 'src/app/model/db-product';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
-import { ResolvedShoppingCartProduct, ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+
+export interface ResolvedShoppingCartProduct extends DbProduct {
+  count: number
+}
 
 @Component({
   selector: 'app-shopping-cart',

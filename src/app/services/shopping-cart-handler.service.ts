@@ -1,18 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { catchError, firstValueFrom, from, of, startWith, Subject, Subscription, switchMap, take, tap, withLatestFrom } from 'rxjs';
-import { DbProduct } from '../model/db-product';
-import { DbShoppingCart, DbShoppingCartProduct } from '../model/shopping-cart';
+import { catchError, firstValueFrom, from, of, ReplaySubject, Subscription, switchMap, take, tap, withLatestFrom } from 'rxjs';
 import { DialogHandler } from './../app-components/dialogs/DialogHandler';
-import { ShoppingCartProduct } from './../model/shopping-cart';
+import { DbShoppingCart, DbShoppingCartProduct, ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ProductService } from './database/product.service';
 import { ShoppingCartProductService } from './database/shopping-cart-product.service';
 import { ShoppingCartService } from './database/shopping-cart.service';
-
-export interface ResolvedShoppingCartProduct extends DbProduct {
-  count: number
-}
 
 /**
  * This service handles the shopping cart.
@@ -22,11 +16,12 @@ export interface ResolvedShoppingCartProduct extends DbProduct {
 })
 export class ShoppingCartHandlerService {
 
-  /** Observable for changes to the shoppingCartId. */
-  shoppingCartId$ = new Subject<string>();
+  /** Observable for changes to the shoppingCartId. Replays the last
+   *  emitted shoppingCartId on subscription. */
+  private shoppingCartId$ = new ReplaySubject<string>(1);
 
   /** The current shoppingCartId */
-  shoppingCartId: string;
+  private shoppingCartId: string;
 
   private shoppingCartProductService!: ShoppingCartProductService
 
@@ -40,7 +35,6 @@ export class ShoppingCartHandlerService {
    * @param loginService To observe user login/logout.
    */
   constructor(
-    private productService: ProductService,
     private shoppingCartService: ShoppingCartService,
     private loginService: LoginService,
     private dialogs: DialogHandler,
@@ -66,57 +60,75 @@ export class ShoppingCartHandlerService {
       )
       .subscribe(([shoppingCarts, dbUser]) => {
         if (dbUser === null) {
-
-          // Logout
-          if (this.userId !== null) {
-
-            // If a user has been logged in before, get back the default
-            // shopping cart Id so it does not overwrite the cart of the
-            // previous user.
-            this.changeShoppingCart(shoppingCartService.getDefaultShoppingCartId());
-          }
-
-          this.userId = null;
+          this.onLogout();
         } else {
-
-          // Login
-          if (!shoppingCarts?.length) {
-
-            // No shopping cart assigned to user => assign the default shopping cart
-            // if it exists.
-            this.shoppingCartService.get(this.shoppingCartId)
-              .pipe(
-                take(1),
-                catchError(error => {
-                  dialogs.error({
-                    title: "Get Default Shopping Cart",
-                    message: error
-                  });
-                  return of(null);
-                })
-              )
-              .subscribe(
-                defaultShoppingCart => {
-                  if (!defaultShoppingCart)
-                    return;
-
-                  defaultShoppingCart.userId = dbUser.id;
-                  this.updateShoppingCart(defaultShoppingCart);
-                }
-              );
-
-          } else {
-
-            // Use the shopping cart of the user
-            let shoppingCart = shoppingCarts[0];
-            this.changeShoppingCart(shoppingCart.id);
-          }
-
-          this.userId = dbUser.id;
+          this.onLogin(dbUser.id, shoppingCarts);
         }
-
       });
 
+  }
+
+  /**
+   * If a user has been logged in before, get back the default
+   * shopping cart id so it does not overwrite the cart of the
+   * previous user.
+   */
+  private onLogout() {
+    if (this.userId !== null) {
+      this.changeShoppingCart(this.shoppingCartService.getDefaultShoppingCartId());
+    }
+
+    this.userId = null;
+  }
+
+  /**
+   * If the user has a shopping cart assigned, use its shoppingCartId, else assign
+   * the current default shopping cart - if it exists - to this user.
+   *
+   * @param userId The userId of the new user.
+   * @param shoppingCarts The array of shoppingCarts. If this is empty or null, the
+   *                      the userId will be set to the default shopping cart, making it
+   *                      a shopping cart of that user.
+   */
+  private onLogin(userId: string, shoppingCarts: DbShoppingCart[] | null) {
+    if (!shoppingCarts?.length) {
+      this.assignDefaultShoppingCartToUser(userId);
+    } else {
+      this.changeShoppingCart(shoppingCarts[0].id)
+    }
+
+    this.userId = userId;
+  }
+
+  /**
+   * Assign this userId to the default shopping cart if it exists. Then
+   * set a new id for the default shopping cart so the next user starts
+   * with his/her own.
+   *
+   * @param userId The userId to set for the default shopping cart.
+   */
+  private assignDefaultShoppingCartToUser(userId: string) {
+    this.shoppingCartService.get(this.shoppingCartId)
+      .pipe(
+        take(1),
+        catchError(error => {
+          this.dialogs.error({
+            title: "Get Default Shopping Cart",
+            message: error
+          });
+          return of(null);
+        })
+      )
+      .subscribe(
+        defaultShoppingCart => {
+          if (!defaultShoppingCart)
+            return;
+
+          defaultShoppingCart.userId = userId;
+          this.updateShoppingCart(defaultShoppingCart);
+          this.shoppingCartService.nextShoppingCartId();
+        }
+      );
   }
 
   private changeShoppingCart(shoppingCartId: string) {
@@ -128,18 +140,15 @@ export class ShoppingCartHandlerService {
 
   /**
    * Install a callback for changes of the shoppingCartId. When the callback is installed,
-   * it gets called once with the current this.shoppingCartId.
+   * it gets called once with the current shoppingCartId (ReplaySubject).
    *
    * @param callback Callback function that gets called whenever the shoppingCartId changes.
-   * @returns A reference to the Subscription to this.shoppingCartId$. Calling modules need
-   *          this reference to be able to unsubscribe the installed callback function.
+   * @returns A reference to the Subscription to this.shoppingCartId$. Calling components need
+   *          this reference to be able to unsubscribe from the installed callback function.
    */
   onShoppingCartChanged(callback: (shoppingCartId: string) => void): Subscription {
     return this.shoppingCartId$
-      .pipe(
-        startWith(this.shoppingCartId)
-      )
-      .subscribe(shoppingCartId => callback(shoppingCartId));
+      .subscribe(callback);
   }
 
   /**
@@ -148,6 +157,10 @@ export class ShoppingCartHandlerService {
    */
   getShoppingCartProductService(shoppingCartId: string): ShoppingCartProductService {
     return new ShoppingCartProductService(shoppingCartId, this.firestore);
+  }
+
+  getShoppingCartService(): ShoppingCartService {
+    return this.shoppingCartService;
   }
 
   /**
