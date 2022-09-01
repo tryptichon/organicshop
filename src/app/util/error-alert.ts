@@ -10,7 +10,7 @@ export class Alert {
    */
   public static show(content: any) {
     console.log(content);
-    let message = (typeof content === 'string') ? content : JSON.stringify(content);
+    let message = (typeof content === 'string') || ('toString' in content) ? content : JSON.stringify(content);
     alert(message);
   }
 
