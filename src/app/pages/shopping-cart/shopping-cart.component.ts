@@ -69,7 +69,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
             })
           )
           .subscribe(resolvedProducts => {
-            let tableData = resolvedProducts.filter(entry => entry.id != undefined);
+            let tableData = resolvedProducts.filter(entry => entry.id !== undefined);
 
             this.totalCount = 0;
             this.totalPrice = 0;

@@ -27,8 +27,6 @@ export interface DbDataEntry {
 /**
  * Generic CRUD operations on Firebase/Firestore database.
  *
- * TODO: Implement correct error handling.
- *
  * @template T Model interface of the data for Firestore, which has to
  *             extend {@link DbEntry}.
  */
