@@ -53,13 +53,13 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
           .getAll()
           .pipe(
             switchMap(dbShoppingCartProducts => {
-              let promises: Promise<ResolvedShoppingCartProduct | null>[] = [];
+              let promises: Promise<ResolvedShoppingCartProduct>[] = [];
 
               dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
                 promises.push(
                   firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
                     .pipe(
-                      map(product => (product ? { ...product, count: dbShoppingCartProduct.count } : null))
+                      map(product => ({ ...product, count: dbShoppingCartProduct.count }))
                     )
                   )
                 )
@@ -69,12 +69,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
             })
           )
           .subscribe(resolvedProducts => {
-            let tableData: ResolvedShoppingCartProduct[] = [];
-
-            resolvedProducts.forEach(entry => {
-              if (entry)
-                tableData.push(entry);
-            })
+            let tableData = resolvedProducts.filter(entry => entry.id != undefined);
 
             this.totalCount = 0;
             this.totalPrice = 0;
