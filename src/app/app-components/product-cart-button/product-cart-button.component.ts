@@ -18,7 +18,6 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
 
   productCount: number = 0;
 
-  private idSubscription?: Subscription;
   private productCountSubscription?: Subscription;
 
   constructor(
@@ -27,25 +26,15 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
-      .subscribe(shoppingCartId => {
-        if (this.productCountSubscription)
-          this.productCountSubscription.unsubscribe();
-
-        this.productCountSubscription = this.shoppingCartHandlerService.shoppingCartProductService
-          .get(this.productId)
-          .subscribe(product => {
-            this.productCount = (product) ? product.count : 0;
-          });
+    this.productCountSubscription = this.shoppingCartHandlerService.shoppingCart$
+      .subscribe(shoppingCart => {
+        this.productCount = shoppingCart.products.get(this.productId)?.count || 0;
       });
-
   }
 
   ngOnDestroy(): void {
     if (this.productCountSubscription)
       this.productCountSubscription.unsubscribe();
-    if (this.idSubscription)
-      this.idSubscription.unsubscribe();
   }
 
   inc() {

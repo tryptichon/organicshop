@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { catchError, firstValueFrom, from, of, ReplaySubject, switchMap, take, withLatestFrom } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, from, map, of, ReplaySubject, switchMap, take, withLatestFrom, Subscription, combineLatest } from 'rxjs';
 import { DialogHandler } from './../app-components/dialogs/DialogHandler';
-import { DbShoppingCart, DbShoppingCartProduct, ShoppingCartProduct } from './../model/shopping-cart';
+import { DbShoppingCart, DbShoppingCartProduct, ShoppingCart, ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ShoppingCartProductService } from './database/shopping-cart-product.service';
 import { ShoppingCartService } from './database/shopping-cart.service';
@@ -15,9 +15,9 @@ import { ShoppingCartService } from './database/shopping-cart.service';
 })
 export class ShoppingCartHandlerService {
 
-  /** Observable for changes to the shoppingCartId. Replays the last
+  /** Observable for changes to the shoppingCart. Replays the last
    *  emitted shoppingCartId on subscription. */
-  shoppingCartId$ = new ReplaySubject<string>(1);
+  shoppingCart$ = new ReplaySubject<ShoppingCart>(1);
 
   /** The current shoppingCartId */
   private shoppingCartId: string;
@@ -26,6 +26,8 @@ export class ShoppingCartHandlerService {
 
   /** Track current status of login */
   private userId: string | null = null;
+
+  private shoppingCartDataSubscription?: Subscription;
 
   /**
    * This service handles the shopping cart.
@@ -134,7 +136,16 @@ export class ShoppingCartHandlerService {
     this.shoppingCartId = shoppingCartId;
     this.shoppingCartProductService = new ShoppingCartProductService(shoppingCartId, this.firestore);
 
-    this.shoppingCartId$.next(shoppingCartId);
+    if (this.shoppingCartDataSubscription)
+      this.shoppingCartDataSubscription.unsubscribe();
+
+    this.shoppingCartDataSubscription = combineLatest([
+      this.shoppingCartService.get(shoppingCartId),
+      this.shoppingCartProductService.getAll()
+    ])
+      .subscribe(([shoppingCartData, shoppingCartProductData]) => {
+        this.shoppingCart$.next(new ShoppingCart(shoppingCartData, shoppingCartProductData));
+      });
   }
 
   /**

@@ -26,8 +26,8 @@
     matTooltip="Your Shopping Cart"
     matTooltipShowDelay="1000"
   >
-    <mat-icon
-      [matBadge]="shoppingCartCount"
+    <mat-icon *ngIf="shoppingCart$ | async as cart"
+      [matBadge]="cart.getShoppingCartCount()"
       matBadgeColor="accent"
       matBadgeOverlap="true"
       aria-hidden="false"

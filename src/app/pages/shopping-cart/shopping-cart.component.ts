@@ -1,15 +1,12 @@
+import { DbProduct } from './../../model/db-product';
+import { ResolvedShoppingCartProduct, ShoppingCartProduct } from './../../model/shopping-cart';
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { firstValueFrom, map, Subscription, switchMap, catchError, of, filter } from 'rxjs';
-import { DbProduct } from 'src/app/model/db-product';
+import { firstValueFrom, map, Subscription, switchMap, catchError, of, filter, tap, combineLatest } from 'rxjs';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
-
-export interface ResolvedShoppingCartProduct extends DbProduct {
-  count: number
-}
 
 @Component({
   selector: 'app-shopping-cart',
@@ -21,16 +18,14 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   /** Be aware, that this number contains rounding errors, so do NOT use this directly without
    * conversion to the precision you need! */
   totalPrice: number = 0;
-  totalCount: number = 0;
 
-  displayedColumns: string[] = ['name', 'category', 'price', 'count'];
+  displayedColumns: string[] = ['name', 'category', 'price', 'count', 'total'];
   dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<DbProduct>;
 
-  private idSubscription?: Subscription;
-  private tableSumSubscription?: Subscription;
+  private shoppingCartSubscription?: Subscription;
 
   constructor(
     private productService: ProductService,
@@ -44,56 +39,41 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
 
-    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
-      .subscribe(shoppingCartId => {
-        if (this.tableSumSubscription)
-          this.tableSumSubscription.unsubscribe();
+    this.shoppingCartSubscription = combineLatest([
+      this.productService.getAll(),
+      this.shoppingCart$
+    ])
+      .subscribe(([products, shoppingCart]) => {
 
-        this.tableSumSubscription = this.shoppingCartHandlerService.shoppingCartProductService
-          .getAll()
-          .pipe(
-            switchMap(dbShoppingCartProducts => {
-              let promises: Promise<ResolvedShoppingCartProduct>[] = [];
+        let fullProducts: ResolvedShoppingCartProduct[] = [];
 
-              dbShoppingCartProducts.forEach(dbShoppingCartProduct => {
-                promises.push(
-                  firstValueFrom(this.productService.get(dbShoppingCartProduct.id)
-                    .pipe(
-                      map(product => ({ ...product, count: dbShoppingCartProduct.count }))
-                    )
-                  )
-                )
-              })
+        shoppingCart.products.forEach((shoppingCartProduct, id) => {
+          let product = products.find(item => item.id === id);
+          if (product)
+            fullProducts.push(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
+        });
 
-              return Promise.all(promises);
-            })
-          )
-          .subscribe(resolvedProducts => {
-            let tableData = resolvedProducts.filter(entry => entry.id !== undefined);
+        this.totalPrice = fullProducts
+          .map(t => t.getTotal())
+          .reduce((prev, current) => prev += current, 0);
 
-            this.totalCount = 0;
-            this.totalPrice = 0;
-            tableData.forEach(t => {
-              this.totalCount += t.count;
-              this.totalPrice += t.count * t.price;
-            });
-
-            if (this.dataSource.data.length != resolvedProducts.length) {
-              this.dataSource.data = [...tableData];
-              this.table.renderRows();
-            }
-          })
+        this.dataSource.data = [...fullProducts];
+        this.table.renderRows();
       });
+
   }
 
   ngOnDestroy(): void {
-    if (this.tableSumSubscription)
-      this.tableSumSubscription.unsubscribe();
-    if (this.idSubscription)
-      this.idSubscription.unsubscribe();
+    if (this.shoppingCartSubscription)
+      this.shoppingCartSubscription.unsubscribe();
+  }
+
+  get shoppingCart$() {
+    return this.shoppingCartHandlerService.shoppingCart$;
   }
 
   getCategoryName(id: string) {
     return this.categoryService.getCategoryName(id);
   }
+
 }

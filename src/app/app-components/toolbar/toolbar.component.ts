@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { map, Subscription } from 'rxjs';
+import { from, map, Observable, Subscription } from 'rxjs';
+import { ShoppingCart } from 'src/app/model/shopping-cart';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 import { DialogHandler } from '../dialogs/DialogHandler';
 
@@ -16,15 +17,11 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   public isAdmin: boolean = false;
   public name?: string;
 
-  public shoppingCartCount!: number | null;
-
-  private idSubscription?: Subscription;
   private userSubscription?: Subscription;
-  private productSumSubscription?: Subscription;
 
   constructor(
     public loginService: LoginService,
-    private shoppingCartHandlerService: ShoppingCartHandlerService,
+    public shoppingCartHandlerService: ShoppingCartHandlerService,
     private dialogs: DialogHandler
   ) {
   }
@@ -35,40 +32,19 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         this.isAdmin = appUser?.isAdmin || false;
         this.name = appUser?.name;
       });
-
-    this.idSubscription = this.shoppingCartHandlerService.shoppingCartId$
-      .subscribe(shoppingCartId => {
-        if (this.productSumSubscription)
-          this.productSumSubscription.unsubscribe();
-
-        this.productSumSubscription = this.shoppingCartHandlerService.shoppingCartProductService
-          .getAll()
-          .pipe(
-            map(shoppingCartDocuments => {
-              if (!shoppingCartDocuments)
-                return null;
-
-              let sum = shoppingCartDocuments.map(shoppingCartDocument => shoppingCartDocument.count).reduce((sum, current) => sum += current, 0);
-
-              return sum > 0 ? sum : null;
-            })
-          )
-          .subscribe(sum => {
-            this.shoppingCartCount = sum;
-          });
-      });
   }
 
   ngOnDestroy(): void {
     if (this.userSubscription)
       this.userSubscription.unsubscribe();
-    if (this.productSumSubscription)
-      this.productSumSubscription.unsubscribe();
-    if (this.idSubscription)
-      this.idSubscription.unsubscribe();
+  }
+
+  get shoppingCart$() {
+    return this.shoppingCartHandlerService.shoppingCart$;
   }
 
   logout() {
     this.loginService.logout();
   }
+
 }

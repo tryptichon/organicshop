@@ -13,9 +13,7 @@
         Name
       </mat-header-cell>
       <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
-      <mat-footer-cell *matFooterCellDef>
-        Total
-      </mat-footer-cell>
+      <mat-footer-cell *matFooterCellDef> Total </mat-footer-cell>
     </ng-container>
 
     <!-- Category Column -->
@@ -26,31 +24,45 @@
       <mat-cell *matCellDef="let row">
         {{ getCategoryName(row.category) }}
       </mat-cell>
-      <mat-footer-cell *matFooterCellDef>
-      </mat-footer-cell>
+      <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
     </ng-container>
 
     <!-- Price Column -->
     <ng-container matColumnDef="price">
-      <mat-header-cell *matHeaderCellDef mat-sort-header  class="content-right">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="content-right">
         Price
       </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="content-right"> {{ row.price | currency }} </mat-cell>
-      <mat-footer-cell *matFooterCellDef  class="content-right">
-        {{ totalPrice | currency }}
-      </mat-footer-cell>
+      <mat-cell *matCellDef="let row" class="content-right">
+        {{ row.price | currency }}
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
     </ng-container>
 
     <!-- Count Column -->
     <ng-container matColumnDef="count">
-      <mat-header-cell *matHeaderCellDef mat-sort-header class="content-right">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="content-center">
         Number of products
       </mat-header-cell>
-      <mat-cell *matCellDef="let row" class="content-right">
+      <mat-cell *matCellDef="let row" class="content-center">
         <app-product-cart-button [productId]="row.id"></app-product-cart-button>
       </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="content-center">
+        <ng-container *ngIf="shoppingCart$ | async as cart">
+          {{ cart.getShoppingCartCount() }}
+        </ng-container>
+      </mat-footer-cell>
+    </ng-container>
+
+    <!-- Total Column -->
+    <ng-container matColumnDef="total">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="content-right">
+        Total
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" class="content-right">
+        {{ row.getTotal() | currency }}
+      </mat-cell>
       <mat-footer-cell *matFooterCellDef class="content-right">
-        {{ totalCount }}
+        {{ totalPrice | currency }}
       </mat-footer-cell>
     </ng-container>
 
