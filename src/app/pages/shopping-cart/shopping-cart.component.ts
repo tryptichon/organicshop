@@ -1,3 +1,4 @@
+import { DialogHandler } from './../../app-components/dialogs/DialogHandler';
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
@@ -31,7 +32,8 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService,
-    private shoppingCartHandlerService: ShoppingCartHandlerService
+    private shoppingCartHandlerService: ShoppingCartHandlerService,
+    private dialogs: DialogHandler
   ) { }
 
   /**
@@ -80,6 +82,19 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
   getCategoryName(id: string) {
     return this.categoryService.getCategoryName(id);
+  }
+
+  onConfirmDelete() {
+    this.dialogs
+      .confirm({
+        title: 'Delete Shopping Cart?',
+        message: 'Do you want to delete your Shopping Cart?',
+        icon: 'warning'
+      })
+      .subscribe(result => {
+        if (result === 'Ok')
+          this.onDeleteShoppingCart();
+      });
   }
 
   onDeleteShoppingCart() {
