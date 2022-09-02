@@ -18,8 +18,9 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   /** Be aware, that this number contains rounding errors, so do NOT use this directly without
    * conversion to the precision you need! */
   totalPrice: number = 0;
+  totalCount: number = 0;
 
-  displayedColumns: string[] = ['name', 'category', 'price', 'count', 'total'];
+  displayedColumns: string[] = ['image', 'name', 'category', 'price', 'count', 'total'];
   dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -56,6 +57,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
         let resolved = new ResolvedShoppingCartProducts(productArray);
 
         this.totalPrice = resolved.getShoppingCartTotal();
+        this.totalCount = shoppingCartProducts.getShoppingCartTotalCount();
 
         this.dataSource.data = [...resolved.productArray];
         this.table.renderRows();
@@ -78,6 +80,10 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
   getCategoryName(id: string) {
     return this.categoryService.getCategoryName(id);
+  }
+
+  onDeleteShoppingCart() {
+    this.shoppingCartHandlerService.deleteShoppingCart();
   }
 
 }

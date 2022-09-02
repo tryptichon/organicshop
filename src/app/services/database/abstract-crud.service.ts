@@ -15,7 +15,7 @@ import {
 } from '@angular/fire/firestore';
 import { uuidv4 as uuid } from "@firebase/util";
 import { getDocs } from 'firebase/firestore';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, of, switchMap, firstValueFrom, take, map } from 'rxjs';
 
 import { DbEntry } from './../../model/db-entry';
 
@@ -163,5 +163,21 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    */
   delete(id: string): Promise<void> {
     return deleteDoc(this.ref(id));
+  }
+
+  /**
+   * Delete all documents from the collection, thereby
+   * removing it from the database.
+   *
+   * @returns A promise that finishes when the process completes.
+   */
+  deleteAll() {
+    return firstValueFrom(this.getAll()
+      .pipe(
+        take(1),
+        map(entry => {
+          entry.forEach(item => this.delete(item.id));
+        })
+      ));
   }
 }

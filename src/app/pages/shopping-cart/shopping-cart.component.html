@@ -7,6 +7,13 @@
     matSortActive="name"
     matSortDirection="asc"
   >
+    <!-- Image Column -->
+    <ng-container matColumnDef="image">
+      <mat-header-cell *matHeaderCellDef></mat-header-cell>
+      <mat-cell *matCellDef="let row"><img [src]="row.imageUrl" /></mat-cell>
+      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+    </ng-container>
+
     <!-- Name Column -->
     <ng-container matColumnDef="name">
       <mat-header-cell *matHeaderCellDef mat-sort-header>
@@ -47,9 +54,7 @@
         <app-product-cart-button [productId]="row.id"></app-product-cart-button>
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="content-center">
-        <ng-container *ngIf="shoppingCartProducts$ | async as products">
-          {{ products.getShoppingCartTotalCount() }}
-        </ng-container>
+        {{ totalCount }}
       </mat-footer-cell>
     </ng-container>
 
@@ -71,3 +76,16 @@
     <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
   </mat-table>
 </div>
+
+<mat-toolbar class="transparent">
+  <span class="filling-spacer"></span>
+  <button
+    mat-flat-button
+    color="warn"
+    type="button"
+    [disabled]="totalCount === 0"
+    (click)="onDeleteShoppingCart()"
+  >
+    <mat-icon>delete</mat-icon> Delete
+  </button>
+</mat-toolbar>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { catchError, firstValueFrom, from, of, ReplaySubject, Subscription, switchMap, take, withLatestFrom } from 'rxjs';
+import { catchError, firstValueFrom, from, map, of, ReplaySubject, Subscription, switchMap, take, withLatestFrom } from 'rxjs';
 import { DialogHandler } from './../app-components/dialogs/DialogHandler';
 import { DbShoppingCart, DbShoppingCartProduct, ShoppingCartProduct, ShoppingCartProducts } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
@@ -268,6 +268,11 @@ export class ShoppingCartHandlerService {
     } catch (error) {
       this.dialogs.error({ title: 'Remove Product from Shopping Cart Communication Error', message: error });
     }
+  }
+
+  async deleteShoppingCart() {
+    await this.shoppingCartProductService.deleteAll();
+    await this.shoppingCartService.delete(this.shoppingCartId);
   }
 
   /**
