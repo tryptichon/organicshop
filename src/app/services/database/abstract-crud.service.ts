@@ -8,7 +8,8 @@ import {
   DocumentData,
   DocumentReference,
   Firestore,
-  query, setDoc,
+  query,
+  setDoc,
   updateDoc,
   where,
   WhereFilterOp
@@ -19,9 +20,8 @@ import { firstValueFrom, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { DbEntry } from './../../model/db-entry';
 
-export interface DbDataEntry {
-  id?: string;
-}
+// A utility type to be able to remove id from data.
+type NoId = { id?: string };
 
 /**
  * Generic CRUD operations on Firebase/Firestore database.
@@ -63,8 +63,8 @@ export abstract class AbstractCrudService<T extends DbEntry> {
    * @param document Thhe original document with id.
    * @returns A DbDataEntry where the field 'id' has been removed.
    */
-  protected removeId(document: DbEntry): DbDataEntry {
-    let documentData: DbDataEntry = document;
+  protected removeId(document: DbEntry) {
+    let documentData: NoId = { ...document };
     delete documentData.id;
     return documentData;
   }
