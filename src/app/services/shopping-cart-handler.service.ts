@@ -20,8 +20,10 @@ import { ShoppingCartService } from './database/shopping-cart.service';
 export class ShoppingCartHandlerService {
 
   /** Observable for changes to the shoppingCart. Replays the last
-   *  emitted shoppingCartId on subscription. */
+   *  emitted item on subscription. */
   shoppingCart$ = new ReplaySubject<DbShoppingCart | null>(1);
+  /** Observable for changes to the shoppingCartProducts. Replays the last
+   *  emitted item on subscription. */
   shoppingCartProducts$ = new ReplaySubject<ShoppingCartProducts>(1);
 
   /** The current shoppingCartId */
