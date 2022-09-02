@@ -175,9 +175,7 @@ export abstract class AbstractCrudService<T extends DbEntry> {
     return firstValueFrom(this.getAll()
       .pipe(
         take(1),
-        map(entry => {
-          entry.forEach(item => this.delete(item.id));
-        })
+        map(documents => documents.forEach(document => this.delete(document.id)))
       ));
   }
 }
