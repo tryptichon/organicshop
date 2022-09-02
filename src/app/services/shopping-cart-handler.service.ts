@@ -19,7 +19,7 @@ export class ShoppingCartHandlerService {
 
   /** Observable for changes to the shoppingCart. Replays the last
    *  emitted shoppingCartId on subscription. */
-  shoppingCart$ = new ReplaySubject<DbShoppingCart>(1);
+  shoppingCart$ = new ReplaySubject<DbShoppingCart | null>(1);
   shoppingCartProducts$ = new ReplaySubject<ShoppingCartProducts>(1);
 
   /** The current shoppingCartId */
@@ -265,6 +265,7 @@ export class ShoppingCartHandlerService {
 
       if ((products.filter(product => product.id != productId)).length === 0) {
         await this.shoppingCartService.delete(shoppingCartId);
+        this.shoppingCart$.next(null);
       }
 
     } catch (error) {
@@ -275,6 +276,7 @@ export class ShoppingCartHandlerService {
   async deleteShoppingCart() {
     await this.shoppingCartProductService.deleteAll();
     await this.shoppingCartService.delete(this.shoppingCartId);
+    this.shoppingCart$.next(null);
   }
 
   /**

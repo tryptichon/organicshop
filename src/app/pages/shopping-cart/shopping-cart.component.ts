@@ -21,6 +21,8 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   totalPrice: number = 0;
   totalQuantity: number = 0;
 
+  dateCreated: number | null = null;
+
   displayedColumns: string[] = ['image', 'name', 'category', 'price', 'count', 'total'];
   dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
 
