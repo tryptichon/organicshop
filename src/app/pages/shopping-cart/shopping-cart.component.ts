@@ -1,12 +1,12 @@
-import { DbProduct } from './../../model/db-product';
-import { ResolvedShoppingCartProduct, ShoppingCartProduct } from './../../model/shopping-cart';
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { firstValueFrom, map, Subscription, switchMap, catchError, of, filter, tap, combineLatest } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { DbProduct } from './../../model/db-product';
+import { ResolvedShoppingCartProduct, ResolvedShoppingCartProducts } from './../../model/shopping-cart';
 
 @Component({
   selector: 'app-shopping-cart',
@@ -41,23 +41,23 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
     this.shoppingCartSubscription = combineLatest([
       this.productService.getAll(),
-      this.shoppingCart$
+      this.shoppingCartProducts$
     ])
-      .subscribe(([products, shoppingCart]) => {
+      .subscribe(([products, shoppingCartProducts]) => {
 
-        let fullProducts: ResolvedShoppingCartProduct[] = [];
+        let productArray: ResolvedShoppingCartProduct[] = [];
 
-        shoppingCart.products.forEach((shoppingCartProduct, id) => {
+        shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
           if (product)
-            fullProducts.push(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
+            productArray.push(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
         });
 
-        this.totalPrice = fullProducts
-          .map(t => t.getTotal())
-          .reduce((prev, current) => prev += current, 0);
+        let resolved = new ResolvedShoppingCartProducts(productArray);
 
-        this.dataSource.data = [...fullProducts];
+        this.totalPrice = resolved.getShoppingCartTotal();
+
+        this.dataSource.data = [...resolved.productArray];
         this.table.renderRows();
       });
 
@@ -70,6 +70,10 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
   get shoppingCart$() {
     return this.shoppingCartHandlerService.shoppingCart$;
+  }
+
+  get shoppingCartProducts$() {
+    return this.shoppingCartHandlerService.shoppingCartProducts$;
   }
 
   getCategoryName(id: string) {

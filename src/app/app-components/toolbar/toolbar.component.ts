@@ -1,9 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { from, map, Observable, Subscription } from 'rxjs';
-import { ShoppingCart } from 'src/app/model/shopping-cart';
+import { Subscription } from 'rxjs';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
-import { DialogHandler } from '../dialogs/DialogHandler';
 
+import { DialogHandler } from '../dialogs/DialogHandler';
 import { LoginService } from './../../services/auth/login.service';
 
 
@@ -32,6 +31,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         this.isAdmin = appUser?.isAdmin || false;
         this.name = appUser?.name;
       });
+
   }
 
   ngOnDestroy(): void {
@@ -39,12 +39,11 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.userSubscription.unsubscribe();
   }
 
-  get shoppingCart$() {
-    return this.shoppingCartHandlerService.shoppingCart$;
-  }
-
   logout() {
     this.loginService.logout();
   }
 
+  get shoppingCartProducts$() {
+    return this.shoppingCartHandlerService.shoppingCartProducts$;
+  }
 }

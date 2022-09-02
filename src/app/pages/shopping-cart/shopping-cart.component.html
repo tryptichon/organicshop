@@ -47,8 +47,8 @@
         <app-product-cart-button [productId]="row.id"></app-product-cart-button>
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="content-center">
-        <ng-container *ngIf="shoppingCart$ | async as cart">
-          {{ cart.getShoppingCartCount() }}
+        <ng-container *ngIf="shoppingCartProducts$ | async as products">
+          {{ products.getShoppingCartCount() }}
         </ng-container>
       </mat-footer-cell>
     </ng-container>

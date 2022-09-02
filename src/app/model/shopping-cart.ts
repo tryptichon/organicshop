@@ -35,27 +35,16 @@ export interface DbShoppingCartProduct extends ShoppingCartProduct, DbEntry {
 }
 
 /**
- * This is the shopping cart with product counters.
+ * This contains product counters.
  */
-export class ShoppingCart implements DbShoppingCart {
-  id: string;
-  dateCreated: number | null;
-  dateOrdered: number | null;
-  userId: string | null;
-
+export class ShoppingCartProducts {
   /** Map of <productId, ShoppingCartProduct> in cart. */
-  products: Map<string, ShoppingCartProduct> = new Map<string, ShoppingCartProduct>();
+  productMap = new Map<string, ShoppingCartProduct>();
 
   constructor(
-    dbShoppingCart: DbShoppingCart,
     dbShoppingCartProducts: DbShoppingCartProduct[]
   ) {
-    this.id = dbShoppingCart.id;
-    this.dateCreated = dbShoppingCart.dateCreated;
-    this.dateOrdered = dbShoppingCart.dateOrdered;
-    this.userId = dbShoppingCart.userId;
-
-    this.products = dbShoppingCartProducts.reduce((prev, current) =>
+    this.productMap = dbShoppingCartProducts.reduce((prev, current) =>
       prev.set(current.id, { count: current.count }),
       new Map<string, ShoppingCartProduct>()
     );
@@ -63,7 +52,7 @@ export class ShoppingCart implements DbShoppingCart {
 
   getShoppingCartCount(): number {
     let sum = 0;
-    this.products.forEach((item) => sum += item.count);
+    this.productMap.forEach((item) => sum += item.count);
     return sum;
   }
 
@@ -90,5 +79,24 @@ export class ResolvedShoppingCartProduct implements DbProduct {
     return this.price * this.count;
   }
 
+}
+
+export class ResolvedShoppingCartProducts {
+
+  productArray: ResolvedShoppingCartProduct[];
+
+  constructor(
+    resolvedhoppingCartProducts: ResolvedShoppingCartProduct[]
+  ) {
+    this.productArray = resolvedhoppingCartProducts;
+  }
+
+  getShoppingCartCount(): number {
+    return this.productArray.reduce((prev, current) => prev += current.count, 0);
+  }
+
+  getShoppingCartTotal(): number {
+    return this.productArray.reduce((prev, current) => prev += current.getTotal(), 0);
+  }
 }
 

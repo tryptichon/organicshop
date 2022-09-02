@@ -26,13 +26,14 @@
     matTooltip="Your Shopping Cart"
     matTooltipShowDelay="1000"
   >
-    <mat-icon *ngIf="shoppingCart$ | async as cart"
-      [matBadge]="cart.getShoppingCartCount()"
+    <mat-icon
+      [matBadge]="(shoppingCartProducts$ | async)?.getShoppingCartCount() || null"
       matBadgeColor="accent"
       matBadgeOverlap="true"
       aria-hidden="false"
-      >shopping_cart</mat-icon
     >
+      shopping_cart
+    </mat-icon>
   </button>
   <button
     *ngIf="name; else anonymousUser"

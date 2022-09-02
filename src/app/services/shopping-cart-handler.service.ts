@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { catchError, firstValueFrom, forkJoin, from, map, of, ReplaySubject, switchMap, take, withLatestFrom, Subscription, combineLatest } from 'rxjs';
+import { catchError, firstValueFrom, from, of, ReplaySubject, Subscription, switchMap, take, withLatestFrom } from 'rxjs';
 import { DialogHandler } from './../app-components/dialogs/DialogHandler';
-import { DbShoppingCart, DbShoppingCartProduct, ShoppingCart, ShoppingCartProduct } from './../model/shopping-cart';
+import { DbShoppingCart, DbShoppingCartProduct, ShoppingCartProduct, ShoppingCartProducts } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ShoppingCartProductService } from './database/shopping-cart-product.service';
 import { ShoppingCartService } from './database/shopping-cart.service';
@@ -17,7 +17,8 @@ export class ShoppingCartHandlerService {
 
   /** Observable for changes to the shoppingCart. Replays the last
    *  emitted shoppingCartId on subscription. */
-  shoppingCart$ = new ReplaySubject<ShoppingCart>(1);
+  shoppingCart$ = new ReplaySubject<DbShoppingCart>(1);
+  shoppingCartProducts$ = new ReplaySubject<ShoppingCartProducts>(1);
 
   /** The current shoppingCartId */
   private shoppingCartId: string;
@@ -75,9 +76,19 @@ export class ShoppingCartHandlerService {
    * previous user.
    */
   private onLogout() {
-    if (this.userId !== null) {
-      this.changeShoppingCart(this.shoppingCartService.getDefaultShoppingCartId());
-    }
+    let defaultShoppingCartId = this.shoppingCartService.getDefaultShoppingCartId();
+
+    this.shoppingCartService.get(defaultShoppingCartId)
+      .pipe(
+        take(1)
+      )
+      .subscribe(shoppingCart => {
+        if (shoppingCart && shoppingCart.userId !== null) {
+          this.changeShoppingCart(this.shoppingCartService.nextShoppingCartId());
+        } else {
+          this.changeShoppingCart(defaultShoppingCartId);
+        }
+      });
 
     this.userId = null;
   }
@@ -127,7 +138,6 @@ export class ShoppingCartHandlerService {
 
           defaultShoppingCart.userId = userId;
           this.updateShoppingCart(defaultShoppingCart);
-          this.shoppingCartService.nextShoppingCartId();
         }
       );
   }
@@ -139,13 +149,18 @@ export class ShoppingCartHandlerService {
     if (this.shoppingCartDataSubscription)
       this.shoppingCartDataSubscription.unsubscribe();
 
-    this.shoppingCartDataSubscription = combineLatest([
-      this.shoppingCartService.get(shoppingCartId),
-      this.shoppingCartProductService.getAll()
-    ])
-      .subscribe(([shoppingCartData, shoppingCartProductData]) => {
-        this.shoppingCart$.next(new ShoppingCart(shoppingCartData, shoppingCartProductData));
+    this.shoppingCartService.get(shoppingCartId)
+      .subscribe(shoppingCart => {
+        if (shoppingCart)
+          this.shoppingCart$.next(shoppingCart);
       });
+
+    this.shoppingCartProductService.getAll()
+      .subscribe(shoppingCartProducts => {
+        if (shoppingCartProducts)
+          this.shoppingCartProducts$.next(new ShoppingCartProducts(shoppingCartProducts));
+      });
+
   }
 
   /**
@@ -164,6 +179,7 @@ export class ShoppingCartHandlerService {
   handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
     return firstValueFrom(this.shoppingCartProductService.getAll()
       .pipe(
+        take(1),
         switchMap(shoppingCartProducts => {
           if (shoppingCartProducts.length == 0) {
 
@@ -263,6 +279,7 @@ export class ShoppingCartHandlerService {
   async removeProductFromAllCarts(productId: string) {
     return await firstValueFrom(this.shoppingCartService.getAll()
       .pipe(
+        take(1),
         switchMap(shoppingCarts => {
           let promises: Promise<void>[] = [];
 
@@ -271,6 +288,7 @@ export class ShoppingCartHandlerService {
 
             promises.push(firstValueFrom(shoppingCartProductService.getAll()
               .pipe(
+                take(1),
                 switchMap(products => this.removeProduct(shoppingCartProductService, products, shoppingCart.id, productId))
               )
             ));
