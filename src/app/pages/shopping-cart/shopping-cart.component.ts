@@ -20,7 +20,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   totalPrice: number = 0;
   totalCount: number = 0;
 
-  displayedColumns: string[] = ['image', 'name', 'category', 'count', 'total'];
+  displayedColumns: string[] = ['image', 'name', 'category', 'price', 'count', 'total'];
   dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
 
   @ViewChild(MatSort) sort!: MatSort;

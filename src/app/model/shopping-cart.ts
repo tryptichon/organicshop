@@ -79,7 +79,7 @@ export class ResolvedShoppingCartProduct implements DbProduct {
     this.count = count;
   }
 
-  getTotal(): number {
+  get total(): number {
     return this.price * this.count;
   }
 
@@ -96,7 +96,7 @@ export class ResolvedShoppingCartProducts {
   }
 
   getShoppingCartTotal(): number {
-    return this.productArray.reduce((prev, current) => prev += current.getTotal(), 0);
+    return this.productArray.reduce((prev, current) => prev += current.total, 0);
   }
 }
 

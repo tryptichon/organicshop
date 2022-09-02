@@ -8,17 +8,16 @@ import {
   DocumentData,
   DocumentReference,
   Firestore,
-  query, QuerySnapshot, setDoc,
+  query, setDoc,
   updateDoc,
   where,
   WhereFilterOp
 } from '@angular/fire/firestore';
 import { uuidv4 as uuid } from "@firebase/util";
 import { getDocs } from 'firebase/firestore';
-import { Observable, of, switchMap, firstValueFrom, take, map } from 'rxjs';
+import { firstValueFrom, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { DbEntry } from './../../model/db-entry';
-
 
 export interface DbDataEntry {
   id?: string;
