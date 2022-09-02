@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
-import { catchError, firstValueFrom, from, map, of, ReplaySubject, Subscription, switchMap, take, withLatestFrom } from 'rxjs';
+import { catchError, firstValueFrom, from, of, ReplaySubject, Subscription, switchMap, take, withLatestFrom } from 'rxjs';
+import { DbShoppingCart, DbShoppingCartProduct } from '../model/db-shopping-cart';
+import { ShoppingCartProducts } from '../model/shopping-cart-products';
 import { DialogHandler } from './../app-components/dialogs/DialogHandler';
-import { DbShoppingCart, DbShoppingCartProduct, ShoppingCartProduct, ShoppingCartProducts } from './../model/shopping-cart';
+import { ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
 import { ShoppingCartProductService } from './database/shopping-cart-product.service';
 import { ShoppingCartService } from './database/shopping-cart.service';

@@ -6,7 +6,7 @@
     mat-button
     color="warn"
     type="button"
-    [disabled]="totalCount === 0"
+    [disabled]="totalQuantity === 0"
     (click)="onConfirmDelete()"
   >
     <mat-icon>delete</mat-icon> Delete
@@ -68,7 +68,7 @@
         <app-product-cart-button [productId]="row.id"></app-product-cart-button>
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="content-center">
-        {{ totalCount }}
+        {{ totalQuantity }}
       </mat-footer-cell>
     </ng-container>
 
@@ -78,7 +78,7 @@
         Total
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="content-right">
-        {{ row.total | currency }}
+        {{ row.totalPrice | currency }}
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="content-right">
         {{ totalPrice | currency }}

@@ -1,13 +1,13 @@
-import { DialogHandler } from './../../app-components/dialogs/DialogHandler';
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { combineLatest, Subscription } from 'rxjs';
+import { ResolvedShoppingCartProduct, ResolvedShoppingCartProducts } from 'src/app/model/resolved-shopping-cart-products';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { DialogHandler } from './../../app-components/dialogs/DialogHandler';
 import { DbProduct } from './../../model/db-product';
-import { ResolvedShoppingCartProduct, ResolvedShoppingCartProducts } from './../../model/shopping-cart';
 
 @Component({
   selector: 'app-shopping-cart',
@@ -19,7 +19,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   /** Be aware, that this number contains rounding errors, so do NOT use this directly without
    * conversion to the precision you need! */
   totalPrice: number = 0;
-  totalCount: number = 0;
+  totalQuantity: number = 0;
 
   displayedColumns: string[] = ['image', 'name', 'category', 'price', 'count', 'total'];
   dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
@@ -58,8 +58,8 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
         let resolved = new ResolvedShoppingCartProducts(productArray);
 
-        this.totalPrice = resolved.getShoppingCartTotal();
-        this.totalCount = shoppingCartProducts.getShoppingCartTotalCount();
+        this.totalPrice = resolved.totalPrice;
+        this.totalQuantity = shoppingCartProducts.totalQuantity;
 
         this.dataSource.data = [...resolved.productArray];
         this.table.renderRows();

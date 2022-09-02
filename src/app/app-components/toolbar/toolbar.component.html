@@ -27,7 +27,7 @@
     matTooltipShowDelay="1000"
   >
     <mat-icon
-      [matBadge]="(shoppingCartProducts$ | async)?.getShoppingCartTotalCount() || null"
+      [matBadge]="(shoppingCartProducts$ | async)?.totalQuantity || null"
       matBadgeColor="accent"
       matBadgeOverlap="true"
       aria-hidden="false"
