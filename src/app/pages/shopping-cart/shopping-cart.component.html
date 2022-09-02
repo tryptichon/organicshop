@@ -1,8 +1,8 @@
 <h1>Shopping Cart</h1>
 
 <mat-toolbar class="transparent content-width">
-  <span *ngIf="shoppingCart$ | async as cart">
-    {{ cart.dateCreated | date }}
+  <span class="mat-body" *ngIf="shoppingCart$ | async as cart">
+    Created {{ cart.dateCreated | date:'medium' }}
   </span>
   <span class="filling-spacer"></span>
   <button
