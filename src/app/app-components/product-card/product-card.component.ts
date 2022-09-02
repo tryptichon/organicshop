@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CategoryService } from './../../services/database/category.service';
 
 @Component({
@@ -12,10 +12,7 @@ export class ProductCardComponent {
   @Input() price?: number | null;
   @Input() category?: string | null;
   @Input() imageUrl?: string | null;
-  @Input() id?: string | null;
-  @Input() idButtonLabel?: string | null;
-
-  @Output() buttonClick = new EventEmitter<string>();
+  @Input() productId?: string | null;
 
   constructor(
     private categoryService: CategoryService
@@ -26,8 +23,4 @@ export class ProductCardComponent {
     return this.categoryService.getCategoryName(this.category);
   }
 
-  onButtonClick() {
-    if (this.id)
-      this.buttonClick.emit(this.id);
-  }
 }

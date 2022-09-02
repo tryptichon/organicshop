@@ -26,7 +26,14 @@
     matTooltip="Your Shopping Cart"
     matTooltipShowDelay="1000"
   >
-    <mat-icon aria-hidden="false">shopping_cart</mat-icon>
+    <mat-icon
+      [matBadge]="(shoppingCartProducts$ | async)?.totalQuantity || null"
+      matBadgeColor="accent"
+      matBadgeOverlap="true"
+      aria-hidden="false"
+    >
+      shopping_cart
+    </mat-icon>
   </button>
   <button
     *ngIf="name; else anonymousUser"
@@ -38,7 +45,7 @@
     <mat-icon aria-hidden="false">arrow_drop_down</mat-icon>
   </button>
   <ng-template #anonymousUser>
-    <button mat-stroked-button routerLink="login">Login</button>
+    <button type="button" mat-stroked-button routerLink="/login">Login</button>
   </ng-template>
   <mat-menu #menu>
     <button

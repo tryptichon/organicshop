@@ -1,1 +1,95 @@
-<p>shopping-cart works!</p>
+<h1>Shopping Cart</h1>
+
+<mat-toolbar class="transparent content-width">
+  <span *ngIf="shoppingCart$ | async as cart">
+    {{ cart.dateCreated | date }}
+  </span>
+  <span class="filling-spacer"></span>
+  <button
+    mat-button
+    color="warn"
+    type="button"
+    [disabled]="totalQuantity === 0"
+    (click)="onConfirmDelete()"
+  >
+    <mat-icon>delete</mat-icon> Delete
+  </button>
+</mat-toolbar>
+
+<div class="mat-elevation-z8 content-width">
+  <mat-table
+    [dataSource]="dataSource"
+    matSort
+    matSortActive="name"
+    matSortDirection="asc"
+  >
+    <!-- Image Column -->
+    <ng-container matColumnDef="image">
+      <mat-header-cell *matHeaderCellDef></mat-header-cell>
+      <mat-cell *matCellDef="let row"><img [src]="row.imageUrl" /></mat-cell>
+      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Name
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
+      <mat-footer-cell *matFooterCellDef> Total </mat-footer-cell>
+    </ng-container>
+
+    <!-- Category Column -->
+    <ng-container matColumnDef="category">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Category
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        {{ getCategoryName(row.category) }}
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+    </ng-container>
+
+    <!-- Price Column -->
+    <ng-container matColumnDef="price">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="content-right">
+        Price
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" class="content-right">
+        {{ row.price | currency }}
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="content-right">
+      </mat-footer-cell>
+    </ng-container>
+
+    <!-- Count Column -->
+    <ng-container matColumnDef="count">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="content-center">
+        Number of products
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" class="content-center">
+        <app-product-cart-button [productId]="row.id"></app-product-cart-button>
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="content-center">
+        {{ totalQuantity }}
+      </mat-footer-cell>
+    </ng-container>
+
+    <!-- Total Column -->
+    <ng-container matColumnDef="total">
+      <mat-header-cell *matHeaderCellDef mat-sort-header class="content-right">
+        Total
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row" class="content-right">
+        {{ row.totalPrice | currency }}
+      </mat-cell>
+      <mat-footer-cell *matFooterCellDef class="content-right">
+        {{ totalPrice | currency }}
+      </mat-footer-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
+  </mat-table>
+</div>

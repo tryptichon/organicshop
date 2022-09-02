@@ -13,6 +13,9 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { FlexLayoutModule } from '@angular/flex-layout';
 
@@ -32,6 +35,9 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatTooltipModule,
     MatDialogModule,
     MatListModule,
+    MatBadgeModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
     FlexLayoutModule
   ]
 })

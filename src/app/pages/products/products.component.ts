@@ -1,6 +1,7 @@
-import { Component, OnDestroy } from '@angular/core';
+import { DialogHandler } from './../../app-components/dialogs/DialogHandler';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, switchMap } from 'rxjs';
+import { catchError, of, Subscription, switchMap } from 'rxjs';
 import { DbProduct } from './../../model/db-product';
 import { CategoryService } from './../../services/database/category.service';
 import { ProductService } from './../../services/database/product.service';
@@ -10,7 +11,7 @@ import { ProductService } from './../../services/database/product.service';
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.sass']
 })
-export class ProductsComponent implements OnDestroy {
+export class ProductsComponent implements OnInit, OnDestroy {
 
   private _selectedCategory: string | null = null;
 
@@ -22,20 +23,31 @@ export class ProductsComponent implements OnDestroy {
     private activatedRoute: ActivatedRoute,
     public categoryService: CategoryService,
     private productService: ProductService,
+    private dialogs: DialogHandler,
     private router: Router
   ) {
-    this.productSubscription = activatedRoute.queryParamMap
+  }
+
+  ngOnInit(): void {
+    this.productSubscription = this.activatedRoute.queryParamMap
       .pipe(
         switchMap((params) => {
           this.selectedCategory = params.get('category');
-          return this.productService.getDocuments$();
+          return this.productService.getAll();
         }),
+        catchError(error => {
+          this.dialogs.error({ title: "Product Service Error", message: error });
+          return of(null);
+        })
       )
-      .subscribe(products =>
+      .subscribe(products => {
+        if (!products)
+          return;
+
         this.filteredProducts = products.filter(product =>
           (this.selectedCategory) ? (product.category === this.selectedCategory) : true
         )
-      );
+      });
   }
 
   ngOnDestroy(): void {
@@ -47,9 +59,9 @@ export class ProductsComponent implements OnDestroy {
     return this._selectedCategory;
   }
 
-  set selectedCategory($event: string | null) {
-    this._selectedCategory = $event;
-    this.router.navigate(['.'], { relativeTo: this.activatedRoute, queryParams: { 'category': $event } });
+  set selectedCategory(category: string | null) {
+    this._selectedCategory = category;
+    this.router.navigate(['.'], { relativeTo: this.activatedRoute, queryParams: { 'category': category } });
   }
 
 }

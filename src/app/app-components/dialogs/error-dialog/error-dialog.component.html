@@ -1,0 +1,18 @@
+<div class="app-dialog-title-bar">
+  <div class="app-dialog-icon">
+    <mat-icon>error</mat-icon>
+  </div>
+  <div class="app-dialog-title">
+    <h1 mat-dialog-title>
+      {{ data.title }}
+    </h1>
+  </div>
+</div>
+<div mat-dialog-content>
+  <p>{{ data.message }}</p>
+</div>
+<div mat-dialog-actions>
+  <button mat-flat-button color="primary" (click)="onClick()" cdkFocusInitial>
+    Close
+  </button>
+</div>

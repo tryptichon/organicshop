@@ -1,5 +1,5 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ConfirmDialogData } from './confirm-dialog-data';
 
 @Component({
@@ -10,15 +10,14 @@ import { ConfirmDialogData } from './confirm-dialog-data';
 export class ConfirmDialogComponent {
 
   constructor(
-    public dialogRef: MatDialogRef<ConfirmDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData,
-  ) {}
+  ) { }
 
-  getOkButtonText() {
+  getOkButtonText(): string {
     return this.data.okButton || "Ok";
   }
 
-  getCancelButtonText() {
+  getCancelButtonText(): string {
     return this.data.cancelButton || "Cancel";
   }
 }

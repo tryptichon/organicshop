@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Auth, authState, GoogleAuthProvider, signOut } from '@angular/fire/auth';
-import { Router } from '@angular/router';
 import { signInWithPopup, User } from 'firebase/auth';
-import { EMPTY, map, Observable, switchMap } from 'rxjs';
+import { map, Observable, of, switchMap } from 'rxjs';
 
 import { DbUser } from './../../model/db-user';
 import { UserService } from './../database/user.service';
@@ -12,32 +11,32 @@ import { UserService } from './../database/user.service';
 })
 export class LoginService {
 
-  private user$: Observable<DbUser | null> = EMPTY;
+  private user$: Observable<DbUser | null>;
+
+  user: DbUser | null = null;
 
   constructor(
     public auth: Auth,
-    public userService: UserService,
-    private router: Router
+    public userService: UserService
   ) {
-    if (!auth)
-      return;
-
     this.user$ = authState(this.auth)
       .pipe(
-        map(firebaseUser => firebaseUser ? this.getMappedUser(firebaseUser) : null)
+        map(firebaseUser => firebaseUser ? this.getMappedUser(firebaseUser) : null),
+        switchMap(user => user ? this.userService.getOrCreate(user) : of(null)),
+        map(dbUser => dbUser || null)
       );
+
+    this.user$.subscribe(dbUser => this.user = dbUser);
   }
 
   /**
    * Obtains user data from the backend database.
    *
    * @return An Observable containing the user data from the user database
-   *         or EMPTY if no such user exists and it cannot be created.
+   *         or of(null) if no such user exists and it cannot be created.
    */
-  get appUser$(): Observable<DbUser | void> {
-    return this.user$.pipe(
-      switchMap(user => user ? this.userService.getOrCreate(user) : EMPTY)
-    );
+  get appUser$(): Observable<DbUser | null> {
+    return this.user$;
   }
 
   /**
@@ -50,21 +49,23 @@ export class LoginService {
    */
   async login(): Promise<void> {
     await signInWithPopup(this.auth, new GoogleAuthProvider());
-    return window.location.reload();
+    return this.reloadPage();
   }
 
 
   /**
-   * Logout and redirect to home.
+   * Logout.
    *
    * @return Promise that gets fulfilled after navigation is done.
    */
   async logout(): Promise<void> {
     await signOut(this.auth);
-    await this.router.navigate(['']);
-    return window.location.reload();
+    return this.reloadPage();
   }
 
+  private reloadPage() {
+    window.location.reload();
+  }
 
   private getMappedUser(firebaseUser: User): DbUser {
     let newUser: DbUser = {
