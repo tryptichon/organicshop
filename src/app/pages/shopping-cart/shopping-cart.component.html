@@ -48,7 +48,7 @@
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="content-center">
         <ng-container *ngIf="shoppingCartProducts$ | async as products">
-          {{ products.getShoppingCartCount() }}
+          {{ products.getShoppingCartTotalCount() }}
         </ng-container>
       </mat-footer-cell>
     </ng-container>

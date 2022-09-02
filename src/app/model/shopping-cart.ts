@@ -50,10 +50,14 @@ export class ShoppingCartProducts {
     );
   }
 
-  getShoppingCartCount(): number {
+  getShoppingCartTotalCount(): number {
     let sum = 0;
     this.productMap.forEach((item) => sum += item.count);
     return sum;
+  }
+
+  getShoppingCartProductCount(productId: string): number {
+    return this.productMap.get(productId)?.count || 0;
   }
 
 }
@@ -89,10 +93,6 @@ export class ResolvedShoppingCartProducts {
     resolvedhoppingCartProducts: ResolvedShoppingCartProduct[]
   ) {
     this.productArray = resolvedhoppingCartProducts;
-  }
-
-  getShoppingCartCount(): number {
-    return this.productArray.reduce((prev, current) => prev += current.count, 0);
   }
 
   getShoppingCartTotal(): number {
