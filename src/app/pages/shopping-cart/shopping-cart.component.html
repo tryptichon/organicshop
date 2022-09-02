@@ -93,3 +93,16 @@
     <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
   </mat-table>
 </div>
+
+<mat-toolbar class="transparent content-width">
+  <span class="filling-spacer"></span>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="totalQuantity === 0 || loginService.user === null"
+    routerLink="/my/check-out"
+  >
+    <mat-icon>shopping_cart_checkout</mat-icon> Check Out
+  </button>
+</mat-toolbar>

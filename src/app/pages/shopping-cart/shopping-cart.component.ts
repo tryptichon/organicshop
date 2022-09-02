@@ -8,6 +8,7 @@ import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 import { DialogHandler } from './../../app-components/dialogs/DialogHandler';
 import { DbProduct } from './../../model/db-product';
+import { LoginService } from './../../services/auth/login.service';
 
 @Component({
   selector: 'app-shopping-cart',
@@ -32,6 +33,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   private shoppingCartSubscription?: Subscription;
 
   constructor(
+    public loginService: LoginService,
     private productService: ProductService,
     private categoryService: CategoryService,
     private shoppingCartHandlerService: ShoppingCartHandlerService,
