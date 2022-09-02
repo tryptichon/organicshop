@@ -28,6 +28,8 @@ const routes: Routes = [
   { path: 'check-out', component: CheckOutComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
   { path: 'order-success', component: OrderSuccessComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
   { path: 'my/orders', component: MyOrdersComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
+  { path: 'my/check-out', component: CheckOutComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
+  { path: 'my/order-success', component: OrderSuccessComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
   { path: 'admin/orders', component: AdminOrdersComponent, canActivate: [AuthGuard, AdminAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
   { path: 'admin/products', component: AdminProductsComponent, canActivate: [AuthGuard, AdminAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
   { path: 'admin/product/:id', component: AdminProductComponent, canActivate: [AuthGuard, AdminAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
