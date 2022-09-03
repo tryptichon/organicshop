@@ -29,10 +29,10 @@ export class ShoppingCartHandlerService {
   /** The current shoppingCartId */
   private shoppingCartId: string;
 
-  shoppingCartProductService!: ShoppingCartProductService
+  private shoppingCartProductService!: ShoppingCartProductService
 
   /** Track current status of login */
-  private userId: string | null = null;
+  // private userId: string | null = null;
 
   private shoppingCartSubscription?: Subscription;
   private shoppingCartProductsSubscription?: Subscription;
@@ -52,28 +52,28 @@ export class ShoppingCartHandlerService {
     this.shoppingCartId = shoppingCartService.getDefaultShoppingCartId();
     this.changeShoppingCart(this.shoppingCartId);
 
-    this.loginService.appUser$
-      .pipe(
-        switchMap(user => (!user) ? of(null) : from(shoppingCartService.getShoppingCarts(user.id))
-          .pipe(
-            catchError(error => {
-              dialogs.error({
-                title: "Get Shopping Carts of User",
-                message: error
-              });
-              return of(null);
-            })
-          )
-        ),
-        withLatestFrom(this.loginService.appUser$)
-      )
-      .subscribe(([shoppingCarts, dbUser]) => {
-        if (dbUser === null) {
-          this.onLogout();
-        } else {
-          this.onLogin(dbUser.id, shoppingCarts);
-        }
-      });
+    // this.loginService.appUser$
+    //   .pipe(
+    //     switchMap(user => (!user) ? of(null) : from(shoppingCartService.getShoppingCarts(user.id))
+    //       .pipe(
+    //         catchError(error => {
+    //           dialogs.error({
+    //             title: "Get Shopping Carts of User",
+    //             message: error
+    //           });
+    //           return of(null);
+    //         })
+    //       )
+    //     ),
+    //     withLatestFrom(this.loginService.appUser$)
+    //   )
+    //   .subscribe(([shoppingCarts, dbUser]) => {
+    //     if (dbUser === null) {
+    //       this.onLogout();
+    //     } else {
+    //       this.onLogin(dbUser.id, shoppingCarts);
+    //     }
+    //   });
 
   }
 
@@ -82,23 +82,23 @@ export class ShoppingCartHandlerService {
    * shopping cart id so it does not overwrite the cart of the
    * previous user.
    */
-  private onLogout() {
-    let defaultShoppingCartId = this.shoppingCartService.getDefaultShoppingCartId();
+  // private onLogout() {
+  //   let defaultShoppingCartId = this.shoppingCartService.getDefaultShoppingCartId();
 
-    this.shoppingCartService.get(defaultShoppingCartId)
-      .pipe(
-        take(1)
-      )
-      .subscribe(shoppingCart => {
-        if (shoppingCart && shoppingCart.userId !== null) {
-          this.changeShoppingCart(this.shoppingCartService.nextShoppingCartId());
-        } else {
-          this.changeShoppingCart(defaultShoppingCartId);
-        }
-      });
+  //   this.shoppingCartService.get(defaultShoppingCartId)
+  //     .pipe(
+  //       take(1)
+  //     )
+  //     .subscribe(shoppingCart => {
+  //       if (shoppingCart && shoppingCart.userId !== null) {
+  //         this.changeShoppingCart(this.shoppingCartService.nextShoppingCartId());
+  //       } else {
+  //         this.changeShoppingCart(defaultShoppingCartId);
+  //       }
+  //     });
 
-    this.userId = null;
-  }
+  //   this.userId = null;
+  // }
 
   /**
    * If the user has a shopping cart assigned, use its shoppingCartId, else assign
@@ -109,15 +109,15 @@ export class ShoppingCartHandlerService {
    *                      the userId will be set to the default shopping cart, making it
    *                      a shopping cart of that user.
    */
-  private onLogin(userId: string, shoppingCarts: DbShoppingCart[] | null) {
-    if (!shoppingCarts?.length) {
-      this.assignDefaultShoppingCartToUser(userId);
-    } else {
-      this.changeShoppingCart(shoppingCarts[0].id)
-    }
+  // private onLogin(userId: string, shoppingCarts: DbShoppingCart[] | null) {
+  //   if (!shoppingCarts?.length) {
+  //     this.assignDefaultShoppingCartToUser(userId);
+  //   } else {
+  //     this.changeShoppingCart(shoppingCarts[0].id)
+  //   }
 
-    this.userId = userId;
-  }
+  //   this.userId = userId;
+  // }
 
   /**
    * Assign this userId to the default shopping cart if it exists. Then
@@ -126,28 +126,28 @@ export class ShoppingCartHandlerService {
    *
    * @param userId The userId to set for the default shopping cart.
    */
-  private assignDefaultShoppingCartToUser(userId: string) {
-    this.shoppingCartService.get(this.shoppingCartId)
-      .pipe(
-        take(1),
-        catchError(error => {
-          this.dialogs.error({
-            title: "Get Default Shopping Cart",
-            message: error
-          });
-          return of(null);
-        })
-      )
-      .subscribe(
-        defaultShoppingCart => {
-          if (!defaultShoppingCart)
-            return;
+  // private assignDefaultShoppingCartToUser(userId: string) {
+  //   this.shoppingCartService.get(this.shoppingCartId)
+  //     .pipe(
+  //       take(1),
+  //       catchError(error => {
+  //         this.dialogs.error({
+  //           title: "Get Default Shopping Cart",
+  //           message: error
+  //         });
+  //         return of(null);
+  //       })
+  //     )
+  //     .subscribe(
+  //       defaultShoppingCart => {
+  //         if (!defaultShoppingCart)
+  //           return;
 
-          defaultShoppingCart.userId = userId;
-          this.updateShoppingCart(defaultShoppingCart);
-        }
-      );
-  }
+  //         defaultShoppingCart.userId = userId;
+  //         this.updateShoppingCart(defaultShoppingCart);
+  //       }
+  //     );
+  // }
 
   private changeShoppingCart(shoppingCartId: string) {
     this.shoppingCartId = shoppingCartId;
@@ -216,8 +216,8 @@ export class ShoppingCartHandlerService {
     return {
       id: this.shoppingCartId,
       dateCreated: new Date().getTime(),
-      dateOrdered: null,
-      userId: this.userId
+      // dateOrdered: null,
+      // userId: this.userId
     };
   }
 
