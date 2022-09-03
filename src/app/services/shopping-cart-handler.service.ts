@@ -1,3 +1,4 @@
+import { DbEntry } from './../model/db-entry';
 import { Injectable } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
 import { catchError, firstValueFrom, from, of, ReplaySubject, Subscription, switchMap, take, withLatestFrom } from 'rxjs';
@@ -6,6 +7,7 @@ import { ShoppingCartProducts } from '../model/shopping-cart-products';
 import { DialogHandler } from './../app-components/dialogs/DialogHandler';
 import { ShoppingCartProduct } from './../model/shopping-cart';
 import { LoginService } from './auth/login.service';
+import { AbstractCrudService } from './database/abstract-crud.service';
 import { ShoppingCartProductService } from './database/shopping-cart-product.service';
 import { ShoppingCartService } from './database/shopping-cart.service';
 
@@ -30,7 +32,8 @@ export class ShoppingCartHandlerService {
   /** Track current status of login */
   private userId: string | null = null;
 
-  private shoppingCartDataSubscription?: Subscription;
+  private shoppingCartSubscription?: Subscription;
+  private shoppingCartProductsSubscription?: Subscription;
 
   /**
    * This service handles the shopping cart.
@@ -148,21 +151,23 @@ export class ShoppingCartHandlerService {
     this.shoppingCartId = shoppingCartId;
     this.shoppingCartProductService = new ShoppingCartProductService(shoppingCartId, this.firestore);
 
-    if (this.shoppingCartDataSubscription)
-      this.shoppingCartDataSubscription.unsubscribe();
+    if (this.shoppingCartSubscription)
+      this.shoppingCartSubscription.unsubscribe();
 
-    this.shoppingCartService.get(shoppingCartId)
+    this.shoppingCartSubscription = this.shoppingCartService.get(shoppingCartId)
       .subscribe(shoppingCart => {
         if (shoppingCart)
           this.shoppingCart$.next(shoppingCart);
       });
 
-    this.shoppingCartProductService.getAll()
+    if (this.shoppingCartProductsSubscription)
+      this.shoppingCartProductsSubscription.unsubscribe();
+
+    this.shoppingCartProductsSubscription = this.shoppingCartProductService.getAll()
       .subscribe(shoppingCartProducts => {
         if (shoppingCartProducts)
           this.shoppingCartProducts$.next(new ShoppingCartProducts(shoppingCartProducts));
       });
-
   }
 
   /**
