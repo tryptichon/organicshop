@@ -10,7 +10,7 @@ import { PagenotfoundComponent } from './pages/errors/pagenotfound/pagenotfound.
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { CheckOutComponent } from './pages/my/check-out/check-out.component';
-import { MyOrdersComponent } from './pages/my/my-orders/my-orders.component';
+import { UserOrdersComponent } from './pages/my/user-orders/user-orders.component';
 import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
@@ -28,7 +28,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectLoggedInToHome } },
   { path: 'check-out', component: CheckOutComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
   { path: 'order-success', component: OrderSuccessComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
-  { path: 'my/orders', component: MyOrdersComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
+  { path: 'my/orders', component: UserOrdersComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
   { path: 'my/check-out', component: CheckOutComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },
   { path: 'my/order-success/:id', component: OrderSuccessComponent, canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin }, resolve: { order: OrderSuccessResolver} },
   { path: 'admin/orders', component: AdminOrdersComponent, canActivate: [AuthGuard, AdminAuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin } },

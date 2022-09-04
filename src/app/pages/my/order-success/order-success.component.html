@@ -4,11 +4,7 @@
     <p>
       This order has been placed successfully.
     </p>
-    <ul>
-      <li>Order Id: {{ order.id }}</li>
-      <li>Date ordered: {{ order.dateOrdered | date: "medium" }}</li>
-      <li>Total Price: {{ order.totalPrice | currency }}</li>
-    </ul>
+    <app-order-card [order]="order"></app-order-card>
   </div>
   <ng-template #noOrder>
     <h1>No such order</h1>

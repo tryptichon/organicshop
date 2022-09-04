@@ -27,11 +27,12 @@ import { PagenotfoundComponent } from './pages/errors/pagenotfound/pagenotfound.
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { CheckOutComponent } from './pages/my/check-out/check-out.component';
-import { MyOrdersComponent } from './pages/my/my-orders/my-orders.component';
 import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
 import { ErrorDialogComponent } from './app-components/dialogs/error-dialog/error-dialog.component';
+import { OrderCardComponent } from './app-components/order-card/order-card.component';
+import { UserOrdersComponent } from './pages/my/user-orders/user-orders.component';
 
 
 @NgModule({
@@ -44,7 +45,6 @@ import { ErrorDialogComponent } from './app-components/dialogs/error-dialog/erro
     CheckOutComponent,
     ShoppingCartComponent,
     OrderSuccessComponent,
-    MyOrdersComponent,
     AdminProductsComponent,
     AdminOrdersComponent,
     AdminProductsComponent,
@@ -58,7 +58,9 @@ import { ErrorDialogComponent } from './app-components/dialogs/error-dialog/erro
     ConfirmDialogComponent,
     ProductFilterComponent,
     ProductCartButtonComponent,
-    ErrorDialogComponent
+    ErrorDialogComponent,
+    OrderCardComponent,
+    UserOrdersComponent
   ],
   imports: [
     FormsModule,
