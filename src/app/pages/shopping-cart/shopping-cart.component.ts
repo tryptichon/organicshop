@@ -51,7 +51,6 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-
         let productArray: ResolvedShoppingCartProduct[] = [];
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
@@ -63,7 +62,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
         let resolved = new ResolvedShoppingCartProducts(productArray);
 
         this.totalPrice = resolved.totalPrice;
-        this.totalQuantity = shoppingCartProducts.totalQuantity;
+        this.totalQuantity = resolved.totalQuantity;
 
         this.dataSource.data = [...resolved.productArray];
         this.table.renderRows();

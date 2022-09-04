@@ -2,7 +2,7 @@
 
 <mat-toolbar class="transparent content-width">
   <span class="mat-body" *ngIf="shoppingCart$ | async as cart">
-    Created {{ cart.dateCreated | date:'medium' }}
+    Created {{ cart.dateCreated | date: "medium" }}
   </span>
   <span class="filling-spacer"></span>
   <button
@@ -27,7 +27,7 @@
     <ng-container matColumnDef="image">
       <mat-header-cell *matHeaderCellDef></mat-header-cell>
       <mat-cell *matCellDef="let row"><img [src]="row.imageUrl" /></mat-cell>
-      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      <mat-footer-cell *matFooterCellDef> Total </mat-footer-cell>
     </ng-container>
 
     <!-- Name Column -->
@@ -36,7 +36,7 @@
         Name
       </mat-header-cell>
       <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
-      <mat-footer-cell *matFooterCellDef> Total </mat-footer-cell>
+      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
     </ng-container>
 
     <!-- Category Column -->
@@ -96,13 +96,25 @@
 
 <mat-toolbar class="transparent content-width">
   <span class="filling-spacer"></span>
-  <button
-    mat-flat-button
-    color="primary"
-    type="button"
-    [disabled]="totalQuantity === 0 || loginService.user === null"
-    routerLink="/my/check-out"
-  >
-    <mat-icon>shopping_cart_checkout</mat-icon> Check Out
-  </button>
+  <div *ngIf="(loginService.user !== null); else anonymous">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="totalQuantity === 0"
+      [routerLink]="['/my', 'check-out']"
+    >
+      <mat-icon>shopping_cart_checkout</mat-icon> Check Out
+    </button>
+  </div>
+  <ng-template #anonymous>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [routerLink]="['/login', {returnUrl: '/my/check-out'}]"
+    >
+      <mat-icon>login</mat-icon> Login / Check Out
+    </button>
+  </ng-template>
 </mat-toolbar>

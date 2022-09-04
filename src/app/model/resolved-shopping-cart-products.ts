@@ -41,5 +41,9 @@ export class ResolvedShoppingCartProducts {
   get totalPrice(): number {
     return this.productArray.reduce((prev, current) => prev += current.totalPrice, 0);
   }
+
+  get totalQuantity(): number {
+    return this.productArray.reduce((prev, current) => prev += current.count, 0);
+  }
 }
 

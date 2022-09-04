@@ -64,7 +64,7 @@ export class AdminProductComponent implements OnInit {
         if (!dbProduct)
           return;
 
-        this.form.setValue(this.productToFormData(dbProduct));
+        this.form.setValue(dbProduct);
       });
   }
 
@@ -135,16 +135,4 @@ export class AdminProductComponent implements OnInit {
     return newProduct;
   }
 
-  /**
-   * @param product The DbProduct as source for the form.
-   * @returns An object matching the form data.
-   */
-  public productToFormData(product: DbProduct) {
-    return {
-      name: product.name,
-      price: product.price,
-      category: product.category,
-      imageUrl: product.imageUrl
-    };
-  }
 }

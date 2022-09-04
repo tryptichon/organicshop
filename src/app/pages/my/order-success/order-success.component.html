@@ -1,1 +1,17 @@
-<p>order-success works!</p>
+  <div *ngIf="order as order; else noOrder">
+    <h1>Order successfull</h1>
+
+    <p>
+      This order has been placed successfully.
+    </p>
+    <ul>
+      <li>Order Id: {{ order.id }}</li>
+      <li>Date ordered: {{ order.dateOrdered | date: "medium" }}</li>
+      <li>Total Price: {{ order.totalPrice | currency }}</li>
+    </ul>
+  </div>
+  <ng-template #noOrder>
+    <h1>No such order</h1>
+
+    <p>No order found.</p>
+  </ng-template>

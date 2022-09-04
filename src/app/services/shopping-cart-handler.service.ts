@@ -27,7 +27,7 @@ export class ShoppingCartHandlerService {
   shoppingCartProducts$ = new ReplaySubject<ShoppingCartProducts>(1);
 
   /** The current shoppingCartId */
-  private shoppingCartId: string;
+  shoppingCartId: string;
 
   private shoppingCartProductService!: ShoppingCartProductService
 
