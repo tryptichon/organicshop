@@ -24,10 +24,10 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.changeUserId(this.loginService.user?.id);
+    this.initWith(this.loginService.user?.id);
 
     this.loginSubscription = this.loginService.appUser$
-      .subscribe(user => this.changeUserId(user?.id))
+      .subscribe(user => this.initWith(user?.id))
   }
 
   ngOnDestroy(): void {
@@ -37,7 +37,7 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
       this.orderSubscription.unsubscribe();
   }
 
-  changeUserId(userId?: string) {
+  initWith(userId?: string) {
     this.userId = userId;
     if (!userId)
       return;

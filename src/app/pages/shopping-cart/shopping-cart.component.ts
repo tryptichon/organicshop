@@ -5,7 +5,7 @@ import { combineLatest, Subscription } from 'rxjs';
 import { ResolvedShoppingCartProduct, ResolvedShoppingCartProducts } from 'src/app/model/resolved-shopping-cart-products';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 import { DialogHandler } from './../../app-components/dialogs/DialogHandler';
 import { DbProduct } from './../../model/db-product';
 import { LoginService } from './../../services/auth/login.service';
@@ -36,7 +36,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
     public loginService: LoginService,
     private productService: ProductService,
     private categoryService: CategoryService,
-    private shoppingCartHandlerService: ShoppingCartHandlerService,
+    private shoppingCartService: ShoppingCartService,
     private dialogs: DialogHandler
   ) { }
 
@@ -76,11 +76,11 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   }
 
   get shoppingCart$() {
-    return this.shoppingCartHandlerService.shoppingCart$;
+    return this.shoppingCartService.shoppingCart$;
   }
 
   get shoppingCartProducts$() {
-    return this.shoppingCartHandlerService.shoppingCartProducts$;
+    return this.shoppingCartService.shoppingCartProducts$;
   }
 
   getCategoryName(id: string) {
@@ -101,7 +101,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   }
 
   onDeleteShoppingCart() {
-    this.shoppingCartHandlerService.deleteShoppingCart();
+    this.shoppingCartService.deleteShoppingCart();
   }
 
 }

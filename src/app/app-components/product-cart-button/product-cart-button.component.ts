@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 
 
 /**
@@ -20,12 +20,12 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   private productCountSubscription?: Subscription;
 
   constructor(
-    private shoppingCartHandlerService: ShoppingCartHandlerService
+    private shoppingCartService: ShoppingCartService
   ) {
   }
 
   ngOnInit(): void {
-    this.productCountSubscription = this.shoppingCartHandlerService.shoppingCartProducts$
+    this.productCountSubscription = this.shoppingCartService.shoppingCartProducts$
       .subscribe(products => {
         this.productCount = products.getShoppingCartProductQuantity(this.productId);
       });
@@ -49,7 +49,7 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
       return;
 
     this.productCount = productCount;
-    this.shoppingCartHandlerService.handleShoppingCartProduct(this.productId, { count: productCount });
+    this.shoppingCartService.handleShoppingCartProduct(this.productId, { count: productCount });
   }
 
 }

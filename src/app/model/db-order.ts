@@ -7,7 +7,7 @@ export interface DbOrderProduct extends DbShoppingCartProduct {
   price: number;
 }
 
-export interface DbShippingAddress {
+export interface DbShipping {
   name: string;
   address: string;
   zipCode: string;
@@ -20,6 +20,6 @@ export interface DbOrder extends DbEntry {
   shoppingCartId: string;
   dateOrdered: number;
   totalPrice: number;
-  shippingAddress: DbShippingAddress;
+  shipping: DbShipping;
   products: DbOrderProduct[];
 }

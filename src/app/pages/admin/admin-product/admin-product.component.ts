@@ -3,7 +3,7 @@ import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of, take } from 'rxjs';
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 
 import { DbProduct } from './../../../model/db-product';
@@ -34,7 +34,7 @@ export class AdminProductComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private productService: ProductService,
-    private shoppingCartHandlerService: ShoppingCartHandlerService,
+    private shoppingCartService: ShoppingCartService,
     private route: ActivatedRoute,
     private router: Router,
     private dialogs: DialogHandler,
@@ -105,7 +105,7 @@ export class AdminProductComponent implements OnInit {
   async onDelete() {
     try {
       await this.productService.delete(this.id);
-      await this.shoppingCartHandlerService.removeProductFromAllCarts(this.id);
+      await this.shoppingCartService.removeProductFromAllCarts(this.id);
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
       this.dialogs.error({ title: 'On Delete Communication Error', message: error });

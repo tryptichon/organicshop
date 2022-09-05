@@ -1,8 +1,8 @@
+import { Shipping } from './../../../model/order';
 import { LoginService } from './../../../services/auth/login.service';
 import { OrderService } from './../../../services/database/order.service';
-import { DbShippingAddress, DbOrderProduct, DbOrder } from './../../../model/db-order';
+import { DbShipping, DbOrderProduct, DbOrder } from './../../../model/db-order';
 import { ProductService } from 'src/app/services/database/product.service';
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { combineLatest, Subscription } from 'rxjs';
@@ -10,6 +10,8 @@ import { ResolvedShoppingCartProduct, ResolvedShoppingCartProducts } from 'src/a
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { DbProduct } from 'src/app/model/db-product';
 import { Router } from '@angular/router';
+import { Order } from 'src/app/model/order';
+import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 
 @Component({
   selector: 'app-check-out',
@@ -45,7 +47,7 @@ export class CheckOutComponent implements AfterViewInit {
   private shoppingCartSubscription?: Subscription;
 
   constructor(
-    private shoppingCartHandlerService: ShoppingCartHandlerService,
+    private shoppingCartService: ShoppingCartService,
     private productService: ProductService,
     private orderService: OrderService,
     private loginService: LoginService,
@@ -77,7 +79,7 @@ export class CheckOutComponent implements AfterViewInit {
   }
 
   get shoppingCartProducts$() {
-    return this.shoppingCartHandlerService.shoppingCartProducts$;
+    return this.shoppingCartService.shoppingCartProducts$;
   }
 
   async onOrder() {
@@ -90,42 +92,17 @@ export class CheckOutComponent implements AfterViewInit {
     if (!userId)
       throw Error("No logged in user");
 
-    if (!formData.name || !formData.address || !formData.zipCode || !formData.city || !formData.state)
-      throw Error('Fields are missing');
+    let order = new Order(
+      this.orderService.getUniqueId(),
+      userId,
+      this.shoppingCartService.shoppingCartId,
+      new Shipping(formData),
+      this.shoppingCartProducts
+    );
 
-    let orderId = this.orderService.getUniqueId();
+    await this.orderService.createOrderAndClearShoppingCart(order);
 
-    let shippingAddress: DbShippingAddress = {
-      name: formData.name,
-      address: formData.address,
-      zipCode: formData.zipCode,
-      city: formData.city,
-      state: formData.state
-    }
-
-    let products: DbOrderProduct[] = this.shoppingCartProducts.productArray.map(entry => ({
-      id: entry.id,
-      name: entry.name,
-      price: entry.price,
-      count: entry.count
-    }));
-
-    let order: DbOrder = {
-      id: orderId,
-      userId: userId,
-      shoppingCartId: this.shoppingCartHandlerService.shoppingCartId,
-      dateOrdered: new Date().getTime(),
-      totalPrice: this.totalPrice,
-      shippingAddress: shippingAddress,
-      products: products
-    }
-
-    await this.orderService.create(order);
-    await this.shoppingCartHandlerService.deleteShoppingCart();
-
-    this.form.reset();
-
-    this.router.navigate(['/my', 'order-success', orderId]);
+    this.router.navigate(['/my', 'order-success', order.id]);
   }
 
 }
