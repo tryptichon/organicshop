@@ -99,12 +99,12 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   async handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
     let shoppingCartRemoved = false;
 
-    await runTransaction(this.firestore, async (transaction) => {
+    let shoppingCartProducts = await firstValueFrom(this.shoppingCartProductService.getAll()
+      .pipe(
+        take(1)
+      ));
 
-      let shoppingCartProducts = await firstValueFrom(this.shoppingCartProductService.getAll()
-        .pipe(
-          take(1)
-        ));
+    await runTransaction(this.firestore, async (transaction) => {
 
       if (shoppingCartProducts.length == 0) {
 
@@ -119,7 +119,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
         if (product.count > 0) {
           return this.updateShoppingCartProduct(transaction, productId, product);
         } else {
-          shoppingCartRemoved = this.removeProduct(transaction, this.shoppingCartProductService, shoppingCartProducts, this.shoppingCartId, productId);
+          shoppingCartRemoved = this.removeProduct(transaction, shoppingCartProducts.map(product => product.id), productId, this.shoppingCartProductService, this.shoppingCartId);
         }
 
       }
@@ -173,11 +173,11 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
     }
   }
 
-  private removeProduct(transaction: Transaction, shoppingCartProductService: ShoppingCartProductService, products: DbShoppingCartProduct[], shoppingCartId: string, productId: string): boolean {
+  private removeProduct(transaction: Transaction, productIds: string[], productId: string, shoppingCartProductService: ShoppingCartProductService, shoppingCartId: string): boolean {
     try {
       shoppingCartProductService.deleteT(transaction, productId);
 
-      if ((products.filter(product => product.id != productId)).length === 0) {
+      if ((productIds.filter(id => id != productId)).length === 0) {
         this.deleteT(transaction, shoppingCartId);
         return true;
       }
@@ -213,28 +213,22 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
    * @returns A promise that completes when the process has finished.
    */
   async removeProductFromAllCarts(productId: string) {
-    await runTransaction(this.firestore, (transaction) => this.removeProductFromAllCartsT(transaction, productId));
-  }
+    let shoppingCartIds = await this.getIds();
+    let products = await Promise.all(shoppingCartIds.map(async shoppingCartId => {
+      const service = new ShoppingCartProductService(shoppingCartId, this.firestore);
+      const productIds = (await firstValueFrom(service.getAll().pipe(take(1)))).map(product => product.id);
+      return {
+        shoppingCartId: shoppingCartId,
+        service: service,
+        productIds: productIds
+      };
+    }));
 
-  async removeProductFromAllCartsT(transaction: Transaction, productId: string) {
-    let shoppingCarts = await firstValueFrom(this.getAll()
-      .pipe(
-        take(1)
-      ));
-
-    shoppingCarts.forEach(async shoppingCart => {
-      let shoppingCartProductService = new ShoppingCartProductService(shoppingCart.id, this.firestore);
-
-      let products = await firstValueFrom(shoppingCartProductService.getAll()
-        .pipe(
-          take(1)
-        ));
-
-      this.removeProduct(transaction, shoppingCartProductService, products, shoppingCart.id, productId);
+    await runTransaction(this.firestore, async (transaction) => {
+      products.forEach(product => {
+        this.removeProduct(transaction, product.productIds, productId, product.service, product.shoppingCartId)
+      });
     });
-
   }
 
 }
-
-

@@ -23,7 +23,7 @@ import { firstValueFrom, from, map, Observable, of, switchMap, take } from 'rxjs
 import { DbEntry } from './../../model/db-entry';
 
 // A utility type to be able to remove id from data.
-type NoId = { id?: string };
+export type NoId = { id?: string };
 
 /**
  * Generic CRUD operations on Firebase/Firestore database.
@@ -143,11 +143,9 @@ export abstract class AbstractCrudService<T extends DbEntry> {
     let queryResult = await getDocs(q);
 
     let documents: T[] = [];
-    queryResult.forEach(result => {
-      let current: T = result.data() as T;
-      current.id = result.id;
-      documents.push(current);
-    });
+    queryResult.forEach(result =>
+      documents.push({ id: result.id, ...result.data() } as T)
+    );
 
     return documents;
   }
