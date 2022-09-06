@@ -8,6 +8,8 @@ import { ShoppingCartProduct } from 'src/app/model/shopping-cart';
 import { ShoppingCartProducts } from 'src/app/model/shopping-cart-products';
 import { AbstractCrudService } from './abstract-crud.service';
 
+/** Contains the shoppingCartId and the ids of all contained products. */
+export type ShoppingCartIdsType = { shoppingCartId: string, productIds: string[] };
 
 @Injectable({
   providedIn: 'root'
@@ -156,7 +158,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
     ));
   }
 
-  removeProduct(transaction: Transaction, productIds: string[], productId: string, shoppingCartId: string): boolean {
+  private removeProduct(transaction: Transaction, productIds: string[], productId: string, shoppingCartId: string): boolean {
     (new ShoppingCartProductService(shoppingCartId, this.firestore)).deleteT(transaction, productId);
 
     if ((productIds.filter(id => id != productId)).length === 0) {
@@ -184,29 +186,41 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
     this.shoppingCart$.next(null);
   }
 
-  // /**
-  //  * Remove a product from all shopping carts.
-  //  *
-  //  * @param productId The productId of the product to remove.
-  //  * @returns A promise that completes when the process has finished.
-  //  */
-  // async removeProductFromAllCarts(productId: string) {
-  //   let shoppingCartIds = await this.getIds();
-  //   let products = await Promise.all(shoppingCartIds.map(async shoppingCartId => {
-  //     const service = new ShoppingCartProductService(shoppingCartId, this.firestore);
-  //     const productIds = (await firstValueFrom(service.getAll().pipe(take(1)))).map(product => product.id);
-  //     return {
-  //       shoppingCartId: shoppingCartId,
-  //       service: service,
-  //       productIds: productIds
-  //     };
-  //   }));
+  /**
+   * Get an array of all shoppingCartIds including all their product ids each.
+   *
+   * @returns An array of object containing shoppingCartId and an array
+   *          of its productIds.
+   */
+  async getAllShoppingCartAndProductIds(): Promise<ShoppingCartIdsType[]> {
+    const shoppingCartIds = await this.getIds();
+    return await Promise.all(shoppingCartIds.map(async shoppingCartId => {
 
-  //   await runTransaction(this.firestore, async (transaction) => {
-  //     products.forEach(product => {
-  //       this.removeProduct(transaction, product.productIds, productId, product.service, product.shoppingCartId)
-  //     });
-  //   });
-  // }
+      const productIds = (await firstValueFrom(
+        (new ShoppingCartProductService(shoppingCartId, this.firestore)).getAll().pipe(take(1))
+      )).map(product => product.id);
+
+      return {
+        shoppingCartId: shoppingCartId,
+        productIds: productIds
+      };
+
+    }));
+  }
+
+  /**
+   * Remove a product from all shopping carts.
+   *
+   * @param transaction The current transaction.
+   * @param shoppingCartAndProductIds Array with id information about all shopping carts.
+   * @param productId Id of the product to remove.
+   *
+   * @see getAllShoppingCartAndProductIds
+   */
+  removeProductFromAllCartsT(transaction: Transaction, shoppingCartAndProductIds: ShoppingCartIdsType[], productId: string) {
+    shoppingCartAndProductIds.forEach(entry =>
+      this.removeProduct(transaction, entry.productIds, productId, entry.shoppingCartId)
+    );
+  }
 
 }
