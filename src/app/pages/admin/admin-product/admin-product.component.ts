@@ -3,7 +3,8 @@ import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of, take } from 'rxjs';
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { NoId } from 'src/app/services/database/abstract-crud.service';
+import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 
 import { DbProduct } from './../../../model/db-product';
@@ -25,6 +26,7 @@ export class AdminProductComponent implements OnInit {
   imageControl = new FormControl<string | null>(null, [Validators.pattern('^[a-zA-Z0-9+\\.-]+://\\S*')]);
 
   form = new FormGroup({
+    id: new FormControl(),
     name: this.nameControl,
     price: this.priceControl,
     category: this.categoryControl,
@@ -34,7 +36,7 @@ export class AdminProductComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private productService: ProductService,
-    private shoppingCartHandlerService: ShoppingCartHandlerService,
+    private shoppingCartService: ShoppingCartService,
     private route: ActivatedRoute,
     private router: Router,
     private dialogs: DialogHandler,
@@ -64,7 +66,7 @@ export class AdminProductComponent implements OnInit {
         if (!dbProduct)
           return;
 
-        this.form.setValue(this.productToFormData(dbProduct));
+        this.form.setValue(dbProduct);
       });
   }
 
@@ -104,8 +106,7 @@ export class AdminProductComponent implements OnInit {
 
   async onDelete() {
     try {
-      await this.productService.delete(this.id);
-      await this.shoppingCartHandlerService.removeProductFromAllCarts(this.id);
+      await this.productService.removeProductFromAllCarts(this.id);
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
       this.dialogs.error({ title: 'On Delete Communication Error', message: error });
@@ -135,16 +136,4 @@ export class AdminProductComponent implements OnInit {
     return newProduct;
   }
 
-  /**
-   * @param product The DbProduct as source for the form.
-   * @returns An object matching the form data.
-   */
-  public productToFormData(product: DbProduct) {
-    return {
-      name: product.name,
-      price: product.price,
-      category: product.category,
-      imageUrl: product.imageUrl
-    };
-  }
 }

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 
 import { DialogHandler } from '../dialogs/DialogHandler';
 import { LoginService } from './../../services/auth/login.service';
@@ -20,7 +20,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   constructor(
     public loginService: LoginService,
-    public shoppingCartHandlerService: ShoppingCartHandlerService,
+    public shoppingCartService: ShoppingCartService,
     private dialogs: DialogHandler
   ) {
   }
@@ -44,6 +44,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   get shoppingCartProducts$() {
-    return this.shoppingCartHandlerService.shoppingCartProducts$;
+    return this.shoppingCartService.shoppingCartProducts$;
   }
 }

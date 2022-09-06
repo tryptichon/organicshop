@@ -1,6 +1,7 @@
+import { DialogHandler } from './../dialogs/DialogHandler';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ShoppingCartHandlerService } from 'src/app/services/shopping-cart-handler.service';
+import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 
 
 /**
@@ -20,12 +21,13 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   private productCountSubscription?: Subscription;
 
   constructor(
-    private shoppingCartHandlerService: ShoppingCartHandlerService
+    private shoppingCartService: ShoppingCartService,
+    private dialogs: DialogHandler
   ) {
   }
 
   ngOnInit(): void {
-    this.productCountSubscription = this.shoppingCartHandlerService.shoppingCartProducts$
+    this.productCountSubscription = this.shoppingCartService.shoppingCartProducts$
       .subscribe(products => {
         this.productCount = products.getShoppingCartProductQuantity(this.productId);
       });
@@ -44,12 +46,16 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
     this.setProductCount(this.productCount - 1);
   }
 
-  private setProductCount(productCount: number) {
+  private async setProductCount(productCount: number) {
     if (productCount < 0)
       return;
 
-    this.productCount = productCount;
-    this.shoppingCartHandlerService.handleShoppingCartProduct(this.productId, { count: productCount });
+    try {
+      await this.shoppingCartService.handleShoppingCartProduct(this.productId, { count: productCount });
+      this.productCount = productCount;
+    } catch (error) {
+      this.dialogs.error({ title: 'Shopping Cart Communication Error', message: error });
+    };
   }
 
 }

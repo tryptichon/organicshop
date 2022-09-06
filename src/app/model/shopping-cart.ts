@@ -8,10 +8,6 @@ import { DbProduct } from "./db-product";
 export interface ShoppingCartData {
   /** This is UTC in ms. */
   dateCreated: number | null,
-  /** This is UTC in ms. */
-  dateOrdered: number | null,
-  /** This is null when no user is associated with this shopping cart. */
-  userId: string | null,
 }
 
 /**

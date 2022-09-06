@@ -1,8 +1,8 @@
 <h1>Shopping Cart</h1>
 
 <mat-toolbar class="transparent content-width">
-  <span *ngIf="shoppingCart$ | async as cart">
-    {{ cart.dateCreated | date }}
+  <span class="mat-body" *ngIf="shoppingCart$ | async as cart">
+    Created {{ cart.dateCreated | date: "medium" }}
   </span>
   <span class="filling-spacer"></span>
   <button
@@ -12,7 +12,7 @@
     [disabled]="totalQuantity === 0"
     (click)="onConfirmDelete()"
   >
-    <mat-icon>delete</mat-icon> Delete
+    <mat-icon>subtitles_off</mat-icon> Clear
   </button>
 </mat-toolbar>
 
@@ -27,7 +27,7 @@
     <ng-container matColumnDef="image">
       <mat-header-cell *matHeaderCellDef></mat-header-cell>
       <mat-cell *matCellDef="let row"><img [src]="row.imageUrl" /></mat-cell>
-      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      <mat-footer-cell *matFooterCellDef> Total </mat-footer-cell>
     </ng-container>
 
     <!-- Name Column -->
@@ -36,7 +36,7 @@
         Name
       </mat-header-cell>
       <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
-      <mat-footer-cell *matFooterCellDef> Total </mat-footer-cell>
+      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
     </ng-container>
 
     <!-- Category Column -->
@@ -93,3 +93,28 @@
     <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
   </mat-table>
 </div>
+
+<mat-toolbar class="transparent content-width">
+  <span class="filling-spacer"></span>
+  <div *ngIf="(loginService.user !== null); else anonymous">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="totalQuantity === 0"
+      [routerLink]="['/my', 'check-out']"
+    >
+      <mat-icon>shopping_cart_checkout</mat-icon> Check Out
+    </button>
+  </div>
+  <ng-template #anonymous>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [routerLink]="['/login', {returnUrl: '/my/check-out'}]"
+    >
+      <mat-icon>login</mat-icon> Login / Check Out
+    </button>
+  </ng-template>
+</mat-toolbar>

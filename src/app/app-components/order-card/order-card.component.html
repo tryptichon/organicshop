@@ -1,0 +1,6 @@
+<ul *ngIf="order">
+  <li>Order Id: {{ order.id }}</li>
+  <li>Date ordered: {{ order.dateOrdered | date: "medium" }}</li>
+  <li>Total Price: {{ order.totalPrice | currency }}</li>
+</ul>
+

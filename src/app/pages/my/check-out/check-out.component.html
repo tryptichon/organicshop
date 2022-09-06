@@ -1,1 +1,131 @@
-<p>check-out works!</p>
+<h1>Check Out</h1>
+
+<form [formGroup]="form" (ngSubmit)="onOrder()" class="content-width">
+  <div class="content-width">
+    <div
+      fxLayout="row"
+      fxLayout.xs="column"
+      fxLayoutAlign="start"
+      fxLayoutGap="1vh"
+    >
+      <div
+        fxLayout="column"
+        fxLayoutAlign="start"
+        fxLayoutGap="1vh"
+        fxFlex="60%"
+      >
+        <h3>Shipping</h3>
+        <div class="product-form">
+          <mat-form-field appearance="fill" class="product-field max-width">
+            <mat-label>Name</mat-label>
+            <input
+              matInput
+              type="text"
+              [formControl]="nameControl"
+              name="name"
+            />
+            <mat-error *ngIf="nameControl.hasError('required')">
+              Name is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="product-field max-width">
+            <mat-label>Address</mat-label>
+            <input
+              matInput
+              type="text"
+              [formControl]="addressControl"
+              name="street"
+            />
+            <mat-error *ngIf="addressControl.hasError('required')">
+              Address is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field
+            appearance="fill"
+            class="product-field zip-code-field"
+          >
+            <mat-label>Zip Code</mat-label>
+            <input
+              matInput
+              type="text"
+              [formControl]="zipCodeControl"
+              name="zipCode"
+            />
+            <mat-error *ngIf="zipCodeControl.hasError('required')">
+              Zip Code is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="product-field city-field">
+            <mat-label>City</mat-label>
+            <input
+              matInput
+              type="text"
+              [formControl]="cityControl"
+              name="city"
+            />
+            <mat-error *ngIf="cityControl.hasError('required')">
+              City is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="product-field max-width">
+            <mat-label>State</mat-label>
+            <input
+              matInput
+              type="text"
+              [formControl]="stateControl"
+              name="state"
+            />
+            <mat-error *ngIf="stateControl.hasError('required')">
+              State is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <div fxLayout="column" fxFlex="40%" fxLayoutGap="1vh">
+        <h3>Shopping Cart</h3>
+        <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+          <!-- Items Column -->
+          <ng-container matColumnDef="items">
+            <mat-header-cell *matHeaderCellDef> Product </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              {{ row.count }} x {{ row.name }}
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef class="table-footer">
+              {{ totalCount }} Total
+            </mat-footer-cell>
+          </ng-container>
+
+          <!-- Total Column -->
+          <ng-container matColumnDef="total">
+            <mat-header-cell *matHeaderCellDef> Total </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="content-right">
+              {{ row.totalPrice | currency }}
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef class="content-right">
+              {{ totalPrice | currency }}
+            </mat-footer-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+          <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
+        </mat-table>
+      </div>
+    </div>
+  </div>
+
+  <mat-toolbar class="transparent content-width">
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="form.invalid || !shoppingCartProducts"
+    >
+      <mat-icon>output</mat-icon> Order
+    </button>
+  </mat-toolbar>
+</form>
