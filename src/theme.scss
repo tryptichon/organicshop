@@ -2,11 +2,11 @@
 
 @include mat.core();
 
-$my-primary: mat.define-palette(mat.$green-palette, 700);
-$my-accent: mat.define-palette(mat.$light-blue-palette, 700);
+$my-primary: mat.define-palette(mat.$green-palette, 700, 300, 900);
+$my-accent: mat.define-palette(mat.$light-blue-palette, 700, 200, 800);
 
 // The "warn" palette is optional and defaults to red if not specified.
-$my-warn: mat.define-palette(mat.$red-palette);
+$my-warn: mat.define-palette(mat.$red-palette, 600, 300, 800);
 
 $my-theme: mat.define-dark-theme((
  color: (
