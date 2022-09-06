@@ -106,8 +106,7 @@ export class AdminProductComponent implements OnInit {
 
   async onDelete() {
     try {
-      await this.productService.delete(this.id);
-      await this.shoppingCartService.removeProductFromAllCarts(this.id);
+      await this.productService.removeProductFromAllCarts(this.id);
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
       this.dialogs.error({ title: 'On Delete Communication Error', message: error });

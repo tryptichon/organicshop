@@ -1,13 +1,12 @@
-import { ShoppingCartProductService } from './shopping-cart-product.service';
 import { Injectable } from '@angular/core';
 import { Firestore, runTransaction, Transaction } from '@angular/fire/firestore';
 import { DbShoppingCart, DbShoppingCartProduct } from 'src/app/model/db-shopping-cart';
+import { ShoppingCartProductService } from './shopping-cart-product.service';
 
-import { AbstractCrudService } from './abstract-crud.service';
-import { firstValueFrom, ReplaySubject, Subscription, switchMap, take, of, tap } from 'rxjs';
-import { ShoppingCartProducts } from 'src/app/model/shopping-cart-products';
-import { DialogHandler } from 'src/app/app-components/dialogs/DialogHandler';
+import { firstValueFrom, ReplaySubject, Subscription, take } from 'rxjs';
 import { ShoppingCartProduct } from 'src/app/model/shopping-cart';
+import { ShoppingCartProducts } from 'src/app/model/shopping-cart-products';
+import { AbstractCrudService } from './abstract-crud.service';
 
 
 @Injectable({
@@ -31,8 +30,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   private shoppingCartProductsSubscription?: Subscription;
 
   constructor(
-    firestore: Firestore,
-    private dialogs: DialogHandler,
+    firestore: Firestore
   ) {
     super('shopping-carts', firestore);
     this.shoppingCartId = this.getDefaultShoppingCartId();
@@ -99,35 +97,33 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   async handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
     let shoppingCartRemoved = false;
 
-    let shoppingCartProducts = await firstValueFrom(this.shoppingCartProductService.getAll()
+    let shoppingCartProductIds = (await firstValueFrom(this.shoppingCartProductService.getAll()
       .pipe(
         take(1)
-      ));
+      )))
+      .map(product => product.id);
 
     await runTransaction(this.firestore, async (transaction) => {
 
-      if (shoppingCartProducts.length == 0) {
+      if (shoppingCartProductIds.length == 0) {
 
-        if (product.count > 0) {
+        if (product.count > 0)
           await this.newShoppingCart(transaction, productId, product);
-        } else {
-          return of();
-        }
 
       } else {
 
         if (product.count > 0) {
-          return this.updateShoppingCartProduct(transaction, productId, product);
+          this.updateShoppingCartProduct(transaction, productId, product);
         } else {
-          shoppingCartRemoved = this.removeProduct(transaction, shoppingCartProducts.map(product => product.id), productId, this.shoppingCartProductService, this.shoppingCartId);
+          shoppingCartRemoved = this.removeProduct(transaction, shoppingCartProductIds, productId, this.shoppingCartId);
         }
 
       }
-
     });
 
     if (shoppingCartRemoved)
       this.broadcastEmptyShoppingCart();
+
   }
 
   private createShoppingCart(): DbShoppingCart {
@@ -145,45 +141,27 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   }
 
   private async newShoppingCart(transaction: Transaction, productId: string, product: ShoppingCartProduct) {
-    try {
-      await this.getOrCreateT(transaction, this.createShoppingCart());
-      this.shoppingCartProductService.createT(transaction, this.createShoppingCartProduct(productId, product));
-    } catch (error) {
-      this.dialogs.error({ title: 'New Shopping Cart Communication Error', message: error });
-    }
+    await this.getOrCreateT(transaction, this.createShoppingCart());
+    this.shoppingCartProductService.createT(transaction, this.createShoppingCartProduct(productId, product));
   }
 
   private updateShoppingCart(transaction: Transaction, shoppingCart: DbShoppingCart) {
-    try {
-      this.updateT(transaction, shoppingCart);
-    } catch (error) {
-      this.dialogs.error({ title: 'Update Shopping Cart Communication Error', message: error });
-    }
+    this.updateT(transaction, shoppingCart);
   }
 
   private updateShoppingCartProduct(transaction: Transaction, productId: string, product: ShoppingCartProduct) {
-    try {
-      this.shoppingCartProductService.createT(transaction, this.createShoppingCartProduct(
-        productId,
-        product
-      ));
-
-    } catch (error) {
-      this.dialogs.error({ title: 'Update Shopping Cart Product Communication Error', message: error });
-    }
+    this.shoppingCartProductService.createT(transaction, this.createShoppingCartProduct(
+      productId,
+      product
+    ));
   }
 
-  private removeProduct(transaction: Transaction, productIds: string[], productId: string, shoppingCartProductService: ShoppingCartProductService, shoppingCartId: string): boolean {
-    try {
-      shoppingCartProductService.deleteT(transaction, productId);
+  removeProduct(transaction: Transaction, productIds: string[], productId: string, shoppingCartId: string): boolean {
+    (new ShoppingCartProductService(shoppingCartId, this.firestore)).deleteT(transaction, productId);
 
-      if ((productIds.filter(id => id != productId)).length === 0) {
-        this.deleteT(transaction, shoppingCartId);
-        return true;
-      }
-
-    } catch (error) {
-      this.dialogs.error({ title: 'Remove Product from Shopping Cart Communication Error', message: error });
+    if ((productIds.filter(id => id != productId)).length === 0) {
+      this.deleteT(transaction, shoppingCartId);
+      return true;
     }
 
     return false;
@@ -206,29 +184,29 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
     this.shoppingCart$.next(null);
   }
 
-  /**
-   * Remove a product from all shopping carts.
-   *
-   * @param productId The productId of the product to remove.
-   * @returns A promise that completes when the process has finished.
-   */
-  async removeProductFromAllCarts(productId: string) {
-    let shoppingCartIds = await this.getIds();
-    let products = await Promise.all(shoppingCartIds.map(async shoppingCartId => {
-      const service = new ShoppingCartProductService(shoppingCartId, this.firestore);
-      const productIds = (await firstValueFrom(service.getAll().pipe(take(1)))).map(product => product.id);
-      return {
-        shoppingCartId: shoppingCartId,
-        service: service,
-        productIds: productIds
-      };
-    }));
+  // /**
+  //  * Remove a product from all shopping carts.
+  //  *
+  //  * @param productId The productId of the product to remove.
+  //  * @returns A promise that completes when the process has finished.
+  //  */
+  // async removeProductFromAllCarts(productId: string) {
+  //   let shoppingCartIds = await this.getIds();
+  //   let products = await Promise.all(shoppingCartIds.map(async shoppingCartId => {
+  //     const service = new ShoppingCartProductService(shoppingCartId, this.firestore);
+  //     const productIds = (await firstValueFrom(service.getAll().pipe(take(1)))).map(product => product.id);
+  //     return {
+  //       shoppingCartId: shoppingCartId,
+  //       service: service,
+  //       productIds: productIds
+  //     };
+  //   }));
 
-    await runTransaction(this.firestore, async (transaction) => {
-      products.forEach(product => {
-        this.removeProduct(transaction, product.productIds, productId, product.service, product.shoppingCartId)
-      });
-    });
-  }
+  //   await runTransaction(this.firestore, async (transaction) => {
+  //     products.forEach(product => {
+  //       this.removeProduct(transaction, product.productIds, productId, product.service, product.shoppingCartId)
+  //     });
+  //   });
+  // }
 
 }
