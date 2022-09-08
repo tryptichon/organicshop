@@ -3,7 +3,7 @@ import { Firestore, runTransaction, Transaction } from '@angular/fire/firestore'
 import { DbShoppingCart, DbShoppingCartProduct } from 'src/app/model/db-shopping-cart';
 import { ShoppingCartProductService } from './shopping-cart-product.service';
 
-import { firstValueFrom, ReplaySubject, Subscription, take } from 'rxjs';
+import { firstValueFrom, map, Observable, ReplaySubject, Subscription, take } from 'rxjs';
 import { ShoppingCartProduct } from 'src/app/model/shopping-cart';
 import { ShoppingCartProducts } from 'src/app/model/shopping-cart-products';
 import { AbstractCrudService } from './abstract-crud.service';
@@ -21,45 +21,27 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
 
   /** Observable for changes to the shoppingCart. Replays the last
    *  emitted item on subscription. */
-  shoppingCart$ = new ReplaySubject<DbShoppingCart | null>(1);
+  shoppingCart$: Observable<DbShoppingCart | null>;
   /** Observable for changes to the shoppingCartProducts. Replays the last
   *  emitted item on subscription. */
-  shoppingCartProducts$ = new ReplaySubject<ShoppingCartProducts>(1);
+  shoppingCartProducts$: Observable<ShoppingCartProducts>;
 
   public shoppingCartProductService!: ShoppingCartProductService;
-
-  private shoppingCartSubscription?: Subscription;
-  private shoppingCartProductsSubscription?: Subscription;
 
   constructor(
     firestore: Firestore
   ) {
     super('shopping-carts', firestore);
+
     this.shoppingCartId = this.getDefaultShoppingCartId();
-    this.changeShoppingCart(this.shoppingCartId);
-  }
+    this.shoppingCartProductService = new ShoppingCartProductService(this.shoppingCartId, this.firestore);
 
-  changeShoppingCart(shoppingCartId: string) {
-    this.shoppingCartId = shoppingCartId;
-    this.shoppingCartProductService = new ShoppingCartProductService(shoppingCartId, this.firestore);
+    this.shoppingCartProducts$ = this.shoppingCartProductService.getAll()
+      .pipe(
+        map(shoppingCartProducts => new ShoppingCartProducts(shoppingCartProducts))
+      )
 
-    if (this.shoppingCartProductsSubscription)
-      this.shoppingCartProductsSubscription.unsubscribe();
-
-    this.shoppingCartProductsSubscription = this.shoppingCartProductService.getAll()
-      .subscribe(shoppingCartProducts => {
-        if (shoppingCartProducts)
-          this.shoppingCartProducts$.next(new ShoppingCartProducts(shoppingCartProducts));
-      });
-
-    if (this.shoppingCartSubscription)
-      this.shoppingCartSubscription.unsubscribe();
-
-    this.shoppingCartSubscription = this.get(shoppingCartId)
-      .subscribe(shoppingCart => {
-        if (shoppingCart)
-          this.shoppingCart$.next(shoppingCart);
-      });
+    this.shoppingCart$ = this.get(this.shoppingCartId);
   }
 
   /**
@@ -97,13 +79,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
    * @returns A promise that resolves when the process has finished.
    */
   async handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
-    let shoppingCartRemoved = false;
-
-    let shoppingCartProductIds = (await firstValueFrom(this.shoppingCartProductService.getAll()
-      .pipe(
-        take(1)
-      )))
-      .map(product => product.id);
+    let shoppingCartProductIds = await this.shoppingCartProductService.getIds();
 
     await runTransaction(this.firestore, async (transaction) => {
 
@@ -117,15 +93,11 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
         if (product.count > 0) {
           this.updateShoppingCartProduct(transaction, productId, product);
         } else {
-          shoppingCartRemoved = this.removeProduct(transaction, shoppingCartProductIds, productId, this.shoppingCartId);
+          this.removeProduct(transaction, shoppingCartProductIds, productId, this.shoppingCartId);
         }
 
       }
     });
-
-    if (shoppingCartRemoved)
-      this.broadcastEmptyShoppingCart();
-
   }
 
   private createShoppingCart(): DbShoppingCart {
@@ -173,17 +145,11 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
     let ids = await this.shoppingCartProductService.getIds();
 
     await runTransaction(this.firestore, async (transaction) => this.deleteShoppingCartT(transaction, ids));
-
-    this.broadcastEmptyShoppingCart();
   }
 
   async deleteShoppingCartT(transaction: Transaction, ids: string[]) {
     this.shoppingCartProductService.deleteAllT(transaction, ids);
     this.deleteT(transaction, this.shoppingCartId);
-  }
-
-  broadcastEmptyShoppingCart() {
-    this.shoppingCart$.next(null);
   }
 
   /**
@@ -196,9 +162,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
     const shoppingCartIds = await this.getIds();
     return await Promise.all(shoppingCartIds.map(async shoppingCartId => {
 
-      const productIds = (await firstValueFrom(
-        (new ShoppingCartProductService(shoppingCartId, this.firestore)).getAll().pipe(take(1))
-      )).map(product => product.id);
+      const productIds = await new ShoppingCartProductService(shoppingCartId, this.firestore).getIds();
 
       return {
         shoppingCartId: shoppingCartId,

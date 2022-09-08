@@ -1,6 +1,6 @@
 import { DialogHandler } from './../dialogs/DialogHandler';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, take, tap } from 'rxjs';
 import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 
 

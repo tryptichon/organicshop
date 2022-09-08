@@ -18,3 +18,12 @@ export interface ShoppingCartProduct {
   count: number
 }
 
+export class ShoppingCartIds implements DbEntry {
+
+  constructor(
+    public id: string,
+    public productIds: string[]
+  ) { }
+
+}
+

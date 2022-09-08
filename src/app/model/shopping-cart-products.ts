@@ -28,4 +28,8 @@ export class ShoppingCartProducts {
     return this.productMap.get(productId)?.count || 0;
   }
 
+  getProductIds(): string[] {
+    return Array.from(this.productMap.keys());
+  }
+
 }

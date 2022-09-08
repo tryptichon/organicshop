@@ -22,6 +22,8 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   totalPrice: number = 0;
   totalQuantity: number = 0;
 
+  productTotals = new Map<string, number>();
+
   dateCreated: number | null = null;
 
   displayedColumns: string[] = ['image', 'name', 'category', 'price', 'count', 'total'];
@@ -55,8 +57,11 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
-          if (product)
-            productArray.push(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
+          if (product) {
+            let resolved = new ResolvedShoppingCartProduct(shoppingCartProduct.count, product);
+            this.productTotals.set(id, resolved.totalPrice);
+            productArray.push(resolved);
+          }
         });
 
         let resolved = new ResolvedShoppingCartProducts(productArray);
@@ -64,8 +69,14 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
         this.totalPrice = resolved.totalPrice;
         this.totalQuantity = resolved.totalQuantity;
 
-        this.dataSource.data = [...resolved.productArray];
-        this.table.renderRows();
+        // Only redraw the table when the amount of products within change
+        // to reduce flickering. Since parts of the table change nevertheless,
+        // this data is in its own fields (productTotals, totalCount,
+        // totalPrice)
+        if (this.dataSource.data.length != resolved.productArray.length) {
+          this.dataSource.data = [...resolved.productArray];
+          this.table.renderRows();
+        }
       });
 
   }

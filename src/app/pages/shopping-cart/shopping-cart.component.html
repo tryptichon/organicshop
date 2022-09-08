@@ -81,7 +81,7 @@
         Total
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="content-right">
-        {{ row.totalPrice | currency }}
+        {{ productTotals.get(row.id) | currency }}
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="content-right">
         {{ totalPrice | currency }}

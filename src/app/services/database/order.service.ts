@@ -23,7 +23,5 @@ export class OrderService extends AbstractCrudService<DbOrder> {
       this.createT(transaction, order);
       this.shoppingCartService.deleteShoppingCartT(transaction, ids);
     });
-
-    this.shoppingCartService.broadcastEmptyShoppingCart();
   }
 }
