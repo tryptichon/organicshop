@@ -1,5 +1,12 @@
 <ul *ngIf="order">
   <li>Order Id: {{ order.id }}</li>
+  <li>Shipping:</li>
+  <ul>
+    <li>{{ order.shipping.name }}</li>
+    <li>{{ order.shipping.address }}</li>
+    <li>{{ order.shipping.zipCode }} {{ order.shipping.city }}</li>
+    <li>{{ order.shipping.state }}</li>
+  </ul>
   <li>Date ordered: {{ order.dateOrdered | date: "medium" }}</li>
   <li>Total Price: {{ order.totalPrice | currency }}</li>
 </ul>

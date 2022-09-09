@@ -25,25 +25,40 @@ export class ResolvedShoppingCartProduct implements DbProduct {
 }
 
 /**
- * Simple wrapper class to provide a method to
- * calculate the total price across all products.
+ * Simple wrapper class to provide methods for
+ * calculations across all products.
  */
 export class ResolvedShoppingCartProducts {
 
-  productArray: ResolvedShoppingCartProduct[];
+  private products = new Map<string, ResolvedShoppingCartProduct>();
 
-  constructor(
-    resolvedhoppingCartProducts: ResolvedShoppingCartProduct[]
-  ) {
-    this.productArray = resolvedhoppingCartProducts;
+  put(product: ResolvedShoppingCartProduct) {
+    this.products.set(product.id, product);
+  }
+
+  get productArray() {
+    return Array.from(this.products.values());
   }
 
   get totalPrice(): number {
-    return this.productArray.reduce((prev, current) => prev += current.totalPrice, 0);
+    let result = 0;
+    this.products.forEach(item => result += item.totalPrice);
+    return result;
   }
 
   get totalQuantity(): number {
-    return this.productArray.reduce((prev, current) => prev += current.count, 0);
+    let result = 0;
+    this.products.forEach(item => result += item.count);
+    return result;
   }
+
+  getProductTotalPrice(productId: string) {
+    return this.products.get(productId)?.totalPrice;
+  }
+
+  get size() {
+    return this.products.size;
+  }
+
 }
 

@@ -37,10 +37,15 @@ export class CheckOutComponent implements AfterViewInit {
   displayedColumns: string[] = ['items', 'total'];
   dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
 
-  totalPrice: number = 0;
-  totalCount: number = 0;
-
   shoppingCartProducts?: ResolvedShoppingCartProducts;
+
+  get totalPrice() {
+    return this.shoppingCartProducts?.totalPrice;
+  };
+
+  get totalCount() {
+    return this.shoppingCartProducts?.totalQuantity;
+  }
 
   @ViewChild(MatTable) table!: MatTable<DbProduct>;
 
@@ -60,18 +65,13 @@ export class CheckOutComponent implements AfterViewInit {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        let productArray: ResolvedShoppingCartProduct[] = [];
+        this.shoppingCartProducts = new ResolvedShoppingCartProducts();
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
           if (product)
-            productArray.push(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
+            this.shoppingCartProducts?.put(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
         });
-
-        this.shoppingCartProducts = new ResolvedShoppingCartProducts(productArray);
-
-        this.totalPrice = this.shoppingCartProducts.totalPrice;
-        this.totalCount = this.shoppingCartProducts.totalQuantity;
 
         this.dataSource.data = [...this.shoppingCartProducts.productArray];
         this.table.renderRows();

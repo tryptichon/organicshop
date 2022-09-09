@@ -81,7 +81,7 @@
         Total
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="content-right">
-        {{ productTotals.get(row.id) | currency }}
+        {{ getProductTotalPrice(row.id) | currency }}
       </mat-cell>
       <mat-footer-cell *matFooterCellDef class="content-right">
         {{ totalPrice | currency }}
@@ -112,6 +112,7 @@
       mat-flat-button
       color="primary"
       type="button"
+      [disabled]="totalQuantity === 0"
       [routerLink]="['/login', {returnUrl: '/my/check-out'}]"
     >
       <mat-icon>login</mat-icon> Login / Check Out

@@ -3,7 +3,6 @@ import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of, take } from 'rxjs';
-import { NoId } from 'src/app/services/database/abstract-crud.service';
 import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 

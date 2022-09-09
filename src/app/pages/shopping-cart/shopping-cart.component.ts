@@ -17,12 +17,7 @@ import { LoginService } from './../../services/auth/login.service';
 })
 export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
-  /** Be aware, that this number contains rounding errors, so do NOT use this directly without
-   * conversion to the precision you need! */
-  totalPrice: number = 0;
-  totalQuantity: number = 0;
-
-  productTotals = new Map<string, number>();
+  tableData?: ResolvedShoppingCartProducts;
 
   dateCreated: number | null = null;
 
@@ -53,28 +48,18 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        let productArray: ResolvedShoppingCartProduct[] = [];
+        this.tableData = new ResolvedShoppingCartProducts();
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
-          if (product) {
-            let resolved = new ResolvedShoppingCartProduct(shoppingCartProduct.count, product);
-            this.productTotals.set(id, resolved.totalPrice);
-            productArray.push(resolved);
-          }
+          if (product)
+            this.tableData?.put(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
         });
 
-        let resolved = new ResolvedShoppingCartProducts(productArray);
-
-        this.totalPrice = resolved.totalPrice;
-        this.totalQuantity = resolved.totalQuantity;
-
         // Only redraw the table when the amount of products within change
-        // to reduce flickering. Since parts of the table change nevertheless,
-        // this data is in its own fields (productTotals, totalCount,
-        // totalPrice)
-        if (this.dataSource.data.length != resolved.productArray.length) {
-          this.dataSource.data = [...resolved.productArray];
+        // to reduce flickering.
+        if (this.dataSource.data.length != this.tableData.size) {
+          this.dataSource.data = [...this.tableData.productArray];
           this.table.renderRows();
         }
       });
@@ -84,6 +69,18 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.shoppingCartSubscription)
       this.shoppingCartSubscription.unsubscribe();
+  }
+
+  get totalPrice() {
+    return this.tableData?.totalPrice;
+  }
+
+  get totalQuantity() {
+    return this.tableData?.totalQuantity;
+  }
+
+  getProductTotalPrice(productId: string) {
+    return this.tableData?.getProductTotalPrice(productId);
   }
 
   get shoppingCart$() {
