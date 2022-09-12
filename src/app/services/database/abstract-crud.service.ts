@@ -71,7 +71,7 @@ export abstract class AbstractCrudService<T extends DbEntry> {
   /**
    * @returns A new unique Id for a database entry.
    */
-  getUniqueId() {
+  public static getUniqueId() {
     return uuid();
   }
 

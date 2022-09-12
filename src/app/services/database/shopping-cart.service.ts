@@ -3,10 +3,9 @@ import { Firestore, runTransaction, Transaction } from '@angular/fire/firestore'
 import { DbShoppingCart, DbShoppingCartProduct } from 'src/app/model/db-shopping-cart';
 import { ShoppingCartProductService } from './shopping-cart-product.service';
 
-import { firstValueFrom, map, Observable, ReplaySubject, Subscription, take } from 'rxjs';
-import { ShoppingCartProduct } from 'src/app/model/shopping-cart';
-import { ShoppingCartProducts } from 'src/app/model/shopping-cart-products';
+import { map, Observable } from 'rxjs';
 import { AbstractCrudService } from './abstract-crud.service';
+import { ShoppingCartProducts } from 'src/app/model/resolved-shopping-cart-products';
 
 /** Contains the shoppingCartId and the ids of all contained products. */
 export type ShoppingCartIdsType = { shoppingCartId: string, productIds: string[] };
@@ -19,12 +18,11 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   /** The current shoppingCartId */
   shoppingCartId: string;
 
-  /** Observable for changes to the shoppingCart. Replays the last
-   *  emitted item on subscription. */
+  /** Observable for changes to the shoppingCart. */
   shoppingCart$: Observable<DbShoppingCart | null>;
   /** Observable for changes to the shoppingCartProducts. Replays the last
   *  emitted item on subscription. */
-  shoppingCartProducts$: Observable<ShoppingCartProducts>;
+  public shoppingCartProducts$: Observable<ShoppingCartProducts>;
 
   public shoppingCartProductService!: ShoppingCartProductService;
 
@@ -60,7 +58,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   }
 
   nextShoppingCartId(): string {
-    let shoppingCartId = super.getUniqueId();
+    let shoppingCartId = AbstractCrudService.getUniqueId();
     localStorage.setItem('shoppingCartId', shoppingCartId);
     return shoppingCartId;
   }
@@ -74,11 +72,10 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
    *
    * Shopping cart has no products at all anymore? delete this shopping cart from the array of shopping carts.
    *
-   * @param productId The id of the product.
    * @param product The shoppingCartProduct-data itself. Contains the current count.
    * @returns A promise that resolves when the process has finished.
    */
-  async handleShoppingCartProduct(productId: string, product: ShoppingCartProduct) {
+  async handleShoppingCartProduct(product: DbShoppingCartProduct) {
     let shoppingCartProductIds = await this.shoppingCartProductService.getIds();
 
     await runTransaction(this.firestore, async (transaction) => {
@@ -86,14 +83,14 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
       if (shoppingCartProductIds.length == 0) {
 
         if (product.count > 0)
-          await this.newShoppingCart(transaction, productId, product);
+          await this.newShoppingCart(transaction, product);
 
       } else {
 
         if (product.count > 0) {
-          this.updateShoppingCartProduct(transaction, productId, product);
+          this.updateShoppingCartProduct(transaction, product);
         } else {
-          this.removeProduct(transaction, shoppingCartProductIds, productId, this.shoppingCartId);
+          this.removeProduct(transaction, shoppingCartProductIds, product.id, this.shoppingCartId);
         }
 
       }
@@ -107,27 +104,17 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
     };
   }
 
-  private createShoppingCartProduct(productId: string, product: ShoppingCartProduct): DbShoppingCartProduct {
-    return {
-      id: productId,
-      ...product
-    };
-  }
-
-  private async newShoppingCart(transaction: Transaction, productId: string, product: ShoppingCartProduct) {
+  private async newShoppingCart(transaction: Transaction, product: DbShoppingCartProduct) {
     await this.getOrCreateT(transaction, this.createShoppingCart());
-    this.shoppingCartProductService.createT(transaction, this.createShoppingCartProduct(productId, product));
+    this.shoppingCartProductService.createT(transaction, product);
   }
 
   private updateShoppingCart(transaction: Transaction, shoppingCart: DbShoppingCart) {
     this.updateT(transaction, shoppingCart);
   }
 
-  private updateShoppingCartProduct(transaction: Transaction, productId: string, product: ShoppingCartProduct) {
-    this.shoppingCartProductService.createT(transaction, this.createShoppingCartProduct(
-      productId,
-      product
-    ));
+  private updateShoppingCartProduct(transaction: Transaction, product: DbShoppingCartProduct) {
+    this.shoppingCartProductService.createT(transaction, product);
   }
 
   private removeProduct(transaction: Transaction, productIds: string[], productId: string, shoppingCartId: string): boolean {

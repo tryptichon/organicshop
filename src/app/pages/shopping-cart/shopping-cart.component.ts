@@ -2,7 +2,7 @@ import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { combineLatest, Subscription } from 'rxjs';
-import { ResolvedShoppingCartProduct, ResolvedShoppingCartProducts } from 'src/app/model/resolved-shopping-cart-products';
+import { ResolvedShoppingCartProduct, ResolvedShoppingCart } from 'src/app/model/resolved-shopping-cart-products';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
@@ -17,7 +17,7 @@ import { LoginService } from './../../services/auth/login.service';
 })
 export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
-  tableData?: ResolvedShoppingCartProducts;
+  tableData?: ResolvedShoppingCart;
 
   dateCreated: number | null = null;
 
@@ -48,7 +48,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        this.tableData = new ResolvedShoppingCartProducts();
+        this.tableData = new ResolvedShoppingCart();
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
@@ -58,8 +58,8 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
         // Only redraw the table when the amount of products within change
         // to reduce flickering.
-        if (this.dataSource.data.length != this.tableData.size) {
-          this.dataSource.data = [...this.tableData.productArray];
+        if (this.dataSource.data.length != this.tableData.disctinctProducts) {
+          this.dataSource.data = [...this.tableData.productArray as ResolvedShoppingCartProduct[]];
           this.table.renderRows();
         }
       });

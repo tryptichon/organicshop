@@ -122,7 +122,7 @@ export class AdminProductComponent implements OnInit {
       throw new Error("Data is missing");
 
     if (this.isNew())
-      this.id = this.productService.getUniqueId();
+      this.id = ProductService.getUniqueId();
 
     let newProduct: DbProduct = {
       id: this.id,

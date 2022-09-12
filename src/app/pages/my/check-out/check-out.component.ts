@@ -1,17 +1,16 @@
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
+import { combineLatest, Subscription } from 'rxjs';
+import { DbProduct } from 'src/app/model/db-product';
+import { Order } from 'src/app/model/order';
+import { ResolvedShoppingCart, ResolvedShoppingCartProduct } from 'src/app/model/resolved-shopping-cart-products';
+import { ProductService } from 'src/app/services/database/product.service';
+import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 import { Shipping } from './../../../model/order';
 import { LoginService } from './../../../services/auth/login.service';
 import { OrderService } from './../../../services/database/order.service';
-import { DbShipping, DbOrderProduct, DbOrder } from './../../../model/db-order';
-import { ProductService } from 'src/app/services/database/product.service';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { combineLatest, Subscription } from 'rxjs';
-import { ResolvedShoppingCartProduct, ResolvedShoppingCartProducts } from 'src/app/model/resolved-shopping-cart-products';
-import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { DbProduct } from 'src/app/model/db-product';
-import { Router } from '@angular/router';
-import { Order } from 'src/app/model/order';
-import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 
 @Component({
   selector: 'app-check-out',
@@ -37,14 +36,14 @@ export class CheckOutComponent implements AfterViewInit {
   displayedColumns: string[] = ['items', 'total'];
   dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
 
-  shoppingCartProducts?: ResolvedShoppingCartProducts;
+  shoppingCart?: ResolvedShoppingCart;
 
   get totalPrice() {
-    return this.shoppingCartProducts?.totalPrice;
+    return this.shoppingCart?.totalPrice;
   };
 
   get totalCount() {
-    return this.shoppingCartProducts?.totalQuantity;
+    return this.shoppingCart?.totalQuantity;
   }
 
   @ViewChild(MatTable) table!: MatTable<DbProduct>;
@@ -65,15 +64,15 @@ export class CheckOutComponent implements AfterViewInit {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        this.shoppingCartProducts = new ResolvedShoppingCartProducts();
+        this.shoppingCart = new ResolvedShoppingCart();
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
           if (product)
-            this.shoppingCartProducts?.put(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
+            this.shoppingCart?.put(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
         });
 
-        this.dataSource.data = [...this.shoppingCartProducts.productArray];
+        this.dataSource.data = [...this.shoppingCart.productArray as ResolvedShoppingCartProduct[]];
         this.table.renderRows();
       });
   }
@@ -83,7 +82,7 @@ export class CheckOutComponent implements AfterViewInit {
   }
 
   async onOrder() {
-    if (!this.shoppingCartProducts)
+    if (!this.shoppingCart)
       return;
 
     let formData = this.form.value;
@@ -93,11 +92,11 @@ export class CheckOutComponent implements AfterViewInit {
       throw Error("No logged in user");
 
     let order = new Order(
-      this.orderService.getUniqueId(),
+      OrderService.getUniqueId(),
       userId,
       this.shoppingCartService.shoppingCartId,
       new Shipping(formData),
-      this.shoppingCartProducts
+      this.shoppingCart
     );
 
     await this.orderService.createOrderAndClearShoppingCart(order);

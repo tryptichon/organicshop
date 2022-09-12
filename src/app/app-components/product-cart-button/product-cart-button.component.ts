@@ -29,7 +29,7 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.productCountSubscription = this.shoppingCartService.shoppingCartProducts$
       .subscribe(products => {
-        this.productCount = products.getShoppingCartProductQuantity(this.productId);
+        this.productCount = products.getProductTotalSize(this.productId) || 0;
       });
   }
 
@@ -51,7 +51,7 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
       return;
 
     try {
-      await this.shoppingCartService.handleShoppingCartProduct(this.productId, { count: productCount });
+      await this.shoppingCartService.handleShoppingCartProduct({ id: this.productId, count: productCount });
       this.productCount = productCount;
     } catch (error) {
       this.dialogs.error({ title: 'Shopping Cart Communication Error', message: error });

@@ -1,14 +1,17 @@
 import { DbEntry } from "./db-entry";
-import { ShoppingCartData, ShoppingCartProduct } from "./shopping-cart";
 
 /**
  * Database model for a shopping cart entry.
  */
- export interface DbShoppingCart extends ShoppingCartData, DbEntry {
+export interface DbShoppingCart extends DbEntry {
+  /** This is UTC in ms. */
+  dateCreated: number | null,
 }
 
 /**
  * Database model for products within a shopping cart.
  */
-export interface DbShoppingCartProduct extends ShoppingCartProduct, DbEntry {
+export interface DbShoppingCartProduct extends DbEntry {
+  count: number
 }
+
