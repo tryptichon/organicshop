@@ -1,5 +1,5 @@
+import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DbOrder } from 'src/app/model/db-order';
 import { OrderService } from 'src/app/services/database/order.service';
 

@@ -1,12 +1,11 @@
-import { OrderService } from './../../../services/database/order.service';
 import { Injectable } from '@angular/core';
 import {
-  Router, Resolve,
-  RouterStateSnapshot,
-  ActivatedRouteSnapshot
+  ActivatedRouteSnapshot, Resolve,
+  RouterStateSnapshot
 } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { DbOrder } from 'src/app/model/db-order';
+import { OrderService } from './../../../services/database/order.service';
 
 @Injectable({
   providedIn: 'root'

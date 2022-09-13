@@ -1,8 +1,7 @@
-import { ActivatedRoute } from '@angular/router';
-import { OrderService } from './../../../services/database/order.service';
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { DbOrder } from 'src/app/model/db-order';
-import { Observable, Subject, take, tap } from 'rxjs';
+import { OrderService } from './../../../services/database/order.service';
 
 @Component({
   selector: 'app-order-success',

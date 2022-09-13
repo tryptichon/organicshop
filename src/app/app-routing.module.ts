@@ -1,4 +1,3 @@
-import { OrderSuccessResolver } from './pages/my/order-success/order-success.resolver';
 import { NgModule } from '@angular/core';
 import { AuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 import { ActivatedRouteSnapshot, RouterModule, RouterStateSnapshot, Routes } from '@angular/router';
@@ -10,8 +9,9 @@ import { PagenotfoundComponent } from './pages/errors/pagenotfound/pagenotfound.
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { CheckOutComponent } from './pages/my/check-out/check-out.component';
-import { UserOrdersComponent } from './pages/my/user-orders/user-orders.component';
 import { OrderSuccessComponent } from './pages/my/order-success/order-success.component';
+import { OrderSuccessResolver } from './pages/my/order-success/order-success.resolver';
+import { UserOrdersComponent } from './pages/my/user-orders/user-orders.component';
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
 import { AdminAuthGuard } from './services/routing/admin-auth-guard.service';

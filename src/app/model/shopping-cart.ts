@@ -1,5 +1,4 @@
 import { DbShoppingCart, DbShoppingCartProduct } from 'src/app/model/db-shopping-cart';
-import { ShoppingCartService } from '../services/database/shopping-cart.service';
 import { DbProduct } from "./db-product";
 
 /**

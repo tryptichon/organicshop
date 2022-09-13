@@ -7,18 +7,12 @@ import {
   docData,
   DocumentData,
   DocumentReference,
-  Firestore,
-  query,
-  setDoc,
-  updateDoc,
+  Firestore, getDocs, query, runTransaction, setDoc, Transaction, updateDoc,
   where,
-  WhereFilterOp,
-  getDocs,
-  runTransaction,
-  Transaction
+  WhereFilterOp
 } from '@angular/fire/firestore';
 import { uuidv4 as uuid } from "@firebase/util";
-import { firstValueFrom, from, map, Observable, of, switchMap, take } from 'rxjs';
+import { firstValueFrom, from, Observable, take } from 'rxjs';
 
 import { DbEntry } from './../../model/db-entry';
 
