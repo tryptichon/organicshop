@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { combineLatest, Subscription } from 'rxjs';
 import { DbProduct } from 'src/app/model/db-product';
 import { Order } from 'src/app/model/order';
-import { ResolvedShoppingCart, ResolvedShoppingCartProduct } from 'src/app/model/resolved-shopping-cart-products';
+import { ShoppingCart, ShoppingCartProduct } from 'src/app/model/shopping-cart';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 import { Shipping } from './../../../model/order';
@@ -34,9 +34,9 @@ export class CheckOutComponent implements AfterViewInit {
   });
 
   displayedColumns: string[] = ['items', 'total'];
-  dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
+  dataSource = new MatTableDataSource<ShoppingCartProduct>;
 
-  shoppingCart?: ResolvedShoppingCart;
+  shoppingCart?: ShoppingCart;
 
   get totalPrice() {
     return this.shoppingCart?.totalPrice;
@@ -64,15 +64,15 @@ export class CheckOutComponent implements AfterViewInit {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        this.shoppingCart = new ResolvedShoppingCart();
+        this.shoppingCart = new ShoppingCart();
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
           if (product)
-            this.shoppingCart?.put(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
+            this.shoppingCart?.put(new ShoppingCartProduct(shoppingCartProduct, product));
         });
 
-        this.dataSource.data = [...this.shoppingCart.productArray as ResolvedShoppingCartProduct[]];
+        this.dataSource.data = [...this.shoppingCart.productArray as ShoppingCartProduct[]];
         this.table.renderRows();
       });
   }

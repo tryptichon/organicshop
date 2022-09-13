@@ -29,7 +29,7 @@ export class ProductCartButtonComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.productCountSubscription = this.shoppingCartService.shoppingCartProducts$
       .subscribe(products => {
-        this.productCount = products.getProductTotalSize(this.productId) || 0;
+        this.productCount = products.getProductQuantity(this.productId) || 0;
       });
   }
 

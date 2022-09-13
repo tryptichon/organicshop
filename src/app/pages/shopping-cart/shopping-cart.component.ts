@@ -2,7 +2,7 @@ import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { combineLatest, Subscription } from 'rxjs';
-import { ResolvedShoppingCartProduct, ResolvedShoppingCart } from 'src/app/model/resolved-shopping-cart-products';
+import { ShoppingCartProduct, ShoppingCart } from 'src/app/model/shopping-cart';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
@@ -17,12 +17,12 @@ import { LoginService } from './../../services/auth/login.service';
 })
 export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
 
-  tableData?: ResolvedShoppingCart;
+  tableData?: ShoppingCart;
 
   dateCreated: number | null = null;
 
   displayedColumns: string[] = ['image', 'name', 'category', 'price', 'count', 'total'];
-  dataSource = new MatTableDataSource<ResolvedShoppingCartProduct>;
+  dataSource = new MatTableDataSource<ShoppingCartProduct>;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<DbProduct>;
@@ -48,18 +48,18 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        this.tableData = new ResolvedShoppingCart();
+        this.tableData = new ShoppingCart();
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
           if (product)
-            this.tableData?.put(new ResolvedShoppingCartProduct(shoppingCartProduct.count, product));
+            this.tableData?.put(new ShoppingCartProduct(shoppingCartProduct, product));
         });
 
         // Only redraw the table when the amount of products within change
         // to reduce flickering.
         if (this.dataSource.data.length != this.tableData.disctinctProducts) {
-          this.dataSource.data = [...this.tableData.productArray as ResolvedShoppingCartProduct[]];
+          this.dataSource.data = [...this.tableData.productArray as ShoppingCartProduct[]];
           this.table.renderRows();
         }
       });

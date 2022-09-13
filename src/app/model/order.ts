@@ -1,5 +1,5 @@
 import { DbOrder, DbOrderProduct, DbShipping as DbShipping } from "./db-order";
-import { ResolvedShoppingCart } from "./resolved-shopping-cart-products";
+import { ShoppingCart } from "./shopping-cart";
 
 export class Shipping implements DbShipping {
   name: string = '';
@@ -37,7 +37,7 @@ export class Order implements DbOrder {
     public userId: string,
     public shoppingCartId: string,
     shipping: Shipping,
-    shoppingCartProducts: ResolvedShoppingCart
+    shoppingCartProducts: ShoppingCart
   ) {
     this.dateOrdered = new Date().getTime();
     this.totalPrice = shoppingCartProducts.totalPrice;
