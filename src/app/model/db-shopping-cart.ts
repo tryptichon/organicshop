@@ -3,9 +3,15 @@ import { DbEntry } from "./db-entry";
 /**
  * Database model for a shopping cart entry.
  */
-export interface DbShoppingCart extends DbEntry {
-  /** This is UTC in ms. */
-  dateCreated: number | null,
+export class DbShoppingCart implements DbEntry {
+  public dateCreated: number;
+
+  constructor(
+    public id: string,
+  ) {
+    /** This is UTC in ms. */
+    this.dateCreated = new Date().getTime();
+  }
 }
 
 /**

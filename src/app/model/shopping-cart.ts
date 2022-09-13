@@ -79,13 +79,15 @@ export class ShoppingCartProducts<T extends DbShoppingCartProduct> {
  * Fully resolved shopping cart containing all relevant data.
  */
 export class ShoppingCart extends ShoppingCartProducts<ShoppingCartProduct> implements DbShoppingCart {
-  public dateCreated: number | null;
-  public id: string;
+  public dateCreated!: number;
+  public id!: string;
 
-  constructor(products?: ShoppingCartProduct[]) {
+  constructor(
+    id: string,
+    products?: ShoppingCartProduct[]
+  ) {
     super(products);
-    this.id = ShoppingCartService.getUniqueId();
-    this.dateCreated = new Date().getTime();
+    Object.assign(this, new DbShoppingCart(id));
   }
 
   get totalPrice(): number {

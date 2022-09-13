@@ -1,7 +1,7 @@
-<h1 *ngIf="id == 'new'; else editProduct">New Product</h1>
+<h1 *ngIf="idControl.value === 'new'; else editProduct">New Product</h1>
 <ng-template #editProduct>
   <h1 class="mat-headline">Edit Product</h1>
-  <p class="mat-small">Product ID: {{ id }}</p>
+  <p class="mat-small">Product ID: {{ idControl.value }}</p>
 </ng-template>
 <form [formGroup]="form" class="product-form" (ngSubmit)="onSubmit()">
   <div

@@ -3,10 +3,9 @@ import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of, take } from 'rxjs';
-import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 
-import { DbProduct } from './../../../model/db-product';
+import { Product } from './../../../model/db-product';
 import { CategoryService } from './../../../services/database/category.service';
 import { ProductService } from './../../../services/database/product.service';
 
@@ -17,15 +16,14 @@ import { ProductService } from './../../../services/database/product.service';
 })
 export class AdminProductComponent implements OnInit {
 
-  id: string = 'new';
-
+  idControl = new FormControl<string | null>('new');
   nameControl = new FormControl<string | null>(null, [Validators.required]);
   priceControl = new FormControl<number | null>(null, [Validators.required, Validators.min(0)]);
   categoryControl = new FormControl<string | null>(null, [Validators.required]);
   imageControl = new FormControl<string | null>(null, [Validators.pattern('^[a-zA-Z0-9+\\.-]+://\\S*')]);
 
   form = new FormGroup({
-    id: new FormControl(),
+    id: this.idControl,
     name: this.nameControl,
     price: this.priceControl,
     category: this.categoryControl,
@@ -35,7 +33,6 @@ export class AdminProductComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private productService: ProductService,
-    private shoppingCartService: ShoppingCartService,
     private route: ActivatedRoute,
     private router: Router,
     private dialogs: DialogHandler,
@@ -48,7 +45,7 @@ export class AdminProductComponent implements OnInit {
     if (!id || id === 'new')
       return;
 
-    this.id = id;
+    this.idControl.setValue(id);
 
     // Only take the product to edit from the database
     // once, therefore ignoring all further updates
@@ -78,7 +75,7 @@ export class AdminProductComponent implements OnInit {
   }
 
   isNew(): boolean {
-    return (this.id === 'new');
+    return (this.idControl.value === 'new');
   }
 
   onConfirmDelete() {
@@ -96,7 +93,7 @@ export class AdminProductComponent implements OnInit {
 
   async onSubmit() {
     try {
-      await this.productService.create(this.formDataToProduct());
+      await this.productService.create(new Product(this.form.value));
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
       this.dialogs.error({ title: 'On Submit Communication Error', message: error });
@@ -105,34 +102,14 @@ export class AdminProductComponent implements OnInit {
 
   async onDelete() {
     try {
-      await this.productService.removeProductFromAllCarts(this.id);
+      if (!this.idControl.value)
+        return;
+
+      await this.productService.removeProductFromAllCarts(this.idControl.value);
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
       this.dialogs.error({ title: 'On Delete Communication Error', message: error });
     }
-  }
-
-  /**
-   * @returns DbProduct created from form data.
-   */
-  public formDataToProduct(): DbProduct {
-    let formData = this.form.value;
-
-    if (!formData.name || formData.price == undefined || !formData.category || !formData.imageUrl)
-      throw new Error("Data is missing");
-
-    if (this.isNew())
-      this.id = ProductService.getUniqueId();
-
-    let newProduct: DbProduct = {
-      id: this.id,
-      name: formData.name,
-      price: formData.price,
-      category: formData.category,
-      imageUrl: formData.imageUrl
-    }
-
-    return newProduct;
   }
 
 }

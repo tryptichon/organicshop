@@ -48,7 +48,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        this.tableData = new ShoppingCart();
+        this.tableData = new ShoppingCart(ShoppingCartService.getUniqueId());
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);

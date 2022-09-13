@@ -64,7 +64,7 @@ export class CheckOutComponent implements AfterViewInit {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        this.shoppingCart = new ShoppingCart();
+        this.shoppingCart = new ShoppingCart(ShoppingCartService.getUniqueId());
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);

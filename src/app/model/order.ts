@@ -2,11 +2,11 @@ import { DbOrder, DbOrderProduct, DbShipping as DbShipping } from "./db-order";
 import { ShoppingCart } from "./shopping-cart";
 
 export class Shipping implements DbShipping {
-  name: string = '';
-  address: string = '';
-  zipCode: string = '';
-  city: string = '';
-  state: string = '';
+  name!: string;
+  address!: string;
+  zipCode!: string;
+  city!: string;
+  state!: string;
 
   constructor(formData: Partial<{
     name: string | null,
@@ -17,8 +17,8 @@ export class Shipping implements DbShipping {
   }>
   ) {
     Object.entries(formData).forEach((key, value) => {
-      if (value === null)
-        throw Error('Key ' + key + ' must not be null');
+      if (value === null || value === undefined)
+        throw Error('Key ' + key + ' must not be null or undefined');
     });
 
     Object.assign(this, formData);

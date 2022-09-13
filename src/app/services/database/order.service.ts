@@ -17,7 +17,7 @@ export class OrderService extends AbstractCrudService<DbOrder> {
   }
 
   async createOrderAndClearShoppingCart(order: DbOrder) {
-    let ids = await this.shoppingCartService.shoppingCartProductService.getIds();
+    const ids = await this.shoppingCartService.shoppingCartProductService.getIds();
 
     await runTransaction(this.firestore, async (transaction) => {
       this.createT(transaction, order);

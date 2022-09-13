@@ -97,15 +97,8 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
     });
   }
 
-  private createShoppingCart(): DbShoppingCart {
-    return {
-      id: this.shoppingCartId,
-      dateCreated: new Date().getTime(),
-    };
-  }
-
   private async newShoppingCart(transaction: Transaction, product: DbShoppingCartProduct) {
-    await this.getOrCreateT(transaction, this.createShoppingCart());
+    await this.getOrCreateT(transaction, new DbShoppingCart(this.shoppingCartId));
     this.shoppingCartProductService.createT(transaction, product);
   }
 
@@ -129,7 +122,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   }
 
   async deleteShoppingCart() {
-    let ids = await this.shoppingCartProductService.getIds();
+    const ids = await this.shoppingCartProductService.getIds();
 
     await runTransaction(this.firestore, async (transaction) => this.deleteShoppingCartT(transaction, ids));
   }
