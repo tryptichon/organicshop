@@ -2,7 +2,7 @@ import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { combineLatest, Subscription } from 'rxjs';
-import { ShoppingCartProduct, ShoppingCart } from 'src/app/model/shopping-cart';
+import { ShoppingCart, ShoppingCartProduct } from 'src/app/model/shopping-cart';
 import { CategoryService } from 'src/app/services/database/category.service';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';

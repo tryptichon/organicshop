@@ -4,8 +4,8 @@ import { DbShoppingCart, DbShoppingCartProduct } from 'src/app/model/db-shopping
 import { ShoppingCartProductService } from './shopping-cart-product.service';
 
 import { map, Observable } from 'rxjs';
-import { AbstractCrudService } from './abstract-crud.service';
 import { ShoppingCartProducts } from 'src/app/model/shopping-cart';
+import { AbstractCrudService } from './abstract-crud.service';
 
 /** Contains the shoppingCartId and the ids of all contained products. */
 export type ShoppingCartIdsType = { shoppingCartId: string, productIds: string[] };
