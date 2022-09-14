@@ -8,6 +8,7 @@ import { Order } from 'src/app/model/order';
 import { ShoppingCart, ShoppingCartProduct } from 'src/app/model/shopping-cart';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
+import { ValueValidator } from 'src/app/util/value-validator';
 import { Shipping } from './../../../model/order';
 import { LoginService } from './../../../services/auth/login.service';
 import { OrderService } from './../../../services/database/order.service';
@@ -72,7 +73,7 @@ export class CheckOutComponent implements AfterViewInit {
             this.shoppingCart?.put(new ShoppingCartProduct(shoppingCartProduct, product));
         });
 
-        this.dataSource.data = [...this.shoppingCart.productArray as ShoppingCartProduct[]];
+        this.dataSource.data = [...this.shoppingCart.productArray];
         this.table.renderRows();
       });
   }
@@ -94,14 +95,30 @@ export class CheckOutComponent implements AfterViewInit {
     let order = new Order(
       OrderService.getUniqueId(),
       userId,
-      this.shoppingCartService.shoppingCartId,
-      new Shipping(formData),
+      this.createShippingFromForm(),
       this.shoppingCart
     );
 
     await this.orderService.createOrderAndClearShoppingCart(order);
 
     this.router.navigate(['/my', 'order-success', order.id]);
+  }
+
+  /**
+   * Create the Shipping object from form data.
+   *
+   * @returns A new instance of class Shipping.
+   */
+  createShippingFromForm() {
+    let formData = this.form.value;
+
+    return new Shipping(
+      ValueValidator.getValid<string>('name', formData.name),
+      ValueValidator.getValid<string>('address', formData.address),
+      ValueValidator.getValid<string>('zipCode', formData.zipCode),
+      ValueValidator.getValid<string>('city', formData.city),
+      ValueValidator.getValid<string>('state', formData.state),
+    );
   }
 
 }

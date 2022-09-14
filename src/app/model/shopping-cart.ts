@@ -27,7 +27,7 @@ export class ShoppingCartProduct implements DbProduct, DbShoppingCartProduct {
 }
 
 /**
- * Only contains a map of DbShoppingCartProductsand some
+ * Only contains a map of DbShoppingCartProducts and some
  * calculation methods.
  * This class is used to separate the data of the ShoppingCart from
  * the data of the ShoppingCartProducts within.
@@ -91,7 +91,7 @@ export class ShoppingCart extends ShoppingCartProducts<ShoppingCartProduct> impl
 
   get totalPrice(): number {
     let result = 0;
-    this.productMap.forEach(item => result += this.getProductTotalPrice(item.id) || 0);
+    this.productMap.forEach(item => result += this.getProductTotalPrice(item.id) ?? 0);
     return result;
   }
 

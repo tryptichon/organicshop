@@ -23,7 +23,7 @@ export class LoginService {
       .pipe(
         map(firebaseUser => firebaseUser ? this.getMappedUser(firebaseUser) : null),
         switchMap(user => user ? this.userService.getOrCreate(user) : of(null)),
-        map(dbUser => dbUser || null)
+        map(dbUser => dbUser ?? null)
       );
 
     this.user$.subscribe(dbUser => this.user = dbUser);

@@ -8,25 +8,11 @@ export interface DbProduct extends DbEntry {
 }
 
 export class Product implements DbProduct {
-  id!: string;
-  name!: string;
-  price!: number;
-  category!: string;
-  imageUrl!: string;
-
-  constructor(formData: Partial<{
-    id: string | null,
-    name: string | null,
-    price: number | null,
-    category: string | null,
-    imageUrl: string | null
-  }>) {
-    Object.entries(formData).forEach((key, value) => {
-      if (value === null || value === undefined)
-        throw Error('Key ' + key + ' must not be null or undefined');
-    });
-
-    Object.assign(this, formData);
-  }
-
+  constructor(
+    public id: string,
+    public name: string,
+    public price: number,
+    public category: string,
+    public imageUrl: string
+  ) { }
 }

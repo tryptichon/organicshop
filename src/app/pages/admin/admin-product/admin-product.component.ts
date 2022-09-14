@@ -3,6 +3,7 @@ import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of, take } from 'rxjs';
+import { ValueValidator } from 'src/app/util/value-validator';
 import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 
 import { Product } from './../../../model/db-product';
@@ -93,7 +94,7 @@ export class AdminProductComponent implements OnInit {
 
   async onSubmit() {
     try {
-      await this.productService.create(new Product(this.form.value));
+      await this.productService.create(this.createProductFromForm());
       await this.router.navigate(['/admin', 'products']);
     } catch (error) {
       this.dialogs.error({ title: 'On Submit Communication Error', message: error });
@@ -112,4 +113,20 @@ export class AdminProductComponent implements OnInit {
     }
   }
 
+  /**
+   * Create the Product object from form data.
+   *
+   * @returns A new instance of class Product.
+   */
+  createProductFromForm() {
+    let formData = this.form.value;
+
+    return new Product(
+      ValueValidator.getValid<string>('id', formData.id),
+      ValueValidator.getValid<string>('name', formData.name),
+      ValueValidator.getValid<number>('price', formData.price),
+      ValueValidator.getValid<string>('category', formData.category),
+      ValueValidator.getValid<string>('imageUrl', formData.imageUrl),
+    )
+  }
 }

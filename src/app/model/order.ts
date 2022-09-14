@@ -1,47 +1,34 @@
-import { DbOrder, DbOrderProduct, DbShipping as DbShipping } from "./db-order";
+import { DbOrder, DbOrderProduct, DbShipping } from "./db-order";
 import { ShoppingCart } from "./shopping-cart";
 
 export class Shipping implements DbShipping {
-  name!: string;
-  address!: string;
-  zipCode!: string;
-  city!: string;
-  state!: string;
-
-  constructor(formData: Partial<{
-    name: string | null,
-    address: string | null,
-    zipCode: string | null,
-    city: string | null,
-    state: string | null,
-  }>
+  constructor(
+    public name: string,
+    public address: string,
+    public zipCode: string,
+    public city: string,
+    public state: string,
   ) {
-    Object.entries(formData).forEach((key, value) => {
-      if (value === null || value === undefined)
-        throw Error('Key ' + key + ' must not be null or undefined');
-    });
-
-    Object.assign(this, formData);
   }
-
 }
 
 export class Order implements DbOrder {
   dateOrdered: number;
   totalPrice: number;
+  shoppingCartId: string;
   products: DbOrderProduct[];
   shipping: DbShipping;
 
   constructor(
     public id: string,
     public userId: string,
-    public shoppingCartId: string,
     shipping: Shipping,
-    shoppingCartProducts: ShoppingCart
+    shoppingCart: ShoppingCart
   ) {
     this.dateOrdered = new Date().getTime();
-    this.totalPrice = shoppingCartProducts.totalPrice;
-    this.products = shoppingCartProducts.productArray.map(entry => ({
+    this.totalPrice = shoppingCart.totalPrice;
+    this.shoppingCartId = shoppingCart.id;
+    this.products = shoppingCart.productArray.map(entry => ({
       id: entry.id,
       name: entry.name,
       price: entry.price,

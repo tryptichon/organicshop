@@ -48,7 +48,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
       this.shoppingCartProducts$
     ])
       .subscribe(([products, shoppingCartProducts]) => {
-        this.tableData = new ShoppingCart(ShoppingCartService.getUniqueId());
+        this.tableData = new ShoppingCart(this.shoppingCartService.shoppingCartId);
 
         shoppingCartProducts.productMap.forEach((shoppingCartProduct, id) => {
           let product = products.find(item => item.id === id);
@@ -59,7 +59,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
         // Only redraw the table when the amount of products within change
         // to reduce flickering.
         if (this.dataSource.data.length != this.tableData.disctinctProducts) {
-          this.dataSource.data = [...this.tableData.productArray as ShoppingCartProduct[]];
+          this.dataSource.data = [...this.tableData.productArray];
           this.table.renderRows();
         }
       });

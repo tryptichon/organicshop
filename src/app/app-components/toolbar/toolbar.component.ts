@@ -26,7 +26,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.userSubscription = this.loginService.appUser$
       .subscribe(appUser => {
-        this.isAdmin = appUser?.isAdmin || false;
+        this.isAdmin = appUser?.isAdmin ?? false;
         this.name = appUser?.name;
       });
 

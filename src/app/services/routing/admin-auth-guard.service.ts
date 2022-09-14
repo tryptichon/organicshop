@@ -20,7 +20,7 @@ export class AdminAuthGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
     return this.loginService.appUser$
       .pipe(
-        map(appUser => appUser?.isAdmin || this.router.createUrlTree(AdminAuthGuard.DEFAULTROUTE))
+        map(appUser => appUser?.isAdmin ?? this.router.createUrlTree(AdminAuthGuard.DEFAULTROUTE))
       );
   }
 }
