@@ -31,7 +31,7 @@ import { OrderSuccessComponent } from './pages/my/order-success/order-success.co
 import { ProductsComponent } from './pages/products/products.component';
 import { ShoppingCartComponent } from './pages/shopping-cart/shopping-cart.component';
 import { ErrorDialogComponent } from './app-components/dialogs/error-dialog/error-dialog.component';
-import { OrderCardComponent } from './app-components/order-card/order-card.component';
+import { OrdersTableComponent } from './app-components/orders-table/orders-table.component';
 import { UserOrdersComponent } from './pages/my/user-orders/user-orders.component';
 
 
@@ -59,7 +59,7 @@ import { UserOrdersComponent } from './pages/my/user-orders/user-orders.componen
     ProductFilterComponent,
     ProductCartButtonComponent,
     ErrorDialogComponent,
-    OrderCardComponent,
+    OrdersTableComponent,
     UserOrdersComponent
   ],
   imports: [

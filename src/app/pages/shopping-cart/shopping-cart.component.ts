@@ -60,7 +60,7 @@ export class ShoppingCartComponent implements AfterViewInit, OnDestroy {
         // to reduce flickering.
         if (this.dataSource.data.length != this.tableData.disctinctProducts) {
           this.dataSource.data = [...this.tableData.productArray];
-          this.table.renderRows();
+          // this.table.renderRows();
         }
       });
 

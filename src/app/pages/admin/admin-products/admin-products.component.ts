@@ -51,7 +51,7 @@ export class AdminProductsComponent implements AfterViewInit, OnDestroy {
           return;
 
         this.dataSource.data = [...productArray];
-        this.table.renderRows();
+        // this.table.renderRows();
       });
   }
 
