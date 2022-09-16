@@ -6,4 +6,3 @@ export interface DbProduct extends DbEntry {
   category: string,
   imageUrl: string
 }
-

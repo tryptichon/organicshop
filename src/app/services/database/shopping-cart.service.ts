@@ -4,7 +4,7 @@ import { DbShoppingCart, DbShoppingCartProduct } from 'src/app/model/db-shopping
 import { ShoppingCartProductService } from './shopping-cart-product.service';
 
 import { map, Observable } from 'rxjs';
-import { ShoppingCartProducts } from 'src/app/model/shopping-cart';
+import { ShoppingCartData, ShoppingCartProducts } from 'src/app/model/shopping-cart';
 import { AbstractCrudService } from './abstract-crud.service';
 
 /** Contains the shoppingCartId and the ids of all contained products. */
@@ -98,7 +98,7 @@ export class ShoppingCartService extends AbstractCrudService<DbShoppingCart> {
   }
 
   private async newShoppingCart(transaction: Transaction, product: DbShoppingCartProduct) {
-    await this.getOrCreateT(transaction, new DbShoppingCart(this.shoppingCartId));
+    await this.getOrCreateT(transaction, new ShoppingCartData(this.shoppingCartId));
     this.shoppingCartProductService.createT(transaction, product);
   }
 

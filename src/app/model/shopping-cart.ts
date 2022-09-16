@@ -77,9 +77,24 @@ export class ShoppingCartProducts<T extends DbShoppingCartProduct> {
 }
 
 /**
+ * Shopping cart data without any product information.
+ * This class is used to separate the data of the ShoppingCart from
+ * the data of the ShoppingCartProducts within.
+ */
+export class ShoppingCartData implements DbShoppingCart {
+  dateCreated: number;
+
+  constructor(
+    public id: string
+  ) {
+    this.dateCreated = new Date().getTime();
+  }
+}
+
+/**
  * Fully resolved shopping cart containing all relevant data.
  */
-export class ShoppingCart extends ShoppingCartProducts<ShoppingCartProduct> implements DbShoppingCart {
+export class ShoppingCart extends ShoppingCartProducts<ShoppingCartProduct> implements ShoppingCartData {
   public dateCreated!: number;
   public id!: string;
 
@@ -88,7 +103,7 @@ export class ShoppingCart extends ShoppingCartProducts<ShoppingCartProduct> impl
     products?: ShoppingCartProduct[]
   ) {
     super(products);
-    Object.assign(this, new DbShoppingCart(id));
+    Object.assign(this, new ShoppingCartData(id));
   }
 
   get totalPrice(): number {
