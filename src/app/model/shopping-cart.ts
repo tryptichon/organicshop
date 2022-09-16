@@ -57,8 +57,10 @@ export class ShoppingCartProducts<T extends DbShoppingCartProduct> {
     return result;
   }
 
-  /** The amount of distinct products within the Shopping Cart. */
-  get disctinctProducts() {
+  /**
+   * The quantity of distinct products within the Shopping Cart.
+   */
+  get disctinctProducts(): number {
     return this.productMap.size;
   }
 

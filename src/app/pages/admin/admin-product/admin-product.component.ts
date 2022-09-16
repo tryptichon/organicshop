@@ -6,7 +6,6 @@ import { catchError, of, take } from 'rxjs';
 import { ValueValidator } from 'src/app/util/value-validator';
 import { DialogHandler } from './../../../app-components/dialogs/DialogHandler';
 
-import { Product } from './../../../model/db-product';
 import { CategoryService } from './../../../services/database/category.service';
 import { ProductService } from './../../../services/database/product.service';
 
@@ -121,12 +120,12 @@ export class AdminProductComponent implements OnInit {
   createProductFromForm() {
     let formData = this.form.value;
 
-    return new Product(
-      ValueValidator.getValid<string>('id', formData.id),
-      ValueValidator.getValid<string>('name', formData.name),
-      ValueValidator.getValid<number>('price', formData.price),
-      ValueValidator.getValid<string>('category', formData.category),
-      ValueValidator.getValid<string>('imageUrl', formData.imageUrl),
-    )
+    return {
+      id: ValueValidator.getValid<string>('id', formData.id),
+      name: ValueValidator.getValid<string>('name', formData.name),
+      price: ValueValidator.getValid<number>('price', formData.price),
+      category: ValueValidator.getValid<string>('category', formData.category),
+      imageUrl: ValueValidator.getValid<string>('imageUrl', formData.imageUrl),
+    };
   }
 }

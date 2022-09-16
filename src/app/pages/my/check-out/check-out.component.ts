@@ -9,7 +9,6 @@ import { ShoppingCart, ShoppingCartProduct } from 'src/app/model/shopping-cart';
 import { ProductService } from 'src/app/services/database/product.service';
 import { ShoppingCartService } from 'src/app/services/database/shopping-cart.service';
 import { ValueValidator } from 'src/app/util/value-validator';
-import { Shipping } from './../../../model/order';
 import { LoginService } from './../../../services/auth/login.service';
 import { OrderService } from './../../../services/database/order.service';
 
@@ -112,13 +111,13 @@ export class CheckOutComponent implements AfterViewInit {
   createShippingFromForm() {
     let formData = this.form.value;
 
-    return new Shipping(
-      ValueValidator.getValid<string>('name', formData.name),
-      ValueValidator.getValid<string>('address', formData.address),
-      ValueValidator.getValid<string>('zipCode', formData.zipCode),
-      ValueValidator.getValid<string>('city', formData.city),
-      ValueValidator.getValid<string>('state', formData.state),
-    );
+    return {
+      name: ValueValidator.getValid<string>('name', formData.name),
+      address: ValueValidator.getValid<string>('address', formData.address),
+      zipCode: ValueValidator.getValid<string>('zipCode', formData.zipCode),
+      city: ValueValidator.getValid<string>('city', formData.city),
+      state: ValueValidator.getValid<string>('state', formData.state),
+    };
   }
 
 }

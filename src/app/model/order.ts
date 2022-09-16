@@ -1,17 +1,6 @@
 import { DbOrder, DbOrderProduct, DbShipping } from "./db-order";
 import { ShoppingCart } from "./shopping-cart";
 
-export class Shipping implements DbShipping {
-  constructor(
-    public name: string,
-    public address: string,
-    public zipCode: string,
-    public city: string,
-    public state: string,
-  ) {
-  }
-}
-
 export class Order implements DbOrder {
   dateOrdered: number;
   totalPrice: number;
@@ -22,7 +11,7 @@ export class Order implements DbOrder {
   constructor(
     public id: string,
     public userId: string,
-    shipping: Shipping,
+    shipping: DbShipping,
     shoppingCart: ShoppingCart
   ) {
     this.dateOrdered = new Date().getTime();

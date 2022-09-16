@@ -7,12 +7,3 @@ export interface DbProduct extends DbEntry {
   imageUrl: string
 }
 
-export class Product implements DbProduct {
-  constructor(
-    public id: string,
-    public name: string,
-    public price: number,
-    public category: string,
-    public imageUrl: string
-  ) { }
-}
